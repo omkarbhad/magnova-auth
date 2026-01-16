@@ -207,7 +207,6 @@ export function KundaliMatcher({ savedCharts, onDeleteChart }: KundaliMatcherPro
           <img src={heartLogo} alt="Heart" className="w-6 h-6" />
           Kundali Matcher
         </h2>
-        <p className="text-neutral-400">Vedic Birth Chart Analysis</p>
       </div>
 
       {/* Birth Data Forms */}
