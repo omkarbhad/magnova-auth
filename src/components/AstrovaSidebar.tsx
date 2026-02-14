@@ -241,7 +241,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
       } else if (models.length > 0) {
         setSelectedModel(models[0].model_id);
       } else {
-        setSelectedModel('google/gemini-2.0-flash-001');
+        setSelectedModel('stepfun/step-3.5-flash:free');
       }
     }
     loadModels();

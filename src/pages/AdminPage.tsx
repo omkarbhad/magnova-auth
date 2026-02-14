@@ -280,7 +280,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: selectedModel || models.find(m => m.is_enabled)?.model_id || 'google/gemini-2.0-flash-001',
+          model: selectedModel || models.find(m => m.is_enabled)?.model_id || 'stepfun/step-3.5-flash:free',
           messages: [
             { role: 'system', content: systemPrompt },
             ...articleChatMessages.map(m => ({ role: m.role, content: m.content })),
