@@ -7,7 +7,7 @@ import { useCredits, CREDIT_COSTS, CreditsDisplay } from '@/contexts/CreditsCont
 import { BuyCreditsModal } from './BuyCreditsModal';
 import { useAuth } from '@/contexts/AuthContext';
 import type { KundaliResponse } from '../types/kundali';
-import { searchKnowledgeBase, getAdminConfig, getUserEnabledModels, getUserSetting, getUserChatSessions, saveChatSession, deleteChatSession, type ChatSession } from '../lib/supabase';
+import { searchKnowledgeBase, getAdminConfig, getUserEnabledModels, getUserSetting } from '../lib/supabase';
 
 interface ChatMessage {
   id: string;
@@ -304,13 +304,13 @@ Only sharp, grounded astrology.
                 prompt += `\n    ${pad.planet}: ${pad.start_date} to ${pad.end_date}${isPadCurrent ? ' [CURRENT]' : ''}`;
               }
             }
-          }
-          prompt += `\nAll Antardashas in current Mahadasha:`;
-          for (const ad of currentPeriod.antardashas) {
-            const adStart = new Date(ad.start_datetime || ad.start_date);
-            const adEnd = ad.end_datetime ? new Date(ad.end_datetime) : new Date(ad.end_date || '');
-            const isAdCurrent = now >= adStart && now < adEnd;
-            prompt += `\n  ${ad.planet}: ${ad.start_date} to ${ad.end_date} (${ad.years?.toFixed(2)}y)${isAdCurrent ? ' [CURRENT]' : ''}`;
+            prompt += `\nAll Antardashas in current Mahadasha:`;
+            for (const ad of currentPeriod.antardashas) {
+              const adStart = new Date(ad.start_datetime || ad.start_date);
+              const adEnd = ad.end_datetime ? new Date(ad.end_datetime) : new Date(ad.end_date || '');
+              const isAdCurrent = now >= adStart && now < adEnd;
+              prompt += `\n  ${ad.planet}: ${ad.start_date} to ${ad.end_date} (${ad.years?.toFixed(2)}y)${isAdCurrent ? ' [CURRENT]' : ''}`;
+            }
           }
         }
       }
@@ -338,12 +338,6 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
   const { credits, deductCredits, showBuyModal, setShowBuyModal } = useCredits();
   const { astrovaUser } = useAuth();
   const astrovaUserId = astrovaUser?.id || '';
-
-  // Chat history state
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Model selection state
   const [selectedModel, setSelectedModel] = useState<string>('');
