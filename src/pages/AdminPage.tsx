@@ -21,7 +21,7 @@ export default function AdminPage() {
   // Model management state
   const [models, setModels] = useState<EnabledModel[]>([]);
   const [modelsLoading, setModelsLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<string>('google/gemini-2.0-flash-001');
+  const [selectedModel, setSelectedModel] = useState<string>('');
   const [fetchingOpenRouter, setFetchingOpenRouter] = useState(false);
   const [openRouterModels, setOpenRouterModels] = useState<Array<{ id: string; name: string }>>([]);
   const [modelSearchQuery, setModelSearchQuery] = useState('');
@@ -79,7 +79,7 @@ export default function AdminPage() {
     setModelsLoading(true);
     const data = await getEnabledModels();
     setModels(data);
-    const config = await getAdminConfig('selected_model');
+    const config = await getAdminConfig('default_model');
     if (config && typeof config === 'string') setSelectedModel(config);
     const costs = await getAdminConfig('credit_costs');
     if (costs && typeof costs === 'object') setCreditCosts(costs as typeof creditCosts);
@@ -131,7 +131,7 @@ export default function AdminPage() {
   const handleSelectModel = async (modelId: string) => {
     setSelectedModel(modelId);
     setModelSaveStatus('saving');
-    await setAdminConfig('selected_model', modelId, 'Currently selected AI model');
+    await setAdminConfig('default_model', modelId);
     setModelSaveStatus('saved');
     setTimeout(() => setModelSaveStatus('idle'), 2000);
   };
@@ -280,7 +280,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: selectedModel || 'google/gemini-2.0-flash-001',
+          model: selectedModel || models.find(m => m.is_enabled)?.model_id || 'google/gemini-2.0-flash-001',
           messages: [
             { role: 'system', content: systemPrompt },
             ...articleChatMessages.map(m => ({ role: m.role, content: m.content })),
@@ -378,8 +378,8 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
 
   const handleSaveCreditSettings = async () => {
     setCreditSaveStatus('saving');
-    await setAdminConfig('credit_costs', creditCosts, 'Credit costs for actions');
-    await setAdminConfig('default_credits', defaultCredits, 'Default credits for new users');
+    await setAdminConfig('credit_costs', creditCosts);
+    await setAdminConfig('default_credits', defaultCredits);
     setCreditSaveStatus('saved');
     setTimeout(() => setCreditSaveStatus('idle'), 2000);
   };
@@ -659,13 +659,12 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                 {/* Model selector */}
                 <select
                   value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
+                  onChange={(e) => handleSelectModel(e.target.value)}
                   className="w-full h-7 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,20%)] rounded-lg px-2 text-[10px] text-neutral-400 focus:outline-none focus:border-emerald-500/30 cursor-pointer"
                 >
                   {models.filter(m => m.is_enabled).map(m => (
                     <option key={m.model_id} value={m.model_id}>{m.display_name} ({m.provider})</option>
                   ))}
-                  <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (default)</option>
                 </select>
               </div>
 

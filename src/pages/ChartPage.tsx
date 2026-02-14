@@ -909,16 +909,16 @@ function ChartPage() {
               </div>
             </main>
 
-            {/* Mobile backdrop */}
+            {/* Single backdrop for sidebar */}
             {sidebarOpen && (
               <div
-                className="fixed inset-0 top-[57px] bg-black/50 z-30 sm:hidden"
+                className="fixed inset-0 bg-black/60 z-40 lg:hidden"
                 onClick={() => setSidebarOpen(false)}
               />
             )}
 
-            {/* Astrova AI Sidebar */}
-            <div className={`fixed top-[57px] right-0 bottom-0 w-full sm:w-[450px] z-40 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            {/* Astrova AI Sidebar - below navbar */}
+            <div className={`fixed top-14 bottom-0 right-0 w-full sm:w-[400px] lg:w-[450px] z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
               <AstrovaSidebar
                 kundaliData={kundaliData}
                 chartName={currentChartName || undefined}
@@ -945,13 +945,6 @@ function ChartPage() {
               />
             </div>
 
-            {/* Sidebar backdrop on mobile */}
-            {sidebarOpen && (
-              <div
-                className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-                onClick={() => setSidebarOpen(false)}
-              />
-            )}
           </div>
 
           {/* Footer */}

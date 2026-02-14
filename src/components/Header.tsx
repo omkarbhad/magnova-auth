@@ -1,4 +1,4 @@
-import { Heart, Shield, LayoutGrid } from 'lucide-react';
+import { Heart, Shield, LayoutGrid, Sparkles } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -21,8 +21,8 @@ export function Header({
   const isAdmin = astrovaUser?.role === 'admin';
 
   const navItems = [
-    { key: 'kundali' as const, label: 'Charts', icon: LayoutGrid, mobileLabel: 'Charts', activeColor: 'text-amber-400', activeBg: 'bg-amber-500/15 text-amber-300 shadow-sm shadow-amber-500/10' },
-    { key: 'matcher' as const, label: 'Matcher', icon: Heart, mobileLabel: 'Match', activeColor: 'text-pink-400', activeBg: 'bg-pink-500/15 text-pink-300 shadow-sm shadow-pink-500/10' },
+    { key: 'kundali' as const, label: 'Charts', icon: LayoutGrid, activeColor: 'text-amber-400', activeBg: 'bg-amber-500/15 text-amber-300 shadow-sm shadow-amber-500/10' },
+    { key: 'matcher' as const, label: 'Matcher', icon: Heart, activeColor: 'text-pink-400', activeBg: 'bg-pink-500/15 text-pink-300 shadow-sm shadow-pink-500/10' },
   ];
 
   return (
@@ -39,8 +39,8 @@ export function Header({
             <h1 className="sm:hidden text-sm font-semibold text-white">Astrova</h1>
           </div>
 
-          {/* Center Nav - Pill style */}
-          <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-0.5 p-0.5 rounded-full bg-[hsl(220,10%,7%)]/90 border border-[hsl(220,8%,18%)]">
+          {/* Center Nav - Icons only on mobile, full on desktop */}
+          <nav className="flex items-center gap-0.5 p-0.5 rounded-full bg-[hsl(220,10%,7%)]/90 border border-[hsl(220,8%,18%)]">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeView === item.key;
@@ -48,35 +48,35 @@ export function Header({
                 <button
                   key={item.key}
                   onClick={() => onViewChange(item.key)}
-                  className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                  className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 shrink-0 ${
                     isActive
                       ? item.activeBg
                       : 'text-neutral-500 hover:text-neutral-300'
                   }`}
+                  title={item.label}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? item.activeColor : ''}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? item.activeColor : ''}`} />
                   <span className="hidden sm:inline">{item.label}</span>
-                  <span className="sm:hidden">{item.mobileLabel}</span>
                 </button>
               );
             })}
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-1.5">
             {/* Astrova AI Toggle */}
             {onToggleSidebar && (
               <button
                 onClick={onToggleSidebar}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                   sidebarOpen
-                    ? 'bg-amber-500/20 text-amber-300 shadow-sm shadow-amber-500/10'
-                    : 'text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800/60'
+                    ? 'bg-amber-500/20 text-amber-300 shadow-sm shadow-amber-500/10 ring-1 ring-amber-500/30'
+                    : 'text-neutral-400 hover:text-amber-300 hover:bg-amber-500/10 border border-[hsl(220,8%,20%)] hover:border-amber-500/30'
                 }`}
                 title="Toggle Astrova AI"
               >
-                <img src="/star.png" alt="" className={`w-3.5 h-3.5 ${sidebarOpen ? '' : 'opacity-50'}`} />
-                <span className="hidden sm:inline">AI</span>
+                <Sparkles className={`w-3.5 h-3.5 ${sidebarOpen ? 'text-amber-400 animate-pulse' : ''}`} />
+                <span className="text-[11px]">AI</span>
               </button>
             )}
 

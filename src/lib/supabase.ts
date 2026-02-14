@@ -180,7 +180,7 @@ export async function getAllKBArticles(): Promise<KBArticle[]> {
     .from('astrova_knowledge_base')
     .select('id, title, category, content, tags')
     .eq('is_active', true)
-    .order('sort_order', { ascending: true });
+    .order('category', { ascending: true });
   return (data as KBArticle[]) ?? [];
 }
 
@@ -209,17 +209,17 @@ export async function getAdminConfig(key: string): Promise<unknown> {
   if (!supabase) return null;
   const { data } = await supabase
     .from('astrova_admin_config')
-    .select('value')
-    .eq('key', key)
+    .select('config_value')
+    .eq('config_key', key)
     .single();
-  return data?.value ?? null;
+  return data?.config_value ?? null;
 }
 
-export async function setAdminConfig(key: string, value: unknown, description?: string): Promise<boolean> {
+export async function setAdminConfig(key: string, value: unknown): Promise<boolean> {
   if (!supabase) return false;
   const { error } = await supabase
     .from('astrova_admin_config')
-    .upsert({ key, value: JSON.stringify(value), description, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    .upsert({ config_key: key, config_value: value, updated_at: new Date().toISOString() }, { onConflict: 'config_key' });
   return !error;
 }
 
@@ -227,12 +227,11 @@ export async function getAllAdminConfig(): Promise<Record<string, unknown>> {
   if (!supabase) return {};
   const { data } = await supabase
     .from('astrova_admin_config')
-    .select('key, value');
+    .select('config_key, config_value');
   if (!data) return {};
   const config: Record<string, unknown> = {};
   for (const row of data) {
-    try { config[row.key] = typeof row.value === 'string' ? JSON.parse(row.value) : row.value; }
-    catch { config[row.key] = row.value; }
+    config[row.config_key] = row.config_value;
   }
   return config;
 }

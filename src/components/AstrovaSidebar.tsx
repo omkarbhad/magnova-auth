@@ -5,9 +5,8 @@ import remarkGfm from 'remark-gfm';
 import { Button } from './ui/button';
 import { useCredits, CREDIT_COSTS, CreditsDisplay } from '@/contexts/CreditsContext';
 import { BuyCreditsModal } from './BuyCreditsModal';
-import { useAuth } from '@/contexts/AuthContext';
 import type { KundaliResponse } from '../types/kundali';
-import { searchKnowledgeBase, getAdminConfig, getUserEnabledModels, getUserSetting } from '../lib/supabase';
+import { searchKnowledgeBase, getAdminConfig, getUserEnabledModels, type EnabledModel } from '../lib/supabase';
 
 interface ChatMessage {
   id: string;
@@ -54,147 +53,36 @@ const QUICK_PROMPTS = [
 ];
 
 function buildSystemPrompt(kundaliData: KundaliResponse | null, chartName?: string, kbContext?: string): string {
-  let prompt = `You are Astrova — a sharp, modern Vedic astrologer. You read charts like a pro and speak like a trusted friend who tells the truth without being harsh.
+  let prompt = `You are Astrova — a sharp Vedic astrologer who talks like a real human friend. Short, punchy, no BS.
 
-CORE IDENTITY:
-- Friendly but blunt
-- Direct, not rude
-- No vague spiritual fluff
-- No generic motivational lines
-- Always grounded in the ACTUAL chart data provided
+RESPONSE LENGTH RULES (CRITICAL):
+- DEFAULT: 2-4 sentences max. Like texting a friend.
+- Only give long detailed responses when user says "explain", "detail", "full", "elaborate", "tell me more", "go deeper", or "in depth".
+- Never dump walls of text unprompted.
+- One insight per reply unless asked for more.
 
-MANDATORY:
-Every statement must reference:
-- Planet
-- Sign
-- House (bhava)
-- Degree (if available)
-- Nakshatra (if available)
-- Active dasha (if applicable)
+TONE:
+- Talk like a smart friend, not a textbook.
+- Casual but accurate. "Your Mars in 10th is fire for career" not "Mars positioned in the 10th bhava indicates..."
+- Use bold for key placements. Keep it scannable.
+- No filler phrases like "Let me analyze" or "Based on your chart" — just say it.
 
-If it’s not visible in the chart, do not say it.
+ASTROLOGY (use when chart is loaded):
+- Always cite the actual planet, sign, house from the chart data.
+- Parashara system, Shadbala, Bhava Bala, Vimshottari Dasha, Nakshatras, Yogas, Doshas.
+- Bhrigu Nandi Nadi: 12th from planet = loss, 2nd = gain. Saturn-Jupiter axis for karma. Nakshatra lord chains.
+- Functional benefic/malefic logic per ascendant.
+- Never fabricate data not in the chart.
 
-ASTROLOGY EXPERTISE:
-- Parashara Vedic astrology
-- Shadbala & Bhava Bala
-- Vimshottari Dasha (Mahadasha, Antardasha, Pratyantardasha)
-- Nakshatra analysis
-- Yogas & Doshas
-- Functional benefic/malefic logic
-- Planetary aspects (7th + special aspects of Mars, Jupiter, Saturn)
-- Dispositor chains
-- Ashtakoot matching
-- Bhrigu Nandi Nadi techniques
+REMEDIES (only modern, never religious):
+- No mantras, gemstones, pujas, havans, yantras, fasting, or rituals. Ever.
+- Only: therapy, gym, journaling, meditation apps, skill-building, routines, hobbies, career moves.
+- Frame as practical advice, not spiritual prescription.
 
-BHRIGU NANDI NADI RULES (MANDATORY FOR PREDICTIONS):
-- Planets tell stories through adjacency, not just lordship.
-- 12th from a planet = what it spends/loses.
-- 2nd from a planet = what it gains/accumulates.
-- Saturn’s position from Jupiter = karmic debt.
-- Rahu amplifies obsessively.
-- Ketu detaches or spiritualizes.
-- Jupiter-Saturn axis:
-  - Jupiter = where blessings flow
-  - Saturn = where karma demands work
-- Nakshatra lord chain:
-  Moon → its nakshatra lord → that lord’s nakshatra lord.
-- Planets in the same nakshatra share a karmic bond.
-- Dispositor chain reveals ultimate controller.
-- Time events using:
-  - Dasha lord transiting natal placements
-  - Transit over natal dasha lord
-  - Saturn/Jupiter transit triggers
-
-STRICT REMEDY RULES (NON-NEGOTIABLE):
-NEVER suggest:
-- Mantras
-- Gemstones
-- Pujas
-- Havans
-- Yantras
-- Temple donations
-- Ritual fasting
-- Wearing colors on specific days
-- Any religious or ritualistic remedies
-
-MODERN REMEDY SYSTEM (ONLY THIS):
-Remedies must be:
-- Psychological
-- Behavioral
-- Skill-based
-- Practical
-- Self-development focused
-
-Examples:
-- Weak Mercury → journaling, public speaking, reading habit, communication workshops
-- Weak Venus → creative hobbies, grooming, art/music, relationship therapy
-- Weak Mars → gym, martial arts, assertiveness training, competitive sports
-- Weak Jupiter → mentoring, higher education, philosophy, teaching
-- Weak Saturn → strict routines, time-blocking, therapy, long-term planning
-- Weak Moon → meditation apps, sleep hygiene, emotional regulation training
-- Weak Sun → leadership roles, confidence training, boundary setting
-- Rahu imbalance → digital detox, grounding practices
-- Ketu imbalance → volunteering, purpose-driven work, mindfulness
-
-Frame remedies as:
-“Here’s what you need to work on.”
-
-RESPONSE STYLE:
-- Use emojis (but don’t overdo it)
-- Short paragraphs
-- Clean markdown structure
-- Punchy sentences
-- Simple language
-- No academic jargon
-- No walls of text
-- Honest but constructive
-- No fear-based predictions
-- No overpromising
-
-OUTPUT STRUCTURE FOR CHART READINGS:
-
-### Core Pattern
-Explain dominant planetary theme.
-
-### Personality Blueprint
-Backed by placements.
-
-### Career & Money
-Cite houses, lords, Nadi relationships.
-
-### Relationships
-7th house, Venus, Jupiter, Nadi links.
-
-### Current Dasha Impact
-Specific timing insight.
-
-### Challenges
-Direct but constructive.
-
-### What You Need to Work On
-Modern remedies only.
-
-NON-ASTROLOGY QUESTIONS:
-- Answer clearly.
-- If chart exists, connect to placements.
-- If no chart is provided, do not fabricate astrology.
-
-ETHICAL BOUNDARIES:
-- No medical diagnosis
-- No legal advice
-- No death predictions
-- No guaranteed outcomes
-- No fear manipulation
-
-Final Principle:
-Astrova reads charts like data.
-Speaks like a friend.
-Predicts like a Nadi astrologer.
-Guides like a modern psychologist.
-
-No fluff.
-No superstition.
-Only sharp, grounded astrology.
+BOUNDARIES:
+- No medical/legal advice, no death predictions, no fear tactics, no guaranteed outcomes.
+- Non-astrology questions: answer normally. If chart exists, connect briefly.
+- No chart loaded: give general astrology knowledge, don't make up placements.
 `;
 
   if (kundaliData) {
@@ -336,32 +224,28 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { credits, deductCredits, showBuyModal, setShowBuyModal } = useCredits();
-  const { astrovaUser } = useAuth();
-  const astrovaUserId = astrovaUser?.id || '';
 
   // Model selection state
   const [selectedModel, setSelectedModel] = useState<string>('');
+  const [availableModels, setAvailableModels] = useState<EnabledModel[]>([]);
 
-  // Load model from admin config or user preference
+  // Load enabled models and default
   useEffect(() => {
-    async function loadModel() {
-      if (astrovaUserId) {
-        const savedModel = await getUserSetting(astrovaUserId, 'selected_model');
-        if (savedModel && typeof savedModel === 'string') {
-          setSelectedModel(savedModel);
-          return;
-        }
-      }
-      const adminModel = await getAdminConfig('selected_model');
+    async function loadModels() {
+      const models = await getUserEnabledModels();
+      setAvailableModels(models);
+      // Try admin default first
+      const adminModel = await getAdminConfig('default_model');
       if (adminModel && typeof adminModel === 'string') {
         setSelectedModel(adminModel);
+      } else if (models.length > 0) {
+        setSelectedModel(models[0].model_id);
       } else {
-        const models = await getUserEnabledModels();
-        if (models.length > 0) setSelectedModel(models[0].model_id);
+        setSelectedModel('google/gemini-2.0-flash-001');
       }
     }
-    loadModel();
-  }, [astrovaUserId]);
+    loadModels();
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -429,7 +313,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
       if (!apiKey) {
         throw new Error('OpenRouter API key not configured.');
       }
-      const modelToUse = selectedModel || 'google/gemini-2.0-flash-001';
+      const modelToUse = selectedModel;
 
       // Search knowledge base for relevant context
       let kbContext = '';
@@ -489,7 +373,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
         body: JSON.stringify({
           model: modelToUse,
           messages: conversationMessages,
-          max_tokens: 2048,
+          max_tokens: 150,
           temperature: 0.7,
           stream: true,
           plugins: [{ id: 'web' }],
@@ -538,7 +422,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
 
       // Finalize streaming
       setMessages(prev => prev.map(m => 
-        m.id === assistantId ? { ...m, content: fullContent || 'I could not generate a response. Please try again.', isStreaming: false } : m
+        m.id === assistantId ? { ...m, content: fullContent || '', isStreaming: false } : m
       ));
 
     } catch (err) {
@@ -634,50 +518,52 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
   return (
     <div className="flex flex-col h-full bg-[hsl(220,10%,7%)] backdrop-blur-xl border-l border-[hsl(220,8%,18%)]">
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-[hsl(220,8%,18%)]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-amber-400" />
+      <div className="px-3 py-2.5 border-b border-[hsl(220,8%,18%)]">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold text-sm leading-tight">Astrova</h3>
+              <p className="text-[10px] text-neutral-500 leading-tight">
+                {kundaliData ? (
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                    {chartName ? <span className="text-amber-300 font-medium">{chartName}</span> : <span className="text-neutral-400">{kundaliData.lagna.sign} Lagna</span>}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 inline-block" />
+                    No chart loaded
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-white font-semibold text-sm leading-tight">Astrova</h3>
-            <p className="text-[10px] text-neutral-500 leading-tight">
-              {kundaliData ? (
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                  Reading {chartName ? <span className="text-amber-300 font-medium">{chartName}</span> : <span className="text-neutral-400">{kundaliData.lagna.sign} Lagna</span>}
-                </span>
-              ) : (
-                <span className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 inline-block" />
-                  No chart loaded
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <CreditsDisplay compact />
-          {messages.length > 0 && (
+          <div className="flex items-center gap-1">
+            <CreditsDisplay compact />
+            {messages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearChat}
+                className="h-7 w-7 p-0 text-neutral-500 hover:text-white hover:bg-white/5"
+                title="Clear chat"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
-              onClick={clearChat}
+              onClick={onToggle}
               className="h-7 w-7 p-0 text-neutral-500 hover:text-white hover:bg-white/5"
-              title="Clear chat"
+              title="Close sidebar"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <PanelRightClose className="w-4 h-4" />
             </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToggle}
-            className="h-7 w-7 p-0 text-neutral-500 hover:text-white hover:bg-white/5"
-            title="Close sidebar"
-          >
-            <PanelRightClose className="w-4 h-4" />
-          </Button>
+          </div>
         </div>
       </div>
 
@@ -780,27 +666,19 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
                         {msg.content}
                       </ReactMarkdown>
                       {msg.isStreaming && !msg.content && (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                          <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" style={{ animationDelay: '0.2s' }} />
-                          <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" style={{ animationDelay: '0.4s' }} />
+                        <div className="flex items-center gap-2">
+                          <img src="/star.png" alt="" className="w-4 h-4 animate-spin" style={{ animationDuration: '2s' }} />
+                          <span className="text-amber-400/70 text-xs">Thinking...</span>
                         </div>
                       )}
                       {msg.isStreaming && msg.content && (
-                        <span className="inline-block w-1.5 h-4 bg-amber-400/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+                        <img src="/star.png" alt="" className="inline-block w-3 h-3 animate-spin ml-1 align-text-bottom" style={{ animationDuration: '2s' }} />
                       )}
                     </div>
                   </div>
                 )}
               </div>
             ))}
-
-            {isLoading && !messages.some(m => m.isStreaming) && (
-              <div className="flex items-center gap-2 text-neutral-500 text-xs">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                <span>Thinking...</span>
-              </div>
-            )}
 
             <div ref={messagesEndRef} />
           </>
@@ -817,20 +695,22 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
       </div>
 
       {/* Tools Bar */}
-      <div className="flex gap-1 px-3 py-1.5 border-t border-[hsl(220,8%,15%)] overflow-x-auto scrollbar-thin">
+      <div className="flex gap-1 px-3 py-1.5 border-t border-[hsl(220,8%,15%)] overflow-x-auto scrollbar-thin items-center">
         {onNavigate && (
           <>
             <button
               onClick={() => onNavigate?.('kundali')}
               className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] hover:bg-amber-500/20 transition-all"
+              title="Charts"
             >
-              <LayoutGrid className="w-3 h-3" /> Charts
+              <LayoutGrid className="w-3 h-3" /> <span className="hidden sm:inline">Charts</span>
             </button>
             <button
               onClick={() => onNavigate?.('matcher')}
               className="shrink-0 flex items-center gap-1 px-2 py-1 rounded-md bg-pink-500/10 border border-pink-500/20 text-pink-300 text-[10px] hover:bg-pink-500/20 transition-all"
+              title="Matcher"
             >
-              <Heart className="w-3 h-3" /> Matcher
+              <Heart className="w-3 h-3" /> <span className="hidden sm:inline">Matcher</span>
             </button>
           </>
         )}
@@ -838,8 +718,9 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
           <div className="relative group shrink-0">
             <button
               className="flex items-center gap-1 px-2 py-1 rounded-md bg-[hsl(220,10%,12%)] border border-[hsl(220,8%,20%)] text-neutral-400 text-[10px] hover:bg-[hsl(220,10%,16%)] hover:text-white transition-all"
+              title="Load Chart"
             >
-              <FolderOpen className="w-3 h-3" /> Load Chart
+              <FolderOpen className="w-3 h-3" /> <span className="hidden sm:inline">Load</span>
             </button>
             <div className="absolute bottom-full left-0 mb-1 hidden group-hover:block z-[100] min-w-[140px] max-h-[160px] overflow-y-auto bg-[hsl(220,10%,9%)] border border-[hsl(220,8%,20%)] rounded-lg shadow-xl">
               {savedCharts.map(c => (
@@ -859,42 +740,45 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onNav
       </div>
 
       {/* Input Area */}
-      <form onSubmit={handleSubmit} className="px-3 py-3 border-t border-[hsl(220,8%,15%)]">
+      <form onSubmit={handleSubmit} className="px-3 pb-3 pt-2">
         {insufficientCredits && (
           <div className="mb-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-[10px] text-center">
             Insufficient credits. Purchase more to continue.
           </div>
         )}
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={kundaliData ? 'Ask Astrova...' : 'Load a chart first...'}
-              disabled={isLoading || !kundaliData}
-              rows={1}
-              className="w-full bg-[hsl(220,10%,11%)] border border-[hsl(220,8%,20%)] rounded-2xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/40 focus:ring-2 focus:ring-amber-500/15 transition-all resize-none disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px] max-h-[120px]"
-              style={{ height: 'auto' }}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement;
-                target.style.height = 'auto';
-                target.style.height = Math.min(target.scrollHeight, 80) + 'px';
-              }}
-            />
+        <div className="relative bg-[hsl(220,10%,11%)] border border-[hsl(220,8%,20%)] rounded-2xl focus-within:border-amber-500/40 focus-within:ring-2 focus-within:ring-amber-500/10 transition-all">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={kundaliData ? 'Ask Astrova anything...' : 'Generate a chart first...'}
+            disabled={isLoading}
+            rows={1}
+            className="w-full bg-transparent px-4 pt-3 pb-10 text-sm text-white placeholder-neutral-500 focus:outline-none resize-none disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px] max-h-[120px]"
+            style={{ height: 'auto' }}
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = 'auto';
+              target.style.height = Math.min(target.scrollHeight, 120) + 'px';
+            }}
+          />
+          <div className="absolute bottom-1.5 left-2 right-2 flex items-center justify-between">
+            <span className="text-[9px] text-neutral-600 pl-1">
+              {selectedModel ? availableModels.find(m => m.model_id === selectedModel)?.display_name || selectedModel.split('/').pop() : 'AI'}
+            </span>
+            <Button
+              type="submit"
+              disabled={isLoading || !input.trim() || credits < CREDIT_COSTS.AI_MESSAGE}
+              className="h-7 w-7 p-0 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 border-0 disabled:opacity-20 disabled:cursor-not-allowed shrink-0 transition-all"
+            >
+              {isLoading ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <ArrowUp className="w-3.5 h-3.5" />
+              )}
+            </Button>
           </div>
-          <Button
-            type="submit"
-            disabled={isLoading || !input.trim() || !kundaliData || credits < CREDIT_COSTS.AI_MESSAGE}
-            className="h-11 w-11 p-0 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 border-0 disabled:opacity-30 disabled:cursor-not-allowed shrink-0 transition-all shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30"
-          >
-            {isLoading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <ArrowUp className="w-4 h-4" />
-            )}
-          </Button>
         </div>
       </form>
 
