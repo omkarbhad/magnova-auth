@@ -44,15 +44,15 @@ const HomePage = () => {
                     <Container>
                         <div className="flex flex-col items-center justify-center py-10 sm:py-14 md:py-16 lg:py-20 h-full relative">
                             <div className="flex flex-col items-center max-w-3xl w-full">
-                                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium text-center leading-tight tracking-tight">
+                                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium text-center leading-tight tracking-tight">
                                     <span className="bg-gradient-to-b from-white via-white to-neutral-400 bg-clip-text text-transparent">Discover Your Cosmic Destiny</span>
                                     <br />
                                     <span className="bg-gradient-to-r from-amber-500 via-amber-300 to-amber-500 bg-clip-text text-transparent">with Ancient Vedic Wisdom</span>
                                 </h1>
-                                <p className="text-neutral-400 mt-4 sm:mt-6 text-center text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+                                <p className="text-neutral-400 mt-3 sm:mt-4 text-center text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
                                     Generate accurate kundali birth charts and unlock insights into your life's journey.
                                 </p>
-                                <div className="flex flex-row items-center justify-center mt-8 sm:mt-10 gap-4">
+                                <div className="flex flex-row items-center justify-center mt-6 sm:mt-8 gap-4">
                                     <Link to="/register">
                                         <Button className="h-10 px-6 bg-gradient-to-r from-amber-600 to-yellow-600 text-white font-medium hover:from-amber-500 hover:to-yellow-500 transition-colors" aria-label="Create account and get started">
                                             Get Started
@@ -67,11 +67,11 @@ const HomePage = () => {
                                 </div>
                             </div>
 
-                            <div className="relative flex items-center py-12 sm:py-16 md:py-20 w-full">
+                            <div className="relative flex items-center py-8 sm:py-12 md:py-16 w-full">
                                 {/* Glow underneath the image - Linkify style */}
                                 <div className="absolute top-[10%] left-1/2 w-3/4 -translate-x-1/2 h-1/4 md:h-1/3 inset-0 bg-gradient-to-r from-amber-500/15 to-orange-500/10 blur-[5rem] animate-image-glow" />
                                 <div className="absolute top-1/2 left-1/2 -z-10 w-full h-full -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-amber-600/5 to-yellow-600/5 rounded-full blur-[150px]" />
-                                <div className="relative group w-full max-w-5xl mx-auto">
+                                <div className="relative group w-full max-w-6xl mx-auto">
                                     <div className="-m-2 rounded-lg p-2 ring-1 ring-inset ring-amber-500/20 lg:-m-4 lg:rounded-xl bg-opacity-50 backdrop-blur-3xl">
                                         <div 
                                             style={{
