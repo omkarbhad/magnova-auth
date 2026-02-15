@@ -161,7 +161,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
     const finalData = { ...localData, latitude: lat, longitude: lon, tz_offset_hours: tz };
     setLocalData(finalData);
     fireUpdate(finalData);
-    setLocationSearchQuery(result.display_name || `${lat}, ${lon}`);
+    setLocationSearchQuery('');
     setShowLocationResults(false);
     setSelectedResultIndex(-1);
   };
@@ -194,10 +194,15 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
   }, [fireUpdate, localData]);
 
   const containerClassName = compact
-    ? 'grid grid-cols-1 lg:grid-cols-3 gap-3'
-    : 'grid grid-cols-1 lg:grid-cols-3 gap-4';
+    ? 'grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4'
+    : 'grid grid-cols-1 sm:grid-cols-3 gap-4';
 
-  const cardClassName = `bg-[hsl(220,10%,8%)] rounded-xl ${compact ? 'p-2' : 'p-3'} border border-[hsl(220,8%,18%)] hover:border-amber-500/20 transition-colors`;
+  const cardClassName = `bg-[hsl(220,10%,8%)] rounded-xl ${compact ? 'p-3' : 'p-3'} border border-[hsl(220,8%,18%)] hover:border-amber-500/20 transition-colors`;
+  const sectionIconWrapClass = 'w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0';
+  const sectionIconClass = 'w-4 h-4 text-amber-300';
+  const sectionHintClass = 'text-xs text-neutral-400 mt-0.5';
+  const selectLabelClass = 'block text-xs text-neutral-400 mb-1';
+  const selectControlClass = 'w-full h-9 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,20%)] rounded-lg px-2 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/40 appearance-none transition-colors';
 
   // Dropdown option helpers
   const years = useMemo(() => {
@@ -233,14 +238,14 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
 
       {/* Date Controls */}
       <div className={cardClassName}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-neutral-700/50 border border-neutral-600/50 flex items-center justify-center shrink-0">
-              <Calendar className="w-4 h-4 text-white" />
+            <div className={sectionIconWrapClass}>
+              <Calendar className={sectionIconClass} />
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white">Date</h4>
-              <div className="text-xs text-white/50 mt-0.5">Birth date</div>
+              <div className={sectionHintClass}>Birth date</div>
             </div>
           </div>
           <div className="px-3 py-1.5 bg-amber-500/15 border border-amber-500/30 rounded-lg">
@@ -249,14 +254,14 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
             </div>
           </div>
         </div>
-        <div className={compact ? 'grid grid-cols-3 gap-1 mb-0.5' : 'grid grid-cols-3 gap-1.5 mb-1'}>
+        <div className={compact ? 'grid grid-cols-3 gap-1.5 mb-1' : 'grid grid-cols-3 gap-1.5 mb-1'}>
           <div>
-            <label className="block text-xs text-neutral-500 mb-1">Year</label>
+            <label className={selectLabelClass}>Year</label>
             <div className="relative">
               <select
                 value={localData.year}
                 onChange={e => updateField('year', parseInt(e.target.value, 10))}
-                className="w-full h-9 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-2 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/30 appearance-none transition-colors"
+                className={selectControlClass}
               >
                 {years.map(y => (
                   <option key={y} value={y}>{y}</option>
@@ -266,12 +271,12 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
             </div>
           </div>
           <div>
-            <label className="block text-xs text-neutral-500 mb-1">Month</label>
+            <label className={selectLabelClass}>Month</label>
             <div className="relative">
               <select
                 value={localData.month}
                 onChange={e => updateField('month', parseInt(e.target.value, 10))}
-                className="w-full h-9 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-2 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/30 appearance-none transition-colors"
+                className={selectControlClass}
               >
                 {months.map(m => (
                   <option key={m} value={m}>{MONTH_NAMES[m - 1]}</option>
@@ -281,12 +286,12 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
             </div>
           </div>
           <div>
-            <label className="block text-xs text-neutral-500 mb-1">Day</label>
+            <label className={selectLabelClass}>Day</label>
             <div className="relative">
               <select
                 value={localData.day}
                 onChange={e => updateField('day', parseInt(e.target.value, 10))}
-                className="w-full h-9 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-2 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/30 appearance-none transition-colors"
+                className={selectControlClass}
               >
                 {days.map(d => (
                   <option key={d} value={d}>{d.toString().padStart(2, '0')}</option>
@@ -352,14 +357,14 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
 
       {/* Time Controls */}
       <div className={cardClassName}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-neutral-700/50 border border-neutral-600/50 flex items-center justify-center shrink-0">
-              <Clock className="w-4 h-4 text-white" />
+            <div className={sectionIconWrapClass}>
+              <Clock className={sectionIconClass} />
             </div>
             <div>
               <h4 className="text-sm font-semibold text-white">Time</h4>
-              <div className="text-xs text-white/50 mt-0.5">Birth time</div>
+              <div className={sectionHintClass}>Birth time</div>
             </div>
           </div>
           <div className="px-3 py-1.5 bg-amber-500/15 border border-amber-500/30 rounded-lg">
@@ -368,14 +373,14 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
             </div>
           </div>
         </div>
-        <div className={compact ? 'grid grid-cols-3 gap-1.5 mb-1' : 'grid grid-cols-3 gap-2 mb-2'}>
+        <div className={compact ? 'grid grid-cols-3 gap-1.5 mb-1' : 'grid grid-cols-3 gap-1.5 mb-2'}>
           <div>
-            <label className="block text-xs text-neutral-500 mb-1">Hour</label>
+            <label className={selectLabelClass}>Hour</label>
             <div className="relative">
               <select
                 value={localData.hour}
                 onChange={e => updateField('hour', parseInt(e.target.value))}
-                className="w-full h-9 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-2 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/30 appearance-none transition-colors"
+                className={selectControlClass}
               >
                 {hours.map(h => (
                   <option key={h} value={h}>{h.toString().padStart(2, '0')}</option>
@@ -385,12 +390,12 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
             </div>
           </div>
           <div>
-            <label className="block text-xs text-neutral-500 mb-1">Minute</label>
+            <label className={selectLabelClass}>Minute</label>
             <div className="relative">
               <select
                 value={localData.minute}
                 onChange={e => updateField('minute', parseInt(e.target.value))}
-                className="w-full h-9 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-2 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/30 appearance-none transition-colors"
+                className={selectControlClass}
               >
                 {minutes.map(m => (
                   <option key={m} value={m}>{m.toString().padStart(2, '0')}</option>
@@ -400,12 +405,12 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
             </div>
           </div>
           <div>
-            <label className="block text-xs text-neutral-500 mb-1">Second</label>
+            <label className={selectLabelClass}>Second</label>
             <div className="relative">
               <select
                 value={localData.second}
                 onChange={e => updateField('second', parseInt(e.target.value))}
-                className="w-full h-9 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-2 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/20 focus:border-amber-500/30 appearance-none transition-colors"
+                className={selectControlClass}
               >
                 {seconds.map(s => (
                   <option key={s} value={s}>{s.toString().padStart(2, '0')}</option>
@@ -472,19 +477,19 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
       {/* Location Controls */}
       {showLocation && (
         <div className={cardClassName}>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-neutral-700/50 border border-neutral-600/50 flex items-center justify-center shrink-0">
-                <MapPin className="w-4 h-4 text-white" />
+              <div className={sectionIconWrapClass}>
+                <MapPin className={sectionIconClass} />
               </div>
               <div>
                 <h4 className="text-sm font-semibold text-white">Location</h4>
-                <div className="text-xs text-white/50 mt-0.5">Birth place</div>
+                <div className={sectionHintClass}>Birth place</div>
               </div>
             </div>
             {locationName && (
-              <div className="px-3 py-2 bg-amber-500/15 border border-amber-500/30 rounded-lg w-full max-w-[140px] min-w-[80px] sm:max-w-[180px]">
-                <div className="text-xs font-bold text-amber-300 leading-tight whitespace-normal">
+              <div className="px-3 py-2 bg-amber-500/15 border border-amber-500/30 rounded-lg w-full sm:w-auto sm:max-w-[180px] min-w-0">
+                <div className="text-xs font-bold text-amber-300 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
                   {locationName}
                 </div>
               </div>
@@ -504,9 +509,10 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                 onKeyDown={handleLocationKeyDown}
                 onFocus={() => setShowLocationResults(true)}
                 onBlur={() => window.setTimeout(() => setShowLocationResults(false), 200)}
-                className={`w-full bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg pl-10 pr-10 ${
-                  compact ? 'py-2' : 'py-2.5'
-                } text-sm text-white placeholder-white/40 focus:outline-none focus:border-amber-500/30 transition-colors`}
+                className={`w-full h-10 sm:h-9 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg pl-10 pr-10 text-sm text-white placeholder-white/40 focus:outline-none focus:border-amber-500/30 transition-colors`}
+                aria-label="Search birth location"
+                autoComplete="off"
+                spellCheck={false}
               />
               
               {locationSearchLoading && (
@@ -519,8 +525,9 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                 <button
                   type="button"
                   onClick={clearLocation}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg hover:bg-[hsl(220,10%,12%)] transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 inline-flex items-center justify-center rounded-lg hover:bg-[hsl(220,10%,12%)] transition-colors"
                   title="Clear location"
+                  aria-label="Clear selected location"
                 >
                   <X className="w-4 h-4 text-white/60 hover:text-white/80" />
                 </button>
@@ -528,7 +535,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
             </div>
 
             {showLocationResults && locationSearchResults.length > 0 && (
-              <div className="absolute z-[9999] w-full mt-2 bg-neutral-950/95 backdrop-blur-sm border border-neutral-800 rounded-xl shadow-2xl max-h-64 overflow-y-auto">
+              <div role="listbox" aria-label="Location suggestions" className="absolute z-[9999] w-full mt-2 bg-neutral-950/95 backdrop-blur-sm border border-amber-500/20 rounded-xl shadow-2xl max-h-64 overflow-y-auto">
                 <div className="p-2">
                   {locationSearchResults.map((result, idx) => {
                     const lat = typeof result.lat === 'string' ? parseFloat(result.lat) : result.lat;
@@ -540,6 +547,8 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                         type="button"
                         onMouseDown={() => handleLocationSearchSelect(result)}
                         onMouseEnter={() => setSelectedResultIndex(idx)}
+                        role="option"
+                        aria-selected={idx === selectedResultIndex}
                         className={`w-full text-left px-3 py-3 rounded-lg transition-all ${
                           idx === selectedResultIndex
                             ? 'bg-neutral-900/50 text-white'
@@ -600,7 +609,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                         lon: city.lon,
                       })
                     }
-                    className="px-2 py-1 text-xs bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg hover:bg-[hsl(220,10%,14%)] hover:border-amber-500/20 transition-all text-white/80 hover:text-white"
+                    className="h-8 px-2 text-xs bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg hover:bg-[hsl(220,10%,14%)] hover:border-amber-500/20 transition-all text-white/80 hover:text-white"
                   >
                     {city.name}
                   </button>

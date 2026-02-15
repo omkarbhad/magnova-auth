@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ArrowUp, BookOpen, PanelRightClose, Trash2, Eye, Briefcase, HeartPulse, Activity, Clock, Dumbbell, Home, Pill, ChevronDown, ChevronRight, Copy, Check, Square, RefreshCw } from 'lucide-react';
+import { ArrowUp, BookOpen, PanelRightClose, Trash2, Eye, Briefcase, HeartPulse, Activity, Clock, Dumbbell, Home, Pill, ChevronDown, ChevronRight, Copy, Check, Square, RefreshCw, Link2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from './ui/button';
 import { useCredits, CreditsDisplay } from '@/contexts/CreditsContext';
 import { BuyCreditsModal } from './BuyCreditsModal';
 import type { KundaliResponse } from '../types/kundali';
-import { getAdminConfig, getUserEnabledModels } from '../lib/supabase';
+import { getAdminConfig, getUserEnabledModels, searchKnowledgeBase } from '../lib/supabase';
 
 interface ChatMessage {
   id: string;
@@ -215,7 +215,7 @@ export function buildMatchContextPrompt(matchData?: MatchDataRef | null): string
   const compatibilityBand = percentage >= 75 ? 'High' : percentage >= 55 ? 'Moderate' : 'Challenging';
 
   let prompt = `\n\n--- COMPATIBILITY ANALYSIS ---`;
-  prompt += `\n${matchData.chart1Name} ❤ ${matchData.chart2Name}`;
+  prompt += `\n${matchData.chart1Name} & ${matchData.chart2Name}`;
   prompt += `\nTotal Score: ${totalScore}/${maxTotalScore} (${percentage}%)`;
   prompt += `\nCompatibility Band: ${compatibilityBand}`;
   prompt += `\n\nAshtakoota Scores:`;
@@ -262,21 +262,35 @@ interface AstrovaSidebarProps {
 
 const CHART_PROMPTS = [
   { label: 'Overview', prompt: 'Give me a full overview of my birth chart', icon: Eye, color: 'text-amber-400' },
-  { label: 'Career', prompt: 'What does my chart say about my career?', icon: Briefcase, color: 'text-blue-400' },
-  { label: 'Love', prompt: 'Tell me about love and marriage in my chart', icon: HeartPulse, color: 'text-pink-400' },
-  { label: 'Health', prompt: 'What are the health indicators in my chart?', icon: Activity, color: 'text-green-400' },
-  { label: 'Dasha', prompt: 'Analyze my current dasha period and antardashas', icon: Clock, color: 'text-purple-400' },
+  { label: 'Career', prompt: 'What does my chart say about my career?', icon: Briefcase, color: 'text-amber-300' },
+  { label: 'Love', prompt: 'Tell me about love and marriage in my chart', icon: HeartPulse, color: 'text-amber-300' },
+  { label: 'Health', prompt: 'What are the health indicators in my chart?', icon: Activity, color: 'text-amber-300' },
+  { label: 'Dasha', prompt: 'Analyze my current dasha period and antardashas', icon: Clock, color: 'text-amber-300' },
   { label: 'Strengths', prompt: 'Show me my planetary strengths (Shadbala)', icon: Dumbbell, color: 'text-orange-400' },
-  { label: 'Houses', prompt: 'Analyze my house strengths (Bhava Bala)', icon: Home, color: 'text-cyan-400' },
-  { label: 'Remedies', prompt: 'What remedies do you suggest for my chart?', icon: Pill, color: 'text-emerald-400' },
+  { label: 'Houses', prompt: 'Analyze my house strengths (Bhava Bala)', icon: Home, color: 'text-amber-300' },
+  { label: 'Remedies', prompt: 'What remedies do you suggest for my chart?', icon: Pill, color: 'text-amber-300' },
 ];
 
 const GENERAL_PROMPTS = [
   { label: 'What is Vedic?', prompt: 'What is Vedic astrology and how is it different from Western astrology?', icon: Eye, color: 'text-amber-400' },
-  { label: 'Houses', prompt: 'Explain the 12 houses in Vedic astrology briefly', icon: Home, color: 'text-cyan-400' },
-  { label: 'Planets', prompt: 'What do the 9 planets (Navagraha) signify in Vedic astrology?', icon: Activity, color: 'text-green-400' },
-  { label: 'Doshas', prompt: 'What are common doshas like Mangal Dosha and Sade Sati?', icon: HeartPulse, color: 'text-pink-400' },
+  { label: 'Houses', prompt: 'Explain the 12 houses in Vedic astrology briefly', icon: Home, color: 'text-amber-300' },
+  { label: 'Planets', prompt: 'What do the 9 planets (Navagraha) signify in Vedic astrology?', icon: Activity, color: 'text-amber-300' },
+  { label: 'Doshas', prompt: 'What are common doshas like Mangal Dosha and Sade Sati?', icon: HeartPulse, color: 'text-amber-300' },
 ];
+
+const LOGO_SRC = '/Logo.png';
+const THINKING_ICON_SRC = '/star.png';
+const FALLBACK_MODEL = 'stepfun/step-3.5-flash:free';
+
+function buildKbContextPrompt(query: string, kbArticles: { title: string; category: string; content: string }[]): string {
+  if (!kbArticles.length) return '';
+  const compactArticles = kbArticles.slice(0, 4).map((article, index) => {
+    const compactContent = article.content.replace(/\s+/g, ' ').slice(0, 1100);
+    return `\n[KB ${index + 1}] ${article.title} (${article.category})\n${compactContent}`;
+  }).join('\n');
+
+  return `\n\n--- KNOWLEDGE BASE CONTEXT (Semantic Retrieval) ---\nUser Query: ${query}\nUse this KB context when relevant, prioritize chart data for chart-specific answers, and do not hallucinate beyond these sources.${compactArticles}`;
+}
 
 export function buildSystemPrompt(kundaliData: KundaliResponse | null, chartName?: string, skipSingleChartSections?: boolean): string {
   let prompt = `You are Astrova — a sharp, modern Vedic astrologer. You read charts like a pro and talk like a trusted friend.
@@ -292,7 +306,6 @@ RULES:
 - No medical/legal advice, no death predictions, no fear tactics.
 - Non-astrology questions: answer normally, connect to chart briefly if loaded.
 - No chart loaded: give general astrology knowledge, don't make up placements.
-- Use emojis where appropriate.
 - Treat currently loaded chart/match as active context until user provides a new chart.
 - Start with 1-line verdict, then 2-4 concise supporting points.
 - Prioritize what is most actionable right now (current dasha + strongest/weakest factors).
@@ -423,6 +436,28 @@ RULES:
         prompt += ` | Bhavadhipati:${bala.bhavadhipati_bala ?? 0}, Dig:${bala.bhava_digbala ?? 0}, Drishti:${bala.bhava_drishti_bala ?? 0}, Residential:${bala.residential_strength ?? 0}, PlanetContribution:${bala.planet_contribution ?? 0}`;
       }
     }
+
+    if (kundaliData.ashtakavarga) {
+      const sarva = kundaliData.ashtakavarga.sarva;
+      if (sarva?.points?.length === 12) {
+        const strongestSarva = sarva.points
+          .map((value, index) => ({ value, house: index + 1 }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 4)
+          .map((entry) => `H${entry.house}:${entry.value}`)
+          .join(', ');
+        const weakestSarva = sarva.points
+          .map((value, index) => ({ value, house: index + 1 }))
+          .sort((a, b) => a.value - b.value)
+          .slice(0, 4)
+          .map((entry) => `H${entry.house}:${entry.value}`)
+          .join(', ');
+        prompt += `\n\n--- ASHTAKAVARGA (Sarva) ---`;
+        prompt += `\nTotal: ${sarva.total ?? 0}`;
+        prompt += `\nStrong Houses by Sarva: ${strongestSarva}`;
+        prompt += `\nWeak Houses by Sarva: ${weakestSarva}`;
+      }
+    }
     
     if (kundaliData.yogas && kundaliData.yogas.length > 0) {
       prompt += `\n\n--- YOGAS (Planetary Combinations) ---`;
@@ -516,7 +551,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { credits, creditCosts, deductCredits, showBuyModal, setShowBuyModal } = useCredits();
 
-  // Model selection state
+  // Active model (configured by admin; no user-side selection here)
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -577,12 +612,6 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
 
-    // Ensure we have a valid model
-    if (!selectedModel) {
-      setMessages(prev => [...prev, { id: `error-${Date.now()}`, role: 'assistant' as const, content: 'Model not loaded. Please refresh the page.', timestamp: new Date() }]);
-      return;
-    }
-
     if (!deductCredits(creditCosts.AI_MESSAGE, 'ai_message')) {
       setInsufficientCredits(true);
       setTimeout(() => setInsufficientCredits(false), 3000);
@@ -623,10 +652,24 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
       if (!apiKey) {
         throw new Error('OpenRouter API key not configured.');
       }
-      const modelToUse = selectedModel;
+      const modelToUse = selectedModel || FALLBACK_MODEL;
+
+      const kbResults = await searchKnowledgeBase(messageText.trim()).catch(() => []);
+      if (kbResults.length > 0) {
+        const kbToolMessage: ChatMessage = {
+          id: `kb-${Date.now()}`,
+          role: 'tool',
+          content: `Using KB context from ${kbResults.length} article${kbResults.length > 1 ? 's' : ''}`,
+          toolName: 'Knowledge Base Retrieval',
+          timestamp: new Date(),
+          kbResults: kbResults.slice(0, 4).map((a) => ({ title: a.title, category: a.category, content: a.content.slice(0, 220) })),
+        };
+        setMessages(prev => [...prev, kbToolMessage]);
+      }
 
       let systemPrompt = buildSystemPrompt(kundaliData, chartName, !!matchData);
       systemPrompt += buildMatchContextPrompt(matchData);
+      systemPrompt += buildKbContextPrompt(messageText.trim(), kbResults);
       const conversationMessages = [
         { role: 'system' as const, content: systemPrompt },
         ...messages.filter(m => m.role !== 'tool').map(m => ({ role: (m.role === 'tool' ? 'user' : m.role) as 'user' | 'assistant', content: m.content })),
@@ -806,7 +849,9 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
     try {
       const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
       if (!apiKey) throw new Error('OpenRouter API key not configured.');
-      const systemPrompt = `${buildSystemPrompt(kundaliData, chartName, !!matchData)}${buildMatchContextPrompt(matchData)}`;
+      const modelToUse = selectedModel || FALLBACK_MODEL;
+      const kbResults = await searchKnowledgeBase(messageText.trim()).catch(() => []);
+      const systemPrompt = `${buildSystemPrompt(kundaliData, chartName, !!matchData)}${buildMatchContextPrompt(matchData)}${buildKbContextPrompt(messageText.trim(), kbResults)}`;
       const conversationMessages = [
         { role: 'system' as const, content: systemPrompt },
         ...messages.filter(m => m.role !== 'tool').map(m => ({ role: (m.role === 'tool' ? 'user' : m.role) as 'user' | 'assistant', content: m.content })),
@@ -819,7 +864,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}`, 'HTTP-Referer': window.location.origin, 'X-Title': 'Astrova - Vedic Astrology' },
-        body: JSON.stringify({ model: selectedModel, messages: conversationMessages, max_tokens: 4096, temperature: 0.7, stream: true }),
+        body: JSON.stringify({ model: modelToUse, messages: conversationMessages, max_tokens: 4096, temperature: 0.7, stream: true }),
         signal: controller.signal,
       });
       if (!response.ok) { const ed = await response.json().catch(() => ({})); throw new Error((ed as { error?: { message?: string } })?.error?.message || `API error: ${response.status}`); }
@@ -881,7 +926,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
         className="fixed right-4 bottom-20 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 border border-amber-400/50 shadow-lg shadow-amber-500/25 flex items-center justify-center hover:scale-110 transition-all duration-200 group"
         title="Open Astrova AI"
       >
-        <img src="/star.png" alt="" className="w-5 h-5 group-hover:animate-pulse" />
+        <img src={LOGO_SRC} alt="Astrova" className="w-6 h-6 object-contain group-hover:scale-105 transition-transform" />
         {messages.length > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center">
             {(() => { const c = messages.filter(m => m.role === 'assistant').length; return c > 9 ? '9+' : c; })()}
@@ -894,24 +939,24 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
   return (
     <div className="flex flex-col h-full bg-[hsl(220,10%,7%)] backdrop-blur-xl border-l border-[hsl(220,8%,18%)]">
       {/* Sidebar Header */}
-      <div className="px-3 py-2.5 border-b border-[hsl(220,8%,18%)]">
-        <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 flex items-center justify-center">
-              <img src="/star.png" alt="" className="w-3.5 h-3.5" />
+      <div className="px-3 py-3 border-b border-[hsl(220,8%,18%)] bg-[linear-gradient(120deg,rgba(245,158,11,0.08),rgba(249,115,22,0.03)_55%,transparent)]">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-[hsl(220,10%,11%)] border border-amber-400/30 shadow-[0_0_0_1px_rgba(245,158,11,0.15)_inset] flex items-center justify-center">
+              <img src={LOGO_SRC} alt="Astrova logo" className="w-5 h-5 object-contain" />
             </div>
             <div>
-              <h3 className="text-white font-semibold text-sm leading-tight">Astrova</h3>
-              <p className="text-[10px] text-neutral-500 leading-tight">
+              <h3 className="text-white font-semibold text-sm leading-tight tracking-wide">Astrova</h3>
+              <p className="text-[10px] text-neutral-400 leading-tight">
                 {matchData ? (
                   <span className="flex items-center gap-1">
                     <span className="text-neutral-300">{matchData.chart1Name}</span>
-                    <span className="text-pink-400">❤</span>
+                    <Link2 className="w-3 h-3 text-amber-400" />
                     <span className="text-neutral-300">{matchData.chart2Name}</span>
                   </span>
                 ) : kundaliData ? (
                   <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
                     {chartName ? <span className="text-amber-300 font-medium">{chartName}</span> : <span className="text-neutral-400">{kundaliData.lagna.sign} Lagna</span>}
                   </span>
                 ) : (
@@ -925,17 +970,15 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
           </div>
           <div className="flex items-center gap-1">
             <CreditsDisplay compact />
-            {messages.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearChat}
-                className="h-7 w-7 p-0 text-neutral-500 hover:text-white hover:bg-white/5"
-                title="Clear chat"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearChat}
+              className="h-7 w-7 p-0 text-neutral-500 hover:text-white hover:bg-white/5"
+              title="Clear chat"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -958,7 +1001,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-2">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/15 to-orange-500/15 border border-amber-500/20 flex items-center justify-center mb-3">
-              <img src="/star.png" alt="" className="w-7 h-7" />
+              <img src={LOGO_SRC} alt="Astrova" className="w-7 h-7 object-contain" />
             </div>
             <h3 className="text-white font-semibold text-base mb-1">Astrova</h3>
             <p className="text-neutral-500 text-[10px] mb-0.5">Your Modern Astrologer</p>
@@ -975,7 +1018,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                     <button
                       key={qp.label}
                       onClick={() => sendMessage(qp.prompt)}
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] text-neutral-300 text-[11px] font-medium hover:bg-[hsl(220,10%,13%)] hover:border-[hsl(220,8%,24%)] hover:text-white transition-all duration-200 text-left group"
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] text-neutral-300 text-[11px] font-medium hover:bg-[hsl(220,10%,13%)] hover:border-amber-500/25 hover:text-white transition-all duration-200 text-left group"
                     >
                       <Icon className={`w-3.5 h-3.5 ${qp.color} shrink-0 group-hover:scale-110 transition-transform`} />
                       <span>{qp.label}</span>
@@ -1014,28 +1057,32 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                     {msg.thinking && (
                       <div className="mb-1.5">
                         {msg.isStreaming && !msg.content ? (
-                          <div className="flex items-center gap-1.5 text-[10px] text-amber-400/70">
-                            <img src="/star.png" alt="" className="w-4 h-4 animate-spin" style={{ animationDuration: '2s' }} />
+                          <div className="flex items-center gap-1.5 text-[10px] text-amber-300/90">
+                            <img src={THINKING_ICON_SRC} alt="" className="w-4 h-4 animate-spin" style={{ animationDuration: '2s' }} />
                             <span>Thinking...</span>
                           </div>
                         ) : (
                           <button
                             onClick={() => setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, showThinking: !m.showThinking } : m))}
-                            className="flex items-center gap-1 text-[10px] text-neutral-500 hover:text-neutral-300 transition-colors"
+                            className="flex items-center gap-1 text-[10px] text-amber-300/75 hover:text-amber-200 transition-colors"
+                            onClickCapture={(e) => {
+                              e.stopPropagation();
+                              setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+                            }}
                           >
                             <ChevronRight className={`w-3 h-3 transition-transform ${msg.showThinking ? 'rotate-90' : ''}`} />
-                            <img src="/star.png" alt="" className="w-3 h-3" />
+                            <img src={THINKING_ICON_SRC} alt="" className="w-3 h-3 object-contain" />
                             <span>Thought{msg.thinkingDuration ? ` for ${msg.thinkingDuration}s` : ''}</span>
                           </button>
                         )}
                         {msg.showThinking && (
-                          <div className="mt-1.5 px-3 py-2.5 rounded-xl bg-[hsl(220,10%,9%)] border border-[hsl(220,8%,15%)] text-[11px] text-neutral-400 leading-relaxed max-h-[180px] overflow-y-auto whitespace-pre-wrap">
+                          <div className="mt-1.5 px-3 py-2.5 rounded-xl bg-amber-500/8 border border-amber-500/20 text-[11px] text-neutral-300 leading-relaxed max-h-[180px] overflow-y-auto whitespace-pre-wrap">
                             {msg.thinking}
                           </div>
                         )}
                       </div>
                     )}
-                    <div className="group/msg">
+                    <div className="group/msg rounded-2xl border border-[hsl(220,8%,18%)] bg-[hsl(220,10%,9%)] px-3 py-2.5">
                       <div 
                         className="prose prose-invert prose-sm max-w-none text-neutral-200
                           [&_h1]:text-white [&_h1]:text-base [&_h1]:font-semibold [&_h1]:mb-2 [&_h1]:mt-0
@@ -1056,8 +1103,8 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                           {msg.content}
                         </ReactMarkdown>
                         {msg.isStreaming && !msg.content && !msg.thinking && (
-                          <div className="flex items-center gap-1.5 text-[10px] text-amber-400/70">
-                            <img src="/star.png" alt="" className="w-4 h-4 animate-spin" style={{ animationDuration: '2s' }} />
+                          <div className="flex items-center gap-1.5 text-[10px] text-amber-300/90">
+                            <img src={THINKING_ICON_SRC} alt="" className="w-4 h-4 animate-spin" style={{ animationDuration: '2s' }} />
                             <span>Thinking...</span>
                           </div>
                         )}
@@ -1072,7 +1119,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                             onClick={() => copyMessage(msg.id, msg.content)}
                             className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-neutral-500 hover:text-white hover:bg-white/5 transition-all"
                           >
-                            {copiedMessageId === msg.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                            {copiedMessageId === msg.id ? <Check className="w-3 h-3 text-amber-300" /> : <Copy className="w-3 h-3" />}
                             {copiedMessageId === msg.id ? 'Copied' : 'Copy'}
                           </button>
                           {msg.id.startsWith('error-') && (
@@ -1108,7 +1155,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
       </div>
 
       {/* Input Area */}
-      <form onSubmit={handleSubmit} className="px-3 pb-3 pt-2">
+      <form onSubmit={handleSubmit} className="px-3 pb-2 pt-2">
         {insufficientCredits && (
           <div className="mb-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-[10px] text-center">
             Insufficient credits. Purchase more to continue.
@@ -1123,7 +1170,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
             placeholder={kundaliData ? 'Ask Astrova anything...' : 'Ask about Vedic astrology...'}
             disabled={isLoading}
             rows={1}
-            className="flex-1 bg-transparent px-6 py-0 text-sm text-white placeholder-neutral-500 focus:outline-none resize-none disabled:opacity-40 disabled:cursor-not-allowed h-[48px] text-left leading-[48px] md:h-[52px] md:leading-[52px]"
+            className="flex-1 bg-transparent px-6 py-0 text-sm text-white placeholder-neutral-500 focus:outline-none resize-none disabled:opacity-40 disabled:cursor-not-allowed h-[48px] leading-[48px]"
           />
           <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center">
             {isLoading ? (

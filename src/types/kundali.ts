@@ -40,6 +40,9 @@ export interface LagnaInfo {
   sign: string;
   sign_sanskrit: string;
   sign_index: number;
+  navamsa_sign_index?: number;
+  navamsa_sign?: string;
+  navamsa_sign_sanskrit?: string;
   deg: number;
   min: number;
   sec: number;
@@ -103,6 +106,16 @@ export interface BhavaBalaInfo {
   strength?: number;
   is_strong: boolean;
   rating: "Very Strong" | "Strong" | "Medium" | "Weak";
+}
+
+export interface AshtakavargaPlanetRow {
+  points: number[];
+  total: number;
+}
+
+export interface AshtakavargaInfo {
+  bhinna: Record<string, AshtakavargaPlanetRow>;
+  sarva: AshtakavargaPlanetRow;
 }
 
 export interface PratyantardashaInfo {
@@ -200,6 +213,7 @@ export interface KundaliResponse {
   navamsa_chart?: string[][];
   shad_bala: Record<string, ShadBalaInfo>;
   bhava_bala: Record<number, BhavaBalaInfo>;
+  ashtakavarga?: AshtakavargaInfo;
   dasha: DashaInfo;
   yogas?: YogaInfo[];
   signs: string[];

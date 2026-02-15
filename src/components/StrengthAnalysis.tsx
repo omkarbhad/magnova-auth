@@ -1,6 +1,6 @@
 import { useState, useMemo, useId, Fragment, useRef, useEffect } from 'react';
 import { Zap, ChevronDown } from 'lucide-react';
-import type { PlanetInfo, ShadBalaInfo, BhavaBalaInfo, DashaInfo, LagnaInfo } from '../types/kundali';
+import type { PlanetInfo, ShadBalaInfo, BhavaBalaInfo, DashaInfo, LagnaInfo, AshtakavargaInfo } from '../types/kundali';
 
 interface RadarDataPoint {
   label: string;
@@ -31,6 +31,7 @@ interface Aspect {
 interface StrengthAnalysisProps {
   shadBala: Record<string, Partial<ShadBalaInfo>>;
   bhavaBala?: Record<number, Partial<BhavaBalaInfo>>;
+  ashtakavarga?: AshtakavargaInfo;
   planets?: Record<string, PlanetInfo>;
   upagrahas?: Record<string, PlanetInfo>;
   lagna?: LagnaInfo;
@@ -47,8 +48,106 @@ function formatYears(y: number | undefined): string {
 }
 
 const REQUIRED_RUPAS: Record<string, number> = {
-  Sun: 5.0, Moon: 6.0, Mars: 5.0, Mercury: 7.0, Jupiter: 6.5, Venus: 5.5, Saturn: 5.0,
+  Sun: 6.5, Moon: 6.0, Mars: 5.0, Mercury: 7.0, Jupiter: 6.5, Venus: 5.5, Saturn: 5.0,
 };
+
+const STRENGTH_TABS = ['combined', 'planets', 'houses', 'aspects', 'shad-table', 'bhava-table', 'ashtakavarga', 'positions', 'dasha'] as const;
+type StrengthTab = (typeof STRENGTH_TABS)[number];
+
+function getTabLabel(tab: StrengthTab): string {
+  if (tab === 'combined') return 'Overview';
+  if (tab === 'planets') return 'Planets';
+  if (tab === 'houses') return 'Houses';
+  if (tab === 'aspects') return 'Aspects';
+  if (tab === 'shad-table') return 'Shad Bala';
+  if (tab === 'bhava-table') return 'Bhava Bala';
+  if (tab === 'ashtakavarga') return 'Ashtakavarga';
+  if (tab === 'positions') return 'Positions';
+  return 'Dasha';
+}
+
+const ASHTAKAVARGA_SIGNS = ['Ar', 'Ta', 'Ge', 'Cn', 'Le', 'Vi', 'Li', 'Sc', 'Sg', 'Cp', 'Aq', 'Pi'];
+
+function CompactAshtakavargaTable({ ashtakavarga }: { ashtakavarga?: AshtakavargaInfo }) {
+  const targetPlanets = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+
+  if (!ashtakavarga) {
+    return (
+      <div className="text-center py-8 text-neutral-500">
+        <div className="text-sm">No Ashtakavarga data available</div>
+        <div className="text-xs mt-1">Generate a kundali to view Bhinna and Sarva Ashtakavarga</div>
+      </div>
+    );
+  }
+
+  const rows = targetPlanets.map((planet) => {
+    const points = ashtakavarga.bhinna?.[planet]?.points ?? Array.from({ length: 12 }, () => 0);
+    const total = ashtakavarga.bhinna?.[planet]?.total ?? points.reduce((sum, value) => sum + value, 0);
+    return { planet, points, total };
+  });
+
+  const sarvaPoints = ashtakavarga.sarva?.points ?? Array.from({ length: 12 }, () => 0);
+  const sarvaTotal = ashtakavarga.sarva?.total ?? sarvaPoints.reduce((sum, value) => sum + value, 0);
+  const maxSarvaPoint = Math.max(1, ...sarvaPoints);
+
+  return (
+    <div className="bg-[hsl(220,10%,8%)] rounded-lg border border-[hsl(220,8%,18%)] overflow-hidden">
+      <div className="max-h-[420px] overflow-auto custom-scrollbar">
+        <table className="w-full text-xs min-w-[980px]">
+          <thead className="bg-[hsl(220,10%,10%)] sticky top-0 z-10">
+            <tr className="border-b border-[hsl(220,8%,18%)]">
+              <th className="px-3 py-2 text-left text-neutral-400 sticky left-0 bg-[hsl(220,10%,10%)] z-20">Planet</th>
+              {ASHTAKAVARGA_SIGNS.map((sign) => (
+                <th key={sign} className="px-2 py-2 text-center text-neutral-500">{sign}</th>
+              ))}
+              <th className="px-3 py-2 text-center text-neutral-400">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => {
+              const config = PLANET_CONFIG[row.planet];
+              return (
+                <tr key={row.planet} className="border-b border-[hsl(220,8%,14%)] hover:bg-[hsl(220,10%,10%)] transition-colors">
+                  <td className="px-3 py-2 sticky left-0 bg-[hsl(220,10%,8%)]">
+                    <div className="flex items-center gap-2">
+                      <span style={{ color: config?.color }}>{config?.icon}</span>
+                      <span className="text-white font-medium">{row.planet}</span>
+                    </div>
+                  </td>
+                  {row.points.map((value, idx) => (
+                    <td key={`${row.planet}-${idx}`} className="px-2 py-2 text-center text-neutral-200">
+                      {value}
+                    </td>
+                  ))}
+                  <td className="px-3 py-2 text-center font-semibold text-white">{row.total}</td>
+                </tr>
+              );
+            })}
+            <tr className="bg-amber-500/10 border-t border-amber-500/30">
+              <td className="px-3 py-2 text-amber-300 font-semibold sticky left-0 bg-[hsl(220,10%,12%)]">Sarva</td>
+              {sarvaPoints.map((value, idx) => {
+                const intensity = value / maxSarvaPoint;
+                return (
+                  <td
+                    key={`sarva-${idx}`}
+                    className="px-2 py-2 text-center font-semibold"
+                    style={{
+                      color: '#fef3c7',
+                      backgroundColor: `rgba(251, 191, 36, ${0.08 + intensity * 0.18})`,
+                    }}
+                  >
+                    {value}
+                  </td>
+                );
+              })}
+              <td className="px-3 py-2 text-center text-amber-300 font-bold">{sarvaTotal}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
 
 const PLANET_CONFIG: Record<string, { 
   icon: string; label: string; color: string; description: string; 
@@ -960,13 +1059,6 @@ const getRupas = (bala: Partial<ShadBalaInfo> | undefined): number => {
   return 0;
 };
 
-const getTotalBala = (bala: Partial<ShadBalaInfo> | undefined): number => {
-  if (!bala) return 0;
-  if (bala.total_shashtiamsas !== undefined) return Math.round(bala.total_shashtiamsas);
-  if (bala.total_rupas !== undefined) return Math.round(bala.total_rupas * 60);
-  return bala.total_bala ?? 0;
-};
-
 // Helper functions for Bhava Bala
 const getBhavaRupas = (bala: Partial<BhavaBalaInfo> | undefined): number => {
   if (!bala) return 0;
@@ -978,8 +1070,7 @@ const getBhavaRupas = (bala: Partial<BhavaBalaInfo> | undefined): number => {
 // Compact Shad Bala Table Component
 function CompactShadBalaTable({ shadBala }: { shadBala: Record<string, Partial<ShadBalaInfo>> }) {
   const basePlanets = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
-  const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
-  const [sortCol, setSortCol] = useState<'planet' | 'rupas' | 'required' | 'percent' | 'strength'>('planet');
+  const [sortCol, setSortCol] = useState<'planet' | 'sthana' | 'dig' | 'kala' | 'chesta' | 'naisargika' | 'drik' | 'total' | 'required' | 'percent'>('planet');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   const handleSort = (col: typeof sortCol) => {
@@ -987,16 +1078,35 @@ function CompactShadBalaTable({ shadBala }: { shadBala: Record<string, Partial<S
     else { setSortCol(col); setSortDir('desc'); }
   };
 
+  const getComponentValues = (bala: Partial<ShadBalaInfo> | undefined) => {
+    const sthana = typeof bala?.sthana_bala === 'object' ? (bala?.sthana_bala as any)?.total ?? 0 : bala?.sthana_bala ?? 0;
+    const kala = typeof bala?.kala_bala === 'object' ? (bala?.kala_bala as any)?.total ?? 0 : bala?.kala_bala ?? 0;
+    return {
+      sthana: Number(sthana) || 0,
+      dig: Number(bala?.dig_bala ?? 0),
+      kala: Number(kala) || 0,
+      chesta: Number(bala?.chesta_bala ?? 0),
+      naisargika: Number(bala?.naisargika_bala ?? 0),
+      drik: Number(bala?.drik_bala ?? 0),
+      totalRupas: getRupas(bala),
+    };
+  };
+
   const getSortValue = (planet: string, col: typeof sortCol) => {
     const bala = shadBala[planet];
-    const rupas = getRupas(bala);
-    const required = bala?.required_rupas ?? (planet === 'Moon' ? 6 : planet === 'Jupiter' ? 6.5 : planet === 'Venus' ? 5.5 : planet === 'Mercury' ? 7 : 5);
-    const percent = (rupas / required) * 100;
+    const v = getComponentValues(bala);
+    const required = bala?.required_rupas ?? REQUIRED_RUPAS[planet] ?? 5;
+    const percent = required > 0 ? (v.totalRupas / required) * 100 : 0;
     if (col === 'planet') return basePlanets.indexOf(planet);
-    if (col === 'rupas') return rupas;
+    if (col === 'sthana') return v.sthana;
+    if (col === 'dig') return v.dig;
+    if (col === 'kala') return v.kala;
+    if (col === 'chesta') return v.chesta;
+    if (col === 'naisargika') return v.naisargika;
+    if (col === 'drik') return v.drik;
+    if (col === 'total') return v.totalRupas;
     if (col === 'required') return required;
     if (col === 'percent') return percent;
-    if (col === 'strength') return percent;
     return 0;
   };
 
@@ -1015,46 +1125,53 @@ function CompactShadBalaTable({ shadBala }: { shadBala: Record<string, Partial<S
   return (
     <div className="bg-[hsl(220,10%,8%)] rounded-lg border border-[hsl(220,8%,18%)] overflow-hidden">
       <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-        <table className="w-full text-xs">
+        <table className="w-full text-xs min-w-[920px]">
           <thead className="bg-[hsl(220,10%,10%)] sticky top-0">
             <tr className="border-b border-[hsl(220,8%,18%)]">
               <th className="px-3 py-2 text-left text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('planet')}>Planet<SortIcon col="planet" /></th>
-              <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('rupas')}>Rupas<SortIcon col="rupas" /></th>
+              <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('sthana')}>Sthana<SortIcon col="sthana" /></th>
+              <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('dig')}>Dig<SortIcon col="dig" /></th>
+              <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('kala')}>Kala<SortIcon col="kala" /></th>
+              <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('chesta')}>Cheshta<SortIcon col="chesta" /></th>
+              <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('naisargika')}>Naisargika<SortIcon col="naisargika" /></th>
+              <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('drik')}>Drik<SortIcon col="drik" /></th>
+              <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('total')}>Total Rupa<SortIcon col="total" /></th>
               <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('required')}>Required<SortIcon col="required" /></th>
               <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('percent')}>%<SortIcon col="percent" /></th>
-              <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('strength')}>Strength<SortIcon col="strength" /></th>
+              <th className="px-3 py-2 text-center text-neutral-400">Strength</th>
             </tr>
           </thead>
           <tbody>
             {planets.map(planet => {
               const bala = shadBala[planet];
-              const rupas = getRupas(bala);
-              const required = bala?.required_rupas ?? (planet === 'Moon' ? 6 : planet === 'Jupiter' ? 6.5 : planet === 'Venus' ? 5.5 : planet === 'Mercury' ? 7 : 5);
-              const percent = (rupas / required) * 100;
-              const strength = percent >= 120 ? 'Strong' : percent >= 90 ? 'Medium' : 'Weak';
-              const strengthColor = 'text-white';
+              const v = getComponentValues(bala);
+              const required = bala?.required_rupas ?? REQUIRED_RUPAS[planet] ?? 5;
+              const percent = required > 0 ? (v.totalRupas / required) * 100 : 0;
+              const strength = percent >= 100 ? 'Strong' : percent >= 80 ? 'Medium' : 'Weak';
               const config = PLANET_CONFIG[planet];
 
               return (
-                <Fragment key={planet}>
-                  <tr 
-                    className="border-b border-[hsl(220,8%,14%)] hover:bg-[hsl(220,10%,10%)] cursor-pointer transition-colors"
-                    onClick={() => setExpandedPlanet(expandedPlanet === planet ? null : planet)}
-                  >
+                <tr key={planet} className="border-b border-[hsl(220,8%,14%)] hover:bg-[hsl(220,10%,10%)] transition-colors">
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
                         <span style={{ color: config?.color }}>{config?.icon}</span>
                         <span className="text-white font-medium">{planet}</span>
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-center">{rupas.toFixed(2)}</td>
+                    <td className="px-3 py-2 text-center text-neutral-200">{v.sthana.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-center text-neutral-200">{v.dig.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-center text-neutral-200">{v.kala.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-center text-neutral-200">{v.chesta.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-center text-neutral-200">{v.naisargika.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-center text-neutral-200">{v.drik.toFixed(1)}</td>
+                    <td className="px-3 py-2 text-center font-semibold text-white">{v.totalRupas.toFixed(2)}</td>
                     <td className="px-3 py-2 text-center">{required}</td>
                     <td className="px-3 py-2 text-center">
-                      <span className={strengthColor}>{percent.toFixed(0)}%</span>
+                      <span className="text-white">{percent.toFixed(0)}%</span>
                     </td>
                     <td className="px-3 py-2 text-center">
                       <span className={`px-2 py-1 rounded text-[9px] font-medium ${
-                        strength === 'Strong' ? 'bg-green-500/20 text-green-400' :
+                        strength === 'Strong' ? 'bg-amber-500/20 text-amber-300' :
                         strength === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
                         'bg-red-500/20 text-red-400'
                       }`}>
@@ -1062,43 +1179,6 @@ function CompactShadBalaTable({ shadBala }: { shadBala: Record<string, Partial<S
                       </span>
                     </td>
                   </tr>
-                  {expandedPlanet === planet && bala && (
-                    <tr className="bg-[hsl(220,10%,9%)]">
-                      <td colSpan={5} className="px-3 py-3">
-                        <div className="space-y-2">
-                          <div className="text-[10px] text-neutral-400 mb-2">{config?.description}</div>
-                          {/* Sub-bala breakdown */}
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5 text-[10px]">
-                            {(() => {
-                              const sthana = typeof bala.sthana_bala === 'object' ? (bala.sthana_bala as any).total : (bala.sthana_bala ?? 0);
-                              const kala = typeof bala.kala_bala === 'object' ? (bala.kala_bala as any).total : (bala.kala_bala ?? 0);
-                              const subBalas = [
-                                { name: 'Sthana', value: sthana, max: 180, color: '#f59e0b' },
-                                { name: 'Dig', value: bala.dig_bala ?? 0, max: 60, color: '#3b82f6' },
-                                { name: 'Kala', value: kala, max: 300, color: '#8b5cf6' },
-                                { name: 'Chesta', value: bala.chesta_bala ?? 0, max: 60, color: '#ef4444' },
-                                { name: 'Naisargika', value: bala.naisargika_bala ?? 0, max: 60, color: '#10b981' },
-                                { name: 'Drik', value: bala.drik_bala ?? 0, max: 60, color: '#06b6d4' },
-                              ];
-                              return subBalas.map(sb => (
-                                <div key={sb.name} className="flex items-center gap-2">
-                                  <span className="text-neutral-500 w-16">{sb.name}</span>
-                                  <div className="flex-1 h-1.5 bg-neutral-700/50 rounded-full overflow-hidden">
-                                    <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, Math.max(0, (Number(sb.value) / sb.max) * 100))}%`, background: sb.color }} />
-                                  </div>
-                                  <span className="text-white font-mono w-8 text-right">{Number(sb.value).toFixed(0)}</span>
-                                </div>
-                              ));
-                            })()}
-                          </div>
-                          <div className="text-[9px] text-neutral-500 pt-1 border-t border-neutral-700/30">
-                            Total: {getTotalBala(bala)} shashtiamsas = {rupas.toFixed(2)} rupas
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </Fragment>
               );
             })}
           </tbody>
@@ -1115,6 +1195,14 @@ function CompactBhavaBalaTable({ bhavaBala }: { bhavaBala: Record<number, Partia
   const [sortCol, setSortCol] = useState<'house' | 'rupas' | 'max' | 'percent' | 'strength'>('house');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
+  const maxRupas = useMemo(() => {
+    const observedMax = Math.max(
+      0,
+      ...baseHouses.map((house) => getBhavaRupas(bhavaBala?.[house]))
+    );
+    return Math.max(3.6, Math.ceil(observedMax * 2) / 2);
+  }, [bhavaBala]);
+
   const handleSort = (col: typeof sortCol) => {
     if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortCol(col); setSortDir('desc'); }
@@ -1123,7 +1211,6 @@ function CompactBhavaBalaTable({ bhavaBala }: { bhavaBala: Record<number, Partia
   const getSortValue = (house: number, col: typeof sortCol) => {
     const bala = bhavaBala?.[house];
     const rupas = getBhavaRupas(bala);
-    const maxRupas = 4.5;
     const percent = (rupas / maxRupas) * 100;
     if (col === 'house') return house;
     if (col === 'rupas') return rupas;
@@ -1162,9 +1249,17 @@ function CompactBhavaBalaTable({ bhavaBala }: { bhavaBala: Record<number, Partia
             {houses.map(house => {
               const bala = bhavaBala?.[house];
               const rupas = getBhavaRupas(bala);
-              const maxRupas = 4.5;
               const percent = (rupas / maxRupas) * 100;
-              const strength = percent >= 120 ? 'Strong' : percent >= 90 ? 'Medium' : 'Weak';
+              const backendRating = bala?.rating;
+              const strength = backendRating === 'Very Strong' || backendRating === 'Strong'
+                ? 'Strong'
+                : backendRating === 'Medium'
+                  ? 'Medium'
+                  : percent >= 100
+                    ? 'Strong'
+                    : percent >= 80
+                      ? 'Medium'
+                      : 'Weak';
               const strengthColor = 'text-white';
               const config = HOUSE_CONFIG[house];
 
@@ -1173,6 +1268,15 @@ function CompactBhavaBalaTable({ bhavaBala }: { bhavaBala: Record<number, Partia
                   <tr 
                     className="border-b border-[hsl(220,8%,14%)] hover:bg-[hsl(220,10%,10%)] cursor-pointer transition-colors"
                     onClick={() => setExpandedHouse(expandedHouse === house ? null : house)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setExpandedHouse(expandedHouse === house ? null : house);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-expanded={expandedHouse === house}
                   >
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
@@ -1187,7 +1291,7 @@ function CompactBhavaBalaTable({ bhavaBala }: { bhavaBala: Record<number, Partia
                     </td>
                     <td className="px-3 py-2 text-center">
                       <span className={`px-2 py-1 rounded text-[9px] font-medium ${
-                        strength === 'Strong' ? 'bg-green-500/20 text-green-400' :
+                        strength === 'Strong' ? 'bg-amber-500/20 text-amber-300' :
                         strength === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
                         'bg-red-500/20 text-red-400'
                       }`}>
@@ -1266,7 +1370,7 @@ function CompactPlanetPositionsTable({ planets, upagrahas, lagna }: {
                         <span style={{ color: config?.color }}>{config?.icon}</span>
                         <span className="text-white font-medium">{planetName}</span>
                         {isUpagraha && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-300">Upagraha</span>
+                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300">Upagraha</span>
                         )}
                       </div>
                     </td>
@@ -1293,9 +1397,9 @@ function CompactPlanetPositionsTable({ planets, upagrahas, lagna }: {
                           </div>
                           <div className="flex flex-wrap gap-1.5 pt-1">
                             {planet.retrograde && <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded text-[9px]">Retrograde</span>}
-                            {planet.exalted && <span className="px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded text-[9px]">Exalted</span>}
+                            {planet.exalted && <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded text-[9px]">Exalted</span>}
                             {planet.debilitated && <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 rounded text-[9px]">Debilitated</span>}
-                            {planet.vargottama && <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded text-[9px]">Vargottama</span>}
+                            {planet.vargottama && <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded text-[9px]">Vargottama</span>}
                             {planet.combust && <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 rounded text-[9px]">Combust</span>}
                           </div>
                         </div>
@@ -1354,6 +1458,28 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
     return now >= padStart && (!padEnd || now < padEnd);
   });
 
+  const getActivePadForPeriod = (period: DashaInfo['periods'][number]) => {
+    if (!period.antardashas?.length) return null;
+
+    const activeAd = period.antardashas.find((ad) => {
+      const adStart = safeGetDate(ad.start_datetime, ad.start_date);
+      const adEnd = safeGetDate(ad.end_datetime, ad.end_date);
+      if (!adStart) return false;
+      return now >= adStart && (!adEnd || now < adEnd);
+    });
+
+    if (!activeAd?.pratyantardashas?.length) return null;
+
+    const activePad = activeAd.pratyantardashas.find((pad) => {
+      const padStart = safeGetDate(pad.start_datetime, pad.start_date);
+      const padEnd = safeGetDate(pad.end_datetime, pad.end_date);
+      if (!padStart) return false;
+      return now >= padStart && (!padEnd || now < padEnd);
+    });
+
+    return activePad ? { ad: activeAd.planet, pad: activePad } : null;
+  };
+
   return (
     <div className="bg-[hsl(220,10%,8%)] rounded-lg border border-[hsl(220,8%,18%)] overflow-hidden">
       <div className="p-3 bg-[hsl(220,10%,10%)] border-b border-[hsl(220,8%,18%)]">
@@ -1371,6 +1497,7 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
           <thead className="bg-[hsl(220,10%,10%)] sticky top-0">
             <tr className="border-b border-[hsl(220,8%,18%)]">
               <th className="px-3 py-2 text-left text-neutral-500">Planet</th>
+              <th className="px-3 py-2 text-left text-neutral-500">Current PAD</th>
               <th className="px-3 py-2 text-left text-neutral-500">Start</th>
               <th className="px-3 py-2 text-left text-neutral-500">End</th>
               <th className="px-3 py-2 text-center text-neutral-500">Years</th>
@@ -1382,6 +1509,7 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
               const config = PLANET_CONFIG[period.planet];
               const isActive = index === activeIndex;
               const isPast = index < activeIndex;
+              const activePadRef = getActivePadForPeriod(period);
 
               return (
                 <Fragment key={period.planet}>
@@ -1398,6 +1526,17 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
                           isActive ? 'text-amber-400' : 'text-white'
                         }`}>{period.planet}</span>
                       </div>
+                    </td>
+                    <td className="px-3 py-2 text-[10px]">
+                      {activePadRef ? (
+                        <div className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-amber-200">
+                          <span className="text-amber-300/80">{activePadRef.ad}</span>
+                          <span className="text-amber-300/60">→</span>
+                          <span className="font-medium text-amber-200">{activePadRef.pad.planet}</span>
+                        </div>
+                      ) : (
+                        <span className="text-neutral-600">—</span>
+                      )}
                     </td>
                     <td className="px-3 py-2 text-[10px]">
                       {period.start_date}
@@ -1418,7 +1557,7 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
                   </tr>
                   {expandedPeriod === period.planet && (
                     <tr className="bg-[hsl(220,10%,9%)]">
-                      <td colSpan={5} className="px-3 py-3">
+                      <td colSpan={6} className="px-3 py-3">
                         <div className="text-[10px] text-neutral-400 mb-2">{config?.description}</div>
                         {period.antardashas && period.antardashas.length > 0 && (
                           <div className="space-y-1">
@@ -1487,8 +1626,8 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
   );
 }
 
-export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagna, dashaData }: StrengthAnalysisProps) {
-  const [activeTab, setActiveTab] = useState<'combined' | 'planets' | 'houses' | 'aspects' | 'shad-table' | 'bhava-table' | 'positions' | 'dasha'>('combined');
+export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, upagrahas, lagna, dashaData }: StrengthAnalysisProps) {
+  const [activeTab, setActiveTab] = useState<StrengthTab>('combined');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -1645,8 +1784,8 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
       ? houseData.reduce((s, h) => s + (h.strengthRatio ?? 0), 0) / houseData.length 
       : 0;
     
-    const strongPlanets = planetData.filter(p => p.value / p.maxValue >= 1.2).length;
-    const strongHouses = houseData.filter(h => (h.strengthRatio ?? 0) >= 1.2).length;
+    const strongPlanets = planetData.filter(p => p.value / p.maxValue >= 1.0).length;
+    const strongHouses = houseData.filter(h => (h.strengthRatio ?? 0) >= 1.0).length;
     
     const strongest = [...planetData].sort((a, b) => (b.value / b.maxValue) - (a.value / a.maxValue))[0];
     const weakest = [...planetData].sort((a, b) => (a.value / a.maxValue) - (b.value / b.maxValue))[0];
@@ -1672,7 +1811,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
 
           {/* Desktop segmented control */}
           <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] overflow-x-auto scrollbar-none">
-            {(['combined', 'planets', 'houses', 'aspects', 'shad-table', 'bhava-table', 'positions', 'dasha'] as const).map(tab => (
+            {STRENGTH_TABS.map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -1682,14 +1821,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
                     : 'text-white/70 hover:text-white hover:bg-[hsl(220,10%,14%)]'
                 }`}
               >
-                {tab === 'combined' ? 'Overview' :
-                 tab === 'planets' ? 'Planets' :
-                 tab === 'houses' ? 'Houses' :
-                 tab === 'aspects' ? 'Aspects' :
-                 tab === 'shad-table' ? 'Shad Bala' :
-                 tab === 'bhava-table' ? 'Bhava Bala' :
-                 tab === 'positions' ? 'Positions' :
-                 'Dasha'}
+                {getTabLabel(tab)}
               </button>
             ))}
           </div>
@@ -1701,22 +1833,13 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
               onClick={() => setDropdownOpen((v) => !v)}
               className="px-3 py-2 rounded-lg bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] text-white text-xs font-medium flex items-center gap-2"
             >
-              <span>
-                {activeTab === 'combined' ? 'Overview' :
-                 activeTab === 'planets' ? 'Planets' :
-                 activeTab === 'houses' ? 'Houses' :
-                 activeTab === 'aspects' ? 'Aspects' :
-                 activeTab === 'shad-table' ? 'Shad Bala' :
-                 activeTab === 'bhava-table' ? 'Bhava Bala' :
-                 activeTab === 'positions' ? 'Positions' :
-                 'Dasha'}
-              </span>
+              <span>{getTabLabel(activeTab)}</span>
               <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-lg bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] shadow-xl overflow-hidden z-50">
-                {(['combined', 'planets', 'houses', 'aspects', 'shad-table', 'bhava-table', 'positions', 'dasha'] as const).map(tab => (
+                {STRENGTH_TABS.map(tab => (
                   <button
                     key={tab}
                     type="button"
@@ -1730,14 +1853,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
                         : 'text-neutral-300 hover:text-white hover:bg-[hsl(220,10%,12%)]'
                     }`}
                   >
-                    {tab === 'combined' ? 'Overview' :
-                     tab === 'planets' ? 'Planets' :
-                     tab === 'houses' ? 'Houses' :
-                     tab === 'aspects' ? 'Aspects' :
-                     tab === 'shad-table' ? 'Shad Bala' :
-                     tab === 'bhava-table' ? 'Bhava Bala' :
-                     tab === 'positions' ? 'Positions' :
-                     'Dasha'}
+                    {getTabLabel(tab)}
                   </button>
                 ))}
               </div>
@@ -1801,6 +1917,13 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
                 size={520}
               />
             </div>
+          </div>
+        )}
+
+        {activeTab === 'houses' && houseData.length === 0 && (
+          <div className="text-center py-8 text-neutral-500">
+            <div className="text-sm">No Bhava Bala data available</div>
+            <div className="text-xs mt-1">Generate a kundali to view house strength distribution</div>
           </div>
         )}
 
@@ -1899,9 +2022,9 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
           <div className="space-y-6">
             {/* Aspect Summary */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-green-400">{aspects.filter(a => a.nature === 'harmonious').length}</div>
-                <div className="text-[10px] text-green-400/80 uppercase">Harmonious</div>
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-amber-300">{aspects.filter(a => a.nature === 'harmonious').length}</div>
+                <div className="text-[10px] text-amber-300/80 uppercase">Harmonious</div>
                 <div className="text-[9px] text-neutral-400 mt-1">Trines & Sextiles</div>
               </div>
               <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center">
@@ -2005,7 +2128,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs font-medium text-white">{aspect.planet1} {aspect.type} {aspect.planet2}</span>
                             <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${
-                              aspect.nature === 'harmonious' ? 'bg-green-500/20 text-green-400' :
+                              aspect.nature === 'harmonious' ? 'bg-amber-500/20 text-amber-300' :
                               aspect.nature === 'tense' ? 'bg-orange-500/20 text-orange-400' :
                               'bg-yellow-500/20 text-yellow-400'
                             }`}>
@@ -2036,11 +2159,11 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
               <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Understanding Aspects</h4>
               <div className="grid sm:grid-cols-2 gap-3 text-[11px]">
                 <div>
-                  <span className="text-green-400 font-medium">△ Trines (120°)</span>
+                  <span className="text-amber-300 font-medium">△ Trines (120°)</span>
                   <span className="text-neutral-500"> - Natural talents, easy flow of energy, gifts that come easily</span>
                 </div>
                 <div>
-                  <span className="text-cyan-400 font-medium">⚹ Sextiles (60°)</span>
+                  <span className="text-amber-300 font-medium">⚹ Sextiles (60°)</span>
                   <span className="text-neutral-500"> - Opportunities, skills that develop with effort, cooperation</span>
                 </div>
                 <div>
@@ -2060,9 +2183,13 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
         {activeTab === 'shad-table' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Shad Bala Details</h3>
-              <div className="text-[10px] text-neutral-500">
-                Click rows for more details
+              <div>
+                <h3 className="text-sm font-semibold text-white">Shad Bala Analysis Table</h3>
+                <p className="text-[10px] text-neutral-500 mt-0.5">Sthana, Dig, Kala, Cheshta, Naisargika, Drik, Total Rupa, Required Rupa</p>
+              </div>
+              <div className="text-[10px] text-neutral-500 text-right">
+                Sort by clicking columns<br />
+                Strength: Strong ≥ 100%
               </div>
             </div>
             <CompactShadBalaTable shadBala={shadBala} />
@@ -2079,6 +2206,23 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
               </div>
             </div>
             <CompactBhavaBalaTable bhavaBala={bhavaBala} />
+          </div>
+        )}
+
+        {/* Ashtakavarga Table View */}
+        {activeTab === 'ashtakavarga' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-white">Ashtakavarga Table</h3>
+                <p className="text-[10px] text-neutral-500 mt-0.5">Bhinna Ashtakavarga by planet + Sarvashtakavarga totals</p>
+              </div>
+              <div className="text-[10px] text-neutral-500 text-right">
+                Columns: Aries to Pisces<br />
+                Higher Sarva points indicate stronger sign potential
+              </div>
+            </div>
+            <CompactAshtakavargaTable ashtakavarga={ashtakavarga} />
           </div>
         )}
 
@@ -2127,19 +2271,19 @@ export function StrengthAnalysis({ shadBala, bhavaBala, planets, upagrahas, lagn
         )}
 
         {/* Legend - show only for non-aspects and non-table tabs */}
-        {activeTab !== 'aspects' && activeTab !== 'shad-table' && activeTab !== 'bhava-table' && activeTab !== 'positions' && activeTab !== 'dasha' && (
+        {activeTab !== 'aspects' && activeTab !== 'shad-table' && activeTab !== 'bhava-table' && activeTab !== 'ashtakavarga' && activeTab !== 'positions' && activeTab !== 'dasha' && (
           <div className="mt-6 pt-4 border-t border-[hsl(220,8%,16%)] flex flex-wrap justify-center gap-4 text-[10px]">
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-              <span className="text-neutral-500">Strong ≥120%</span>
+              <div className="w-2.5 h-2.5 rounded-full bg-amber-300" />
+              <span className="text-neutral-500">Strong ≥100%</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-              <span className="text-neutral-500">Medium 90-120%</span>
+              <span className="text-neutral-500">Medium 80-100%</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-              <span className="text-neutral-500">Weak &lt;90%</span>
+              <span className="text-neutral-500">Weak &lt;80%</span>
             </div>
           </div>
         )}

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Heart, Shield, LayoutGrid, Sparkles, Info } from 'lucide-react';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,9 +23,19 @@ export function Header({
   const navigate = useNavigate();
   const isAdmin = astrovaUser?.role === 'admin';
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.altKey && event.key === '1') onViewChange('kundali');
+      if (event.altKey && event.key === '2') onViewChange('matcher');
+      if (event.altKey && event.key.toLowerCase() === 'a' && onToggleSidebar) onToggleSidebar();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onToggleSidebar, onViewChange]);
+
   const navItems = [
     { key: 'kundali' as const, label: 'Charts', icon: LayoutGrid, activeColor: 'text-amber-400', activeBg: 'bg-amber-500/15 text-amber-300 shadow-sm shadow-amber-500/10' },
-    { key: 'matcher' as const, label: 'Matcher', icon: Heart, activeColor: 'text-pink-400', activeBg: 'bg-pink-500/15 text-pink-300 shadow-sm shadow-pink-500/10' },
+    { key: 'matcher' as const, label: 'Matcher', icon: Heart, activeColor: 'text-amber-400', activeBg: 'bg-amber-500/15 text-amber-300 shadow-sm shadow-amber-500/10' },
   ];
 
   return (
@@ -56,6 +67,7 @@ export function Header({
                       : 'text-neutral-500 hover:text-neutral-300'
                   }`}
                   title={item.label}
+                  aria-label={`Open ${item.label}`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? item.activeColor : ''}`} />
                   <span className="hidden sm:inline">{item.label}</span>
@@ -66,8 +78,9 @@ export function Header({
             {isAdmin && onOpenModelInfo && (
               <button
                 onClick={onOpenModelInfo}
-                className="flex items-center gap-1.5 px-3 sm:px-3 py-2 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 text-neutral-500 hover:text-cyan-300"
+                className="flex items-center gap-1.5 px-3 sm:px-3 py-2 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 text-neutral-500 hover:text-amber-300"
                 title="Model Context Info"
+                aria-label="Open model context info"
               >
                 <Info className="w-4 h-4" />
                 <span className="hidden sm:inline">Info</span>
@@ -81,15 +94,16 @@ export function Header({
             {onToggleSidebar && (
               <button
                 onClick={onToggleSidebar}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                className={`flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                   sidebarOpen
-                    ? 'bg-amber-500/20 text-amber-300 shadow-sm shadow-amber-500/10 ring-1 ring-amber-500/30'
-                    : 'text-neutral-400 hover:text-amber-300 hover:bg-amber-500/10 border border-[hsl(220,8%,20%)] hover:border-amber-500/30'
+                    ? 'text-neutral-400 hover:text-amber-300 hover:bg-amber-500/10 border border-[hsl(220,8%,20%)] hover:border-amber-500/30'
+                    : 'bg-amber-500/20 text-amber-300 shadow-sm shadow-amber-500/10 ring-1 ring-amber-500/30'
                 }`}
                 title="Toggle Astrova AI"
+                aria-label="Toggle Astrova AI sidebar"
               >
-                <Sparkles className={`w-3.5 h-3.5 ${sidebarOpen ? 'text-amber-400 animate-pulse' : ''}`} />
-                <span className="text-[11px]">AI</span>
+                <Sparkles className={`w-4 h-4 ${sidebarOpen ? 'text-amber-400 animate-pulse' : ''}`} />
+                <span className="text-xs">AI</span>
               </button>
             )}
 
@@ -99,8 +113,9 @@ export function Header({
                 onClick={() => navigate('/admin')}
                 className="p-1.5 rounded-full text-neutral-500 hover:bg-neutral-800/60 transition-all group"
                 title="Admin Panel"
+                aria-label="Open admin panel"
               >
-                <Shield className="w-3.5 h-3.5 text-emerald-400 group-hover:text-emerald-300" />
+                <Shield className="w-3.5 h-3.5 text-amber-400 group-hover:text-amber-300" />
               </button>
             )}
 

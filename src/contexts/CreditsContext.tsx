@@ -152,7 +152,6 @@ export function CreditsDisplay({ compact = false }: { compact?: boolean }) {
     >
       <Coins className={`${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} text-amber-400`} />
       <span className="font-semibold text-amber-200">{credits}</span>
-      <span className="text-amber-400/70 text-xs">Dakshina</span>
     </button>
   );
 }

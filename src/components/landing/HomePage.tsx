@@ -1,3 +1,4 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, UserIcon, Settings, Zap, DollarSign, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,10 +16,13 @@ const HomePage = () => {
 
     return (
         <div className="min-h-screen bg-[hsl(220,10%,6%)]">
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-3 focus:py-2 focus:bg-neutral-950 focus:text-white focus:rounded-md">
+                Skip to content
+            </a>
             {/* Header */}
             <Header />
             
-            <section className="w-full relative flex items-center justify-center flex-col px-4 sm:px-6 md:px-8 py-8 sm:py-10 lg:py-12 min-h-screen">
+            <section id="main-content" className="w-full relative flex items-center justify-center flex-col px-4 sm:px-6 md:px-8 py-8 sm:py-10 lg:py-12 min-h-screen">
                 {/* Cosmic Background */}
                 <StarsBackground />
                 <CosmicOrbs />
@@ -50,13 +54,13 @@ const HomePage = () => {
                                 </p>
                                 <div className="flex flex-row items-center justify-center mt-8 sm:mt-10 gap-4">
                                     <Link to="/register">
-                                        <Button className="h-10 px-6 bg-white text-black font-medium hover:bg-neutral-200 transition-colors">
+                                        <Button className="h-10 px-6 bg-white text-black font-medium hover:bg-neutral-200 transition-colors" aria-label="Create account and get started">
                                             Get Started
                                             <ArrowRight className="w-4 h-4 ml-2" />
                                         </Button>
                                     </Link>
                                     <Link to="/login">
-                                        <Button className="h-10 px-6 bg-transparent border border-neutral-700 text-white font-medium hover:bg-neutral-800 hover:border-neutral-600 transition-all">
+                                        <Button className="h-10 px-6 bg-transparent border border-neutral-700 text-white font-medium hover:bg-neutral-800 hover:border-neutral-600 transition-all" aria-label="Log into Astrova">
                                             Login
                                         </Button>
                                     </Link>
@@ -86,6 +90,7 @@ const HomePage = () => {
                                                 src="/image1.png"
                                                 alt="Your Kundali Chart Will Appear Here"
                                                 className="w-full h-auto object-cover"
+                                                loading="lazy"
                                             />
                                         </div>
                                         <div className="absolute -bottom-4 inset-x-0 w-full h-1/2 bg-gradient-to-t from-[hsl(220,10%,6%)] z-40"></div>
@@ -241,6 +246,7 @@ const HomePage = () => {
                                                     ? "bg-white text-black hover:bg-neutral-200" 
                                                     : "bg-transparent border border-neutral-700 text-white hover:bg-neutral-800 hover:border-neutral-600"
                                             )}
+                                            aria-label={`${card.buttonText} ${card.title} plan`}
                                         >
                                             {card.buttonText}
                                         </Button>
@@ -274,8 +280,8 @@ const HomePage = () => {
                             <div className="relative flex h-full w-full flex-col items-center justify-between overflow-hidden py-4">
                                 <div className="flex items-start justify-start w-full mb-4">
                                     <Marquee reverse pauseOnHover className="[--duration:30s] select-none">
-                                        {firstRow.map((review) => (
-                                            <Card key={review.name} className="w-72 sm:w-80 mx-2 bg-[hsl(220,10%,8%)]/50 border border-[hsl(220,8%,16%)] hover:border-amber-500/20 hover:bg-[hsl(220,10%,10%)] transition-all duration-300">
+                                        {firstRow.map((review, idx) => (
+                                            <Card key={`${review.name}-${idx}`} className="w-72 sm:w-80 mx-2 bg-[hsl(220,10%,8%)]/50 border border-[hsl(220,8%,16%)] hover:border-amber-500/20 hover:bg-[hsl(220,10%,10%)] transition-all duration-300">
                                                 <CardHeader className="pb-2">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center">
@@ -296,8 +302,8 @@ const HomePage = () => {
                                 </div>
                                 <div className="flex items-start justify-start w-full">
                                     <Marquee pauseOnHover className="[--duration:30s] select-none">
-                                        {secondRow.map((review) => (
-                                            <Card key={review.name} className="w-72 sm:w-80 mx-2 bg-[hsl(220,10%,8%)]/50 border border-[hsl(220,8%,16%)] hover:border-amber-500/20 hover:bg-[hsl(220,10%,10%)] transition-all duration-300">
+                                        {secondRow.map((review, idx) => (
+                                            <Card key={`${review.name}-${idx}`} className="w-72 sm:w-80 mx-2 bg-[hsl(220,10%,8%)]/50 border border-[hsl(220,8%,16%)] hover:border-amber-500/20 hover:bg-[hsl(220,10%,10%)] transition-all duration-300">
                                                 <CardHeader className="pb-2">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center">
@@ -337,14 +343,16 @@ const HomePage = () => {
                             </p>
                             <div className="flex flex-row items-center justify-center gap-3 sm:gap-4 mt-6 sm:mt-8">
                                 <Link to="/chart">
-                                    <Button size="lg" className="h-10 sm:h-11 px-6 sm:px-8">
+                                    <Button size="lg" className="h-10 sm:h-11 px-6 sm:px-8" aria-label="Open chart generation page">
                                         Get Started Free
                                         <ArrowRight className="w-4 h-4 ml-2" />
                                     </Button>
                                 </Link>
-                                <Button variant="outline" size="lg" className="h-10 sm:h-11 px-6 sm:px-8">
-                                    Contact Sales
-                                </Button>
+                                <a href="mailto:support@astrova.app?subject=Astrova%20Sales%20Inquiry" className="inline-flex">
+                                    <Button variant="outline" size="lg" className="h-10 sm:h-11 px-6 sm:px-8" aria-label="Contact sales via email">
+                                        Contact Sales
+                                    </Button>
+                                </a>
                             </div>
                         </div>
                     </Container>
@@ -392,7 +400,7 @@ function Header() {
                     </Link>
 
                     {/* Navigation Links */}
-                    <nav className="hidden md:flex items-center gap-6">
+                    <nav className="hidden md:flex items-center gap-6" aria-label="Homepage sections">
                         <a href="#features" className={`text-sm transition-all duration-500 ${
                             scrolled ? 'text-neutral-400 hover:text-white opacity-100' : 'text-neutral-300 hover:text-white opacity-80'
                         }`}>
@@ -412,7 +420,7 @@ function Header() {
 
                     {/* CTA Buttons */}
                     <div className="flex items-center gap-3">
-                        <Link to="/login">
+                        <Link to="/login" aria-label="Go to login page">
                             <Button variant="ghost" size="sm" className={`transition-all duration-500 h-8 px-3 text-sm ${
                                 scrolled 
                                     ? 'text-neutral-400 hover:text-white hover:bg-white/5 opacity-100' 
@@ -421,7 +429,7 @@ function Header() {
                                 Log in
                             </Button>
                         </Link>
-                        <Link to="/register">
+                        <Link to="/register" aria-label="Go to registration page">
                             <Button size="sm" className="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white h-8 px-4 text-sm font-medium rounded-lg transition-all duration-500 opacity-100">
                                 Get Started
                             </Button>
@@ -435,6 +443,24 @@ function Header() {
 
 // Footer component (exact copy from homepage)
 function Footer() {
+    const [newsletterEmail, setNewsletterEmail] = React.useState('');
+    const [newsletterNotice, setNewsletterNotice] = React.useState<string | null>(null);
+
+    const handleNewsletterSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
+        const email = newsletterEmail.trim();
+        if (!email || !email.includes('@')) {
+            setNewsletterNotice('Please enter a valid email address.');
+            window.setTimeout(() => setNewsletterNotice(null), 2200);
+            return;
+        }
+
+        window.location.href = `mailto:support@astrova.app?subject=Newsletter%20Signup&body=Please%20add%20${encodeURIComponent(email)}%20to%20Astrova%20newsletter.`;
+        setNewsletterEmail('');
+        setNewsletterNotice('Thanks! Your mail app opened for confirmation.');
+        window.setTimeout(() => setNewsletterNotice(null), 2600);
+    };
+
     return (
         <footer className="border-t border-[hsl(220,8%,14%)] bg-[hsl(220,10%,5%)]">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
@@ -451,10 +477,11 @@ function Footer() {
                     </div>
                     <div className="flex flex-col items-start md:items-end gap-3">
                         <span className="text-xs text-neutral-500 font-medium uppercase tracking-wider">Stay Updated</span>
-                        <div className="flex gap-2">
-                            <input type="email" placeholder="your@email.com" className="bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/40 w-56" />
-                            <Button className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-sm px-4 py-2 rounded-lg font-medium">Subscribe</Button>
-                        </div>
+                        <form className="flex gap-2" onSubmit={handleNewsletterSubmit}>
+                            <input type="email" value={newsletterEmail} onChange={(e) => setNewsletterEmail(e.target.value)} placeholder="your@email.com" aria-label="Newsletter email" className="bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/40 w-56" />
+                            <Button type="submit" className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-sm px-4 py-2 rounded-lg font-medium" aria-label="Subscribe to newsletter">Subscribe</Button>
+                        </form>
+                        {newsletterNotice && <p className="text-[11px] text-neutral-400">{newsletterNotice}</p>}
                     </div>
                 </div>
 
@@ -472,26 +499,26 @@ function Footer() {
                     <div>
                         <h3 className="text-xs font-semibold text-white mb-4 uppercase tracking-wider">Features</h3>
                         <ul className="space-y-2.5">
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">AI Astrologer</a></li>
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Shadbala Analysis</a></li>
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Dasha Predictions</a></li>
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Yoga Detection</a></li>
+                            <li><Link to="/chart" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">AI Astrologer</Link></li>
+                            <li><Link to="/chart" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Shadbala Analysis</Link></li>
+                            <li><Link to="/chart" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Dasha Predictions</Link></li>
+                            <li><Link to="/chart" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Yoga Detection</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h3 className="text-xs font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
                         <ul className="space-y-2.5">
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">About</a></li>
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Blog</a></li>
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Contact</a></li>
+                            <li><a href="#features" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">About</a></li>
+                            <li><a href="https://astrova.app" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors" target="_blank" rel="noreferrer">Blog</a></li>
+                            <li><a href="mailto:support@astrova.app" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Contact</a></li>
                         </ul>
                     </div>
                     <div>
                         <h3 className="text-xs font-semibold text-white mb-4 uppercase tracking-wider">Legal</h3>
                         <ul className="space-y-2.5">
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Privacy Policy</a></li>
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Terms of Service</a></li>
-                            <li><a href="#" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Cookie Policy</a></li>
+                            <li><a href="mailto:support@astrova.app?subject=Privacy%20Policy" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Privacy Policy</a></li>
+                            <li><a href="mailto:support@astrova.app?subject=Terms%20of%20Service" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Terms of Service</a></li>
+                            <li><a href="mailto:support@astrova.app?subject=Cookie%20Policy" className="text-sm text-neutral-400 hover:text-amber-300 transition-colors">Cookie Policy</a></li>
                         </ul>
                     </div>
                 </div>
@@ -506,13 +533,13 @@ function Footer() {
                         <span className="text-xs text-neutral-600">Made with precision</span>
                     </div>
                     <div className="flex items-center gap-3">
-                        <a href="#" className="w-8 h-8 rounded-lg bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] flex items-center justify-center text-neutral-400 hover:text-white hover:border-[hsl(220,8%,25%)] transition-all">
+                        <a href="https://x.com" target="_blank" rel="noreferrer" aria-label="Open Astrova on X" className="w-8 h-8 rounded-lg bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] flex items-center justify-center text-neutral-400 hover:text-white hover:border-[hsl(220,8%,25%)] transition-all">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
                         </a>
-                        <a href="#" className="w-8 h-8 rounded-lg bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] flex items-center justify-center text-neutral-400 hover:text-white hover:border-[hsl(220,8%,25%)] transition-all">
+                        <a href="https://github.com" target="_blank" rel="noreferrer" aria-label="Open Astrova on GitHub" className="w-8 h-8 rounded-lg bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] flex items-center justify-center text-neutral-400 hover:text-white hover:border-[hsl(220,8%,25%)] transition-all">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                         </a>
-                        <a href="#" className="w-8 h-8 rounded-lg bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] flex items-center justify-center text-neutral-400 hover:text-white hover:border-[hsl(220,8%,25%)] transition-all">
+                        <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Open Astrova on Instagram" className="w-8 h-8 rounded-lg bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] flex items-center justify-center text-neutral-400 hover:text-white hover:border-[hsl(220,8%,25%)] transition-all">
                             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                         </a>
                     </div>
@@ -521,7 +548,5 @@ function Footer() {
         </footer>
     );
 }
-
-import React from 'react';
 
 export default HomePage;

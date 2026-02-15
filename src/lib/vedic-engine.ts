@@ -5,7 +5,7 @@
  * then converts to sidereal using Lahiri ayanamsha.
  */
 import * as Astronomy from 'astronomy-engine';
-import type { KundaliRequest, KundaliResponse, PlanetInfo, LagnaInfo, ShadBalaInfo, BhavaBalaInfo, DashaInfo, DashaPeriodInfo, AntardashaInfo, PratyantardashaInfo, SthanaBalaInfo, KalaBalaInfo, YogaInfo } from '../types/kundali';
+import type { KundaliRequest, KundaliResponse, PlanetInfo, LagnaInfo, ShadBalaInfo, BhavaBalaInfo, DashaInfo, DashaPeriodInfo, AntardashaInfo, PratyantardashaInfo, SthanaBalaInfo, KalaBalaInfo, YogaInfo, AshtakavargaInfo } from '../types/kundali';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -122,6 +122,79 @@ const DIG_BALA_HOUSE: Record<string, number> = {
   Jupiter: 1, Venus: 4, Saturn: 7,
 };
 
+const ASHTAKAVARGA_RULES: Record<string, Record<string, number[]>> = {
+  Sun: {
+    Sun: [1, 2, 4, 7, 8, 9, 10, 11],
+    Moon: [3, 6, 10, 11],
+    Mars: [1, 2, 4, 7, 8, 9, 10, 11],
+    Mercury: [3, 5, 6, 9, 10, 11, 12],
+    Jupiter: [5, 6, 9, 11],
+    Venus: [6, 7, 12],
+    Saturn: [1, 2, 4, 7, 8, 9, 10, 11],
+    Asc: [3, 4, 6, 10, 11, 12],
+  },
+  Moon: {
+    Sun: [3, 6, 7, 8, 10, 11],
+    Moon: [1, 3, 6, 7, 10, 11],
+    Mars: [2, 3, 5, 6, 9, 10, 11],
+    Mercury: [3, 4, 5, 7, 8, 10, 11],
+    Jupiter: [1, 4, 7, 8, 10, 11, 12],
+    Venus: [3, 4, 5, 7, 9, 10, 11],
+    Saturn: [3, 5, 6, 11],
+    Asc: [3, 6, 10, 11],
+  },
+  Mars: {
+    Sun: [3, 5, 6, 10, 11],
+    Moon: [3, 6, 11],
+    Mars: [1, 2, 4, 7, 8, 10, 11],
+    Mercury: [3, 5, 6, 11],
+    Jupiter: [6, 10, 11, 12],
+    Venus: [6, 8, 11, 12],
+    Saturn: [1, 4, 7, 8, 9, 10, 11],
+    Asc: [1, 3, 6, 10, 11],
+  },
+  Mercury: {
+    Sun: [5, 6, 9, 11, 12],
+    Moon: [2, 4, 6, 8, 10, 11],
+    Mars: [1, 2, 4, 7, 8, 9, 10, 11],
+    Mercury: [1, 3, 5, 6, 9, 10, 11, 12],
+    Jupiter: [6, 8, 11, 12],
+    Venus: [1, 2, 3, 4, 5, 8, 9, 11],
+    Saturn: [1, 2, 4, 7, 8, 9, 10, 11],
+    Asc: [1, 2, 4, 6, 8, 10, 11],
+  },
+  Jupiter: {
+    Sun: [1, 2, 3, 4, 7, 8, 9, 10, 11],
+    Moon: [2, 5, 7, 9, 11],
+    Mars: [1, 2, 4, 7, 8, 10, 11],
+    Mercury: [1, 2, 4, 5, 6, 9, 10, 11],
+    Jupiter: [1, 2, 3, 4, 7, 8, 10, 11],
+    Venus: [2, 5, 6, 9, 10, 11],
+    Saturn: [3, 5, 6, 12],
+    Asc: [1, 2, 4, 5, 6, 7, 9, 10, 11],
+  },
+  Venus: {
+    Sun: [8, 11, 12],
+    Moon: [1, 2, 3, 4, 5, 8, 9, 11, 12],
+    Mars: [3, 5, 6, 9, 11, 12],
+    Mercury: [3, 5, 6, 9, 11],
+    Jupiter: [5, 8, 9, 10, 11],
+    Venus: [1, 2, 3, 4, 5, 8, 9, 10, 11],
+    Saturn: [3, 4, 5, 8, 9, 10, 11],
+    Asc: [1, 2, 3, 4, 5, 8, 9, 11],
+  },
+  Saturn: {
+    Sun: [1, 2, 4, 7, 8, 10, 11],
+    Moon: [3, 6, 11],
+    Mars: [3, 5, 6, 10, 11, 12],
+    Mercury: [6, 8, 9, 10, 11, 12],
+    Jupiter: [5, 6, 11, 12],
+    Venus: [6, 11, 12],
+    Saturn: [3, 5, 6, 11],
+    Asc: [1, 3, 4, 6, 10, 11],
+  },
+};
+
 const UPAGRAHA_SYMBOLS: Record<string, string> = {
   Dhuma: 'Dh', Vyatipata: 'Vy', Parivesha: 'Pv', Indrachapa: 'Ic', Upaketu: 'Uk',
   Kaala: 'Ka', Mrityu: 'Mr', ArthaPrahara: 'Ap', YamaGhantaka: 'Yg', Gulika: 'Gk', Mandi: 'Mn',
@@ -206,6 +279,15 @@ function calcJulianDayUTC(date: Date): number {
 
 function normalizeLongitude(longitude: number): number {
   return ((longitude % 360) + 360) % 360;
+}
+
+function forwardArc(from: number, to: number): number {
+  return normalizeLongitude(to - from);
+}
+
+function shortestAngularDistance(a: number, b: number): number {
+  const diff = Math.abs(normalizeLongitude(a) - normalizeLongitude(b));
+  return Math.min(diff, 360 - diff);
 }
 
 function findRiseSet(body: Astronomy.Body, observer: Astronomy.Observer, direction: number, dateStart: Date, limitDays = 2): Date | null {
@@ -425,11 +507,11 @@ function getSiderealLongitude(tropicalLon: number, ayanamsha: number): number {
 }
 
 function getSignIndex(longitude: number): number {
-  return Math.floor(longitude / 30) % 12;
+  return Math.floor(normalizeLongitude(longitude) / 30) % 12;
 }
 
 function getDegInSign(longitude: number): { deg: number; min: number; sec: number } {
-  const posInSign = longitude % 30;
+  const posInSign = normalizeLongitude(longitude) % 30;
   const deg = Math.floor(posInSign);
   const minFrac = (posInSign - deg) * 60;
   const min = Math.floor(minFrac);
@@ -438,13 +520,18 @@ function getDegInSign(longitude: number): { deg: number; min: number; sec: numbe
 }
 
 function getNavamsaSignIndex(longitude: number): number {
-  const posInSign = longitude % 30;
-  const pada = Math.floor(posInSign / 3.333333);
+  const posInSign = normalizeLongitude(longitude) % 30;
+  const pada = Math.min(8, Math.floor((posInSign * 9) / 30));
   const signIdx = getSignIndex(longitude);
-  // Navamsa starts from: Aries for fire signs, Capricorn for earth, Libra for air, Cancer for water
-  const elementMap = [0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3];
-  const startSign = [0, 9, 6, 3]; // fire→Aries, earth→Capricorn, air→Libra, water→Cancer
-  const navamsaSign = (startSign[elementMap[signIdx]] + pada) % 12;
+  // Classical D9 rule by sign modality:
+  // movable -> starts from same sign, fixed -> from 9th sign, dual -> from 5th sign.
+  const signModality = signIdx % 3; // 0 movable, 1 fixed, 2 dual
+  const startSign = signModality === 0
+    ? signIdx
+    : signModality === 1
+      ? (signIdx + 8) % 12
+      : (signIdx + 4) % 12;
+  const navamsaSign = (startSign + pada) % 12;
   return navamsaSign;
 }
 
@@ -563,6 +650,85 @@ function calcLagna(jd: number, latitude: number, longitude: number, ayanamsha: n
   // Convert to sidereal
   const siderealAsc = ((asc - ayanamsha) % 360 + 360) % 360;
   return siderealAsc;
+}
+
+function calcMidheaven(jd: number, longitude: number, ayanamsha: number): number {
+  const T = (jd - 2451545.0) / 36525.0;
+  let gmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * T * T - (T * T * T) / 38710000;
+  gmst = normalizeLongitude(gmst);
+
+  const lst = normalizeLongitude(gmst + longitude);
+  const ramc = (lst * Math.PI) / 180;
+  const obliquity = ((23.439291 - 0.0130042 * T) * Math.PI) / 180;
+
+  const mcTropical = normalizeLongitude((Math.atan2(Math.sin(ramc) * Math.cos(obliquity), Math.cos(ramc)) * 180) / Math.PI);
+  return normalizeLongitude(mcTropical - ayanamsha);
+}
+
+interface SripatiHouseSystem {
+  cusps: number[];
+  starts: number[];
+  ends: number[];
+  midpoints: number[];
+  getHouse: (longitude: number) => number;
+}
+
+function buildSripatiHouseSystem(lagnaLongitude: number, mcLongitude: number): SripatiHouseSystem {
+  const asc = normalizeLongitude(lagnaLongitude);
+  const mc = normalizeLongitude(mcLongitude);
+
+  let quadrantArc = forwardArc(asc, mc);
+  if (quadrantArc > 180) quadrantArc = 360 - quadrantArc;
+  const interval = quadrantArc / 3;
+
+  const cusps: number[] = Array.from({ length: 12 }, () => 0);
+  cusps[0] = asc;
+  cusps[9] = mc;
+  cusps[10] = normalizeLongitude(mc + interval);
+  cusps[11] = normalizeLongitude(mc + 2 * interval);
+  cusps[1] = normalizeLongitude(asc + interval);
+  cusps[2] = normalizeLongitude(asc + 2 * interval);
+
+  cusps[3] = normalizeLongitude(cusps[9] + 180);
+  cusps[4] = normalizeLongitude(cusps[10] + 180);
+  cusps[5] = normalizeLongitude(cusps[11] + 180);
+  cusps[6] = normalizeLongitude(cusps[0] + 180);
+  cusps[7] = normalizeLongitude(cusps[1] + 180);
+  cusps[8] = normalizeLongitude(cusps[2] + 180);
+
+  const starts = cusps.map((_, idx) => {
+    const prev = (idx + 11) % 12;
+    return normalizeLongitude(cusps[prev] + forwardArc(cusps[prev], cusps[idx]) / 2);
+  });
+
+  const ends = cusps.map((_, idx) => {
+    const next = (idx + 1) % 12;
+    return normalizeLongitude(cusps[idx] + forwardArc(cusps[idx], cusps[next]) / 2);
+  });
+
+  const midpoints = starts.map((start, idx) => normalizeLongitude(start + forwardArc(start, ends[idx]) / 2));
+
+  const getHouse = (longitude: number): number => {
+    const lon = normalizeLongitude(longitude);
+    for (let i = 0; i < 12; i++) {
+      const span = forwardArc(starts[i], ends[i]);
+      const rel = forwardArc(starts[i], lon);
+      if (rel <= span) return i + 1;
+    }
+
+    let closestHouse = 1;
+    let bestDistance = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < 12; i++) {
+      const d = shortestAngularDistance(lon, midpoints[i]);
+      if (d < bestDistance) {
+        bestDistance = d;
+        closestHouse = i + 1;
+      }
+    }
+    return closestHouse;
+  };
+
+  return { cusps, starts, ends, midpoints, getHouse };
 }
 
 // ─── Rahu/Ketu (Mean Node) ───────────────────────────────────────────────────
@@ -758,6 +924,7 @@ function calcPratyantardashas(startDate: Date, endDate: Date, antardashaSeqIdx: 
 function calcShadBala(
   planets: Record<string, { longitude: number; signIndex: number; retrograde: boolean }>,
   lagnaSignIndex: number,
+  lagnaLongitude: number,
   birthUtcDate: Date,
   tzOffsetHours: number,
   latitude: number,
@@ -774,21 +941,24 @@ function calcShadBala(
     if (!p) continue;
     
     const sthanaBala = calcSthanaBala(planet, p.longitude, p.signIndex, lagnaSignIndex);
-    const digBala = calcDigBala(planet, p.longitude, lagnaSignIndex);
+    const digBala = calcDigBala(planet, p.longitude, lagnaSignIndex, lagnaLongitude);
     const moonLon = planets['Moon']?.longitude ?? 0;
     const kalaBala = calcKalaBala(planet, kalaContext, p.longitude, sunLon, moonLon, ayanamshaValue);
-    const chestaBala = calcChestaBala(planet, p.retrograde, p.longitude, sunLon, moonLon, ayanamshaValue);
+    const chestaBala = calcChestaBala(planet, p.retrograde, p.longitude, sunLon, moonLon);
     const naisargikaBala = NAISARGIKA_BALA[planet] ?? 0;
     const drikBala = calcDrikBala(planet, p.longitude, planets);
     
     const sthanaTotal = typeof sthanaBala === 'object' ? sthanaBala.total : sthanaBala;
     const kalaTotal = typeof kalaBala === 'object' ? kalaBala.total : kalaBala;
     
-    const totalShashtiamsas = sthanaTotal + digBala + kalaTotal + chestaBala + naisargikaBala + drikBala;
+    const totalShashtiamsas = Math.max(
+      0,
+      sthanaTotal + digBala + kalaTotal + chestaBala + naisargikaBala + drikBala
+    );
     const totalRupas = totalShashtiamsas / 60;
     
     const requiredRupas: Record<string, number> = {
-      Sun: 5.0, Moon: 6.0, Mars: 5.0, Mercury: 7.0, Jupiter: 6.5, Venus: 5.5, Saturn: 5.0,
+      Sun: 6.5, Moon: 6.0, Mars: 5.0, Mercury: 7.0, Jupiter: 6.5, Venus: 5.5, Saturn: 5.0,
     };
     const required = requiredRupas[planet] ?? 5.0;
     const ratio = totalRupas / required;
@@ -806,7 +976,7 @@ function calcShadBala(
       required_rupas: required,
       ratio: Math.round(ratio * 100) / 100,
       is_strong: isStrong,
-      strength: ratio >= 1.2 ? 'Strong' : ratio >= 0.8 ? 'Medium' : 'Weak',
+      strength: ratio >= 1.2 ? 'Strong' : ratio >= 1.0 ? 'Medium' : 'Weak',
     };
   }
   
@@ -815,78 +985,77 @@ function calcShadBala(
 
 function calcSthanaBala(planet: string, longitude: number, signIndex: number, lagnaSignIndex: number): SthanaBalaInfo {
   const getDignityScore = (planetName: string, signIdx: number, allowMoolatrikona = false): number => {
-    let dignity = 0;
-    if (OWN_SIGNS[planetName]?.includes(signIdx)) dignity = 30;
-    else if (EXALTATION[planetName]?.sign === signIdx) dignity = 20;
-    else {
-      const signLord = getSignLord(signIdx);
-      if (FRIENDS[planetName]?.includes(signLord)) dignity = 15;
-      else if (ENEMIES[planetName]?.includes(signLord)) dignity = -10;
+    const mt = MOOLATRIKONA[planetName];
+    const degInSign = normalizeLongitude(longitude) % 30;
+
+    if (allowMoolatrikona && mt && signIdx === mt.sign && degInSign >= mt.from && degInSign <= mt.to) {
+      return 45;
     }
-    if (allowMoolatrikona) {
-      const mt = MOOLATRIKONA[planetName];
-      if (mt && signIdx === mt.sign) {
-        const degInSign = longitude % 30;
-        if (degInSign >= mt.from && degInSign <= mt.to) {
-          dignity = Math.max(dignity, 22.5);
-        }
-      }
-    }
-    return dignity;
+    if (EXALTATION[planetName]?.sign === signIdx) return 20;
+    if (DEBILITATION[planetName] === signIdx) return 1.875;
+    if (OWN_SIGNS[planetName]?.includes(signIdx)) return 30;
+
+    const signLord = getSignLord(signIdx);
+    if (FRIENDS[planetName]?.includes(signLord)) return 15;
+    if (ENEMIES[planetName]?.includes(signLord)) return 3.75;
+    return 7.5;
   };
 
-  // 1. Uccha Bala (exaltation strength)
+  // 1) Uccha Bala (from debilitation to current position)
   let uccha = 0;
-  if (EXALTATION[planet]) {
-    const exaltDeg = EXALTATION[planet].sign * 30 + EXALTATION[planet].deg;
-    let diff = Math.abs(longitude - exaltDeg);
-    if (diff > 180) diff = 360 - diff;
-    uccha = (180 - diff) / 3; // Max 60 shashtiamsas
+  const exalt = EXALTATION[planet];
+  const debSign = DEBILITATION[planet];
+  if (exalt && debSign !== undefined) {
+    const debLon = debSign * 30 + exalt.deg;
+    let arc = normalizeLongitude(longitude - debLon);
+    if (arc > 180) arc = 360 - arc;
+    uccha = arc / 3;
   }
-  
-  // 2. Saptavargaja Bala (D1, D2, D3, D7, D9, D12, D30)
+
+  // 2) Saptavargaja Bala (D1, D2, D3, D7, D9, D12, D30)
   const horaSign = getHoraSignIndex(longitude, signIndex);
   const drekkanaSign = getDrekkanaSignIndex(longitude, signIndex);
   const saptamsaSign = getSaptamsaSignIndex(longitude, signIndex);
   const navamsaSign = getNavamsaSignIndex(longitude);
   const dwadashamsaSign = getDwadashamsaSignIndex(longitude, signIndex);
   const trimsamsaSign = getTrimsamsaSignIndex(longitude, signIndex);
-  const rasiDignity = getDignityScore(planet, signIndex, true);
-  const horaDignity = getDignityScore(planet, horaSign);
-  const drekkanaDignity = getDignityScore(planet, drekkanaSign);
-  const saptamsaDignity = getDignityScore(planet, saptamsaSign);
-  const navamsaDignity = getDignityScore(planet, navamsaSign);
-  const dwadashamsaDignity = getDignityScore(planet, dwadashamsaSign);
-  const trimsamsaDignity = getDignityScore(planet, trimsamsaSign);
-  const vargaTotal = rasiDignity + horaDignity + drekkanaDignity + saptamsaDignity + navamsaDignity + dwadashamsaDignity + trimsamsaDignity;
-  let saptavargaja = (vargaTotal / 7) * 1.5;
-  saptavargaja = Math.max(0, Math.min(saptavargaja, 45));
-  
-  // 3. Ojayugma Bala (odd/even sign strength)
-  const isOddSign = signIndex % 2 === 0; // Aries=0 is odd
+
+  const saptavargaja = [
+    getDignityScore(planet, signIndex, true),
+    getDignityScore(planet, horaSign),
+    getDignityScore(planet, drekkanaSign),
+    getDignityScore(planet, saptamsaSign),
+    getDignityScore(planet, navamsaSign),
+    getDignityScore(planet, dwadashamsaSign),
+    getDignityScore(planet, trimsamsaSign),
+  ].reduce((sum, value) => sum + value, 0);
+
+  // 3) Ojayugma Bala (Rasi + Navamsa odd/even)
+  const isOddSign = signIndex % 2 === 0;
+  const navamsaIsOdd = navamsaSign % 2 === 0;
+  const oddGroup = new Set(['Sun', 'Mars', 'Jupiter', 'Saturn', 'Mercury']);
   let ojayugma = 0;
-  if (planet === 'Sun' || planet === 'Mars' || planet === 'Jupiter') {
-    ojayugma = isOddSign ? 15 : 0;
-  } else if (planet === 'Moon' || planet === 'Venus') {
-    ojayugma = !isOddSign ? 15 : 0;
+  if (oddGroup.has(planet)) {
+    if (isOddSign) ojayugma += 15;
+    if (navamsaIsOdd) ojayugma += 15;
   } else {
-    ojayugma = 7.5;
+    if (!isOddSign) ojayugma += 15;
+    if (!navamsaIsOdd) ojayugma += 15;
   }
-  
-  // 4. Kendra Bala (angular house strength) — per Brihat Parashara
+
+  // 4) Kendradi Bala
   const houseFromLagna = ((signIndex - lagnaSignIndex + 12) % 12) + 1;
-  let kendra = 0;
-  if ([1, 4, 7, 10].includes(houseFromLagna)) kendra = 30;       // Kendra
-  else if ([2, 5, 8, 11].includes(houseFromLagna)) kendra = 15;  // Panaphara
-  else kendra = 7.5;                                               // Apoklima
-  
-  // 5. Drekkana Bala
-  const degInSign = longitude % 30;
+  let kendra = 15;
+  if ([1, 4, 7, 10].includes(houseFromLagna)) kendra = 60;
+  else if ([2, 5, 8, 11].includes(houseFromLagna)) kendra = 30;
+
+  // 5) Drekkana Bala
+  const drekkanaIndex = Math.floor((normalizeLongitude(longitude) % 30) / 10) + 1;
   let drekkana = 0;
-  if (degInSign < 10) drekkana = planet === 'Sun' || planet === 'Mars' || planet === 'Jupiter' ? 15 : 5;
-  else if (degInSign < 20) drekkana = planet === 'Moon' || planet === 'Venus' ? 15 : 5;
-  else drekkana = planet === 'Mercury' || planet === 'Saturn' ? 15 : 5;
-  
+  if (['Sun', 'Mars', 'Jupiter'].includes(planet) && drekkanaIndex === 1) drekkana = 15;
+  else if (['Mercury', 'Saturn'].includes(planet) && drekkanaIndex === 2) drekkana = 15;
+  else if (['Moon', 'Venus'].includes(planet) && drekkanaIndex === 3) drekkana = 15;
+
   const total = uccha + saptavargaja + ojayugma + kendra + drekkana;
   
   return {
@@ -899,15 +1068,14 @@ function calcSthanaBala(planet: string, longitude: number, signIndex: number, la
   };
 }
 
-function calcDigBala(planet: string, longitude: number, lagnaSignIndex: number): number {
-  const signIndex = Math.floor(longitude / 30) % 12;
-  const house = ((signIndex - lagnaSignIndex + 12) % 12) + 1;
-  const maxHouse = DIG_BALA_HOUSE[planet] ?? 1;
-  // Distance from max house (in houses, 0-6 range)
-  let dist = Math.abs(house - maxHouse);
-  if (dist > 6) dist = 12 - dist;
-  // Cosine-based curve: max 60 at own direction, 0 at opposite (smoother than linear)
-  const bala = 30 + 30 * Math.cos((dist / 6) * Math.PI);
+function calcDigBala(planet: string, longitude: number, lagnaSignIndex: number, lagnaLongitude?: number): number {
+  const strongestHouse = DIG_BALA_HOUSE[planet] ?? 1;
+  const weakestHouse = ((strongestHouse + 5) % 12) + 1;
+  const lagnaRef = typeof lagnaLongitude === 'number' ? lagnaLongitude : lagnaSignIndex * 30;
+  const weakestPointLongitude = normalizeLongitude(lagnaRef + (weakestHouse - 1) * 30 + 15);
+
+  const distanceFromWeakest = Math.max(0, Math.min(180, shortestAngularDistance(longitude, weakestPointLongitude)));
+  const bala = distanceFromWeakest / 3;
   return Math.round(bala * 100) / 100;
 }
 
@@ -937,7 +1105,7 @@ function calcKalaBala(
   const diurnalPeak = isDaytime ? (1 - Math.abs(dayFraction - 0.5) * 2) : 0;
   const nocturnalPeak = !isDaytime ? (1 - Math.abs(nightFraction - 0.5) * 2) : 0;
   if (planet === 'Mercury') {
-    divaratri = 60; // Mercury is always strong
+    divaratri = 30;
   } else if (diurnalPlanets.includes(planet)) {
     divaratri = Math.max(0, Math.min(60, diurnalPeak * 60));
   } else if (nocturnalPlanets.includes(planet)) {
@@ -967,6 +1135,7 @@ function calcKalaBala(
     else if (nightFraction < 0.667) { if (planet === 'Venus') tribhaga = 60; }
     else { if (planet === 'Mars') tribhaga = 60; }
   }
+  if (planet === 'Jupiter') tribhaga = 60;
   
   // 4. Vara Bala (day lord)
   const dayLords = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
@@ -1018,14 +1187,14 @@ function calcChestaBala(
   longitude: number,
   sunLon: number,
   moonLon?: number,
-  ayanamshaValue: number = 24
 ): number {
   if (planet === 'Sun') {
-    // Sun's Chesta Bala = Ayana Bala (based on declination/season)
-    const tropicalLon = normalizeLongitude(longitude + ayanamshaValue);
-    const obliquity = 23.44;
-    const decl = Math.asin(Math.sin(obliquity * Math.PI / 180) * Math.sin(tropicalLon * Math.PI / 180)) * 180 / Math.PI;
-    return Math.max(0, Math.min(60, 30 + (decl / obliquity) * 30));
+    const exalt = EXALTATION.Sun;
+    const debLon = DEBILITATION.Sun * 30 + exalt.deg;
+    let arc = normalizeLongitude(longitude - debLon);
+    if (arc > 180) arc = 360 - arc;
+    const uccha = arc / 3;
+    return Math.max(0, Math.min(60, uccha * 2));
   }
   if (planet === 'Moon') {
     // Moon's Chesta Bala = Paksha Bala (based on phase)
@@ -1068,93 +1237,99 @@ function calculateVedicAspectStrength(fromLon: number, toLon: number, planet: st
 
 function calcDrikBala(planet: string, longitude: number, planets: Record<string, { longitude: number; signIndex: number; retrograde: boolean }>): number {
   let drikBala = 0;
-  const benefics = ['Jupiter', 'Venus', 'Mercury'];
-  const malefics = ['Sun', 'Mars', 'Saturn', 'Rahu', 'Ketu'];
+  const mainPlanets = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+  const benefics = new Set(['Jupiter', 'Venus', 'Mercury']);
+  const malefics = new Set(['Sun', 'Mars', 'Saturn']);
   const sunLon = planets['Sun']?.longitude ?? 0;
-  
-  for (const [name, p] of Object.entries(planets)) {
-    if (name === planet) continue;
+  const moonLon = planets['Moon']?.longitude ?? 0;
+  const moonWaxing = normalizeLongitude(moonLon - sunLon) < 180;
 
-    const aspectStrength = calculateVedicAspectStrength(p.longitude, longitude, name, 15);
+  for (const name of mainPlanets) {
+    if (name === planet) continue;
+    const p = planets[name];
+    if (!p) continue;
+
+    const aspectStrength = calculateVedicAspectStrength(p.longitude, longitude, name, 12);
     if (aspectStrength <= 0) continue;
 
-    if (benefics.includes(name)) {
-      drikBala += 20 * aspectStrength;
-    } else if (malefics.includes(name)) {
-      drikBala -= 20 * aspectStrength;
-    } else if (name === 'Moon') {
-      const moonPhase = normalizeLongitude(p.longitude - sunLon);
-      const isWaxing = moonPhase < 180;
-      drikBala += (isWaxing ? 16 : -8) * aspectStrength;
+    const aspectVirupa = 60 * aspectStrength;
+    const contribution = aspectVirupa / 4;
+
+    if (name === 'Moon') {
+      drikBala += moonWaxing ? contribution : -contribution;
+    } else if (benefics.has(name)) {
+      drikBala += contribution;
+    } else if (malefics.has(name)) {
+      drikBala -= contribution;
     }
   }
-  
-  return Math.max(-60, Math.min(60, drikBala));
+
+  return Math.max(-60, Math.min(60, Math.round(drikBala * 100) / 100));
 }
 
 // ─── Bhava Bala ──────────────────────────────────────────────────────────────
 
 function calcBhavaBala(
-  lagnaSignIndex: number,
+  lagnaLongitude: number,
+  mcLongitude: number,
   planets: Record<string, { longitude: number; signIndex: number }>,
   shadBala: Record<string, ShadBalaInfo>,
 ): Record<number, BhavaBalaInfo> {
   const result: Record<number, BhavaBalaInfo> = {};
+  const sripati = buildSripatiHouseSystem(lagnaLongitude, mcLongitude);
   const beneficSet = new Set(['Jupiter', 'Venus', 'Mercury', 'Moon']);
   const maleficSet = new Set(['Sun', 'Mars', 'Saturn', 'Rahu', 'Ketu']);
-
-  const angularDistance = (a: number, b: number): number => {
-    const d = Math.abs(normalizeLongitude(a) - normalizeLongitude(b));
-    return Math.min(d, 360 - d);
-  };
+  const sunLon = planets['Sun']?.longitude ?? 0;
+  const moonLon = planets['Moon']?.longitude ?? 0;
+  const moonWaxing = normalizeLongitude(moonLon - sunLon) < 180;
   
   for (let house = 1; house <= 12; house++) {
-    const signIndex = (lagnaSignIndex + house - 1) % 12;
+    const cuspLongitude = sripati.cusps[house - 1];
+    const signIndex = getSignIndex(cuspLongitude);
     const lord = getSignLord(signIndex);
+    const houseMidLon = sripati.midpoints[house - 1];
+    const houseSpan = Math.max(1, forwardArc(sripati.starts[house - 1], sripati.ends[house - 1]));
+    const halfHouseSpan = houseSpan / 2;
     
     // Find planets in this house
     const planetsInHouse: string[] = [];
     for (const [name, p] of Object.entries(planets)) {
-      const pHouse = ((p.signIndex - lagnaSignIndex + 12) % 12) + 1;
+      const pHouse = sripati.getHouse(p.longitude);
       if (pHouse === house) planetsInHouse.push(name);
     }
     
     // Lord's house
     const lordData = planets[lord];
-    const lordHouse = lordData ? ((lordData.signIndex - lagnaSignIndex + 12) % 12) + 1 : 0;
+    const lordHouse = lordData ? sripati.getHouse(lordData.longitude) : 0;
     
     // Bhavadhipati Bala (lord's shadbala)
     const lordShadBala = shadBala[lord];
-    const lordTotalShashtiamsas = lordShadBala?.total_shashtiamsas ?? 300;
+    const lordTotalShashtiamsas = typeof lordShadBala?.total_shashtiamsas === 'number'
+      ? lordShadBala.total_shashtiamsas
+      : typeof lordShadBala?.total_rupas === 'number'
+        ? lordShadBala.total_rupas * 60
+        : 300;
     const bhavadhipatiBala = Math.min(60, Math.max(20, lordTotalShashtiamsas / 10));
     
     // Bhava Digbala — based on house type (kendra strongest, then panaphara, then apoklima)
-    let bhavaDigbala = 0;
-    if ([1, 4, 7, 10].includes(house)) bhavaDigbala = 45;
+    let bhavaDigbala = 15;
+    if ([1, 4, 7, 10].includes(house)) bhavaDigbala = 60;
     else if ([2, 5, 8, 11].includes(house)) bhavaDigbala = 30;
-    else bhavaDigbala = 18;
-
-    if (house === 1) bhavaDigbala += 6;
-    else if (house === 10) bhavaDigbala += 5;
-    else if (house === 9) bhavaDigbala += 4;
-    else if ([5, 11].includes(house)) bhavaDigbala += 3;
     
     // Bhava Drishti Bala — aspects TO this house from all planets
     let bhavaDrishtiBala = 0;
-    const houseMidLon = (signIndex * 30 + 15); // midpoint of house sign
-    const sunLon = planets['Sun']?.longitude ?? 0;
     for (const [name, p] of Object.entries(planets)) {
-      const aspectStrength = calculateVedicAspectStrength(p.longitude, houseMidLon, name, 15);
+      const aspectStrength = calculateVedicAspectStrength(p.longitude, houseMidLon, name, 12);
       if (aspectStrength <= 0) continue;
 
+      const contribution = (60 * aspectStrength) / 4;
+
       if (beneficSet.has(name)) {
-        bhavaDrishtiBala += 12 * aspectStrength;
+        bhavaDrishtiBala += contribution;
       } else if (maleficSet.has(name)) {
-        bhavaDrishtiBala -= 12 * aspectStrength;
+        bhavaDrishtiBala -= contribution;
       } else if (name === 'Moon') {
-        const moonPhase = normalizeLongitude(p.longitude - sunLon);
-        const isWaxing = moonPhase < 180;
-        bhavaDrishtiBala += (isWaxing ? 10 : -6) * aspectStrength;
+        bhavaDrishtiBala += moonWaxing ? contribution : -contribution;
       }
     }
 
@@ -1165,12 +1340,11 @@ function calcBhavaBala(
     for (const name of planetsInHouse) {
       const pdata = planets[name];
       if (!pdata) continue;
-      const dist = angularDistance(pdata.longitude, houseMidLon);
-      const inSignDist = dist > 15 ? 30 - dist : dist;
-      const base = Math.max(0, (15 - inSignDist) * 4);
+      const dist = shortestAngularDistance(pdata.longitude, houseMidLon);
+      const base = Math.max(0, 60 * (1 - dist / halfHouseSpan));
       if (beneficSet.has(name)) residentialStrength += base;
       else if (maleficSet.has(name)) residentialStrength += base * 0.5;
-      else residentialStrength += base * 0.8;
+      else residentialStrength += base * 0.75;
     }
     residentialStrength = Math.min(60, residentialStrength);
     
@@ -1202,14 +1376,14 @@ function calcBhavaBala(
       else lordPlacementBala = -5; // 6th, 8th, 12th from own house
     }
     
-    const totalShashtiamsas = bhavadhipatiBala + bhavaDigbala + bhavaDrishtiBala + residentialStrength + planetContribution + lordPlacementBala + 60;
+    const totalShashtiamsas = bhavadhipatiBala + bhavaDigbala + bhavaDrishtiBala + residentialStrength + planetContribution + lordPlacementBala;
     const totalRupas = totalShashtiamsas / 60;
     
-    const isStrong = totalRupas >= 2.5;
+    const isStrong = totalRupas >= 2.0;
     let rating: 'Very Strong' | 'Strong' | 'Medium' | 'Weak';
-    if (totalRupas >= 4.0) rating = 'Very Strong';
-    else if (totalRupas >= 3.0) rating = 'Strong';
-    else if (totalRupas >= 2.0) rating = 'Medium';
+    if (totalRupas >= 3.6) rating = 'Very Strong';
+    else if (totalRupas >= 2.8) rating = 'Strong';
+    else if (totalRupas >= 1.8) rating = 'Medium';
     else rating = 'Weak';
     
     result[house] = {
@@ -1218,10 +1392,10 @@ function calcBhavaBala(
       sign_sanskrit: SIGNS_SANSKRIT[signIndex],
       lord,
       lord_house: lordHouse,
-      lord_sign: lordData ? SIGNS_EN[lordData.signIndex] : undefined,
+      lord_sign: lordData ? SIGNS_EN[getSignIndex(lordData.longitude)] : undefined,
       planets_in_house: planetsInHouse,
       bhavadhipati_bala: Math.round(bhavadhipatiBala * 100) / 100,
-      bhava_digbala: bhavaDigbala,
+      bhava_digbala: Math.round(bhavaDigbala * 100) / 100,
       bhava_drishti_bala: Math.round(bhavaDrishtiBala * 100) / 100,
       residential_strength: Math.round(residentialStrength * 100) / 100,
       planet_contribution: Math.round(planetContribution * 100) / 100,
@@ -1238,6 +1412,54 @@ function calcBhavaBala(
 function getSignLord(signIndex: number): string {
   const lords = ['Mars', 'Venus', 'Mercury', 'Moon', 'Sun', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Saturn', 'Jupiter'];
   return lords[signIndex % 12];
+}
+
+function calcAshtakavarga(
+  planets: Record<string, { signIndex: number }>,
+  lagnaSignIndex: number,
+): AshtakavargaInfo {
+  const targetPlanets = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+  const contributors = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Asc'];
+  const bhinna: AshtakavargaInfo['bhinna'] = {};
+
+  for (const target of targetPlanets) {
+    const points = Array.from({ length: 12 }, () => 0);
+    const rules = ASHTAKAVARGA_RULES[target] ?? {};
+
+    for (const contributor of contributors) {
+      const refSign = contributor === 'Asc'
+        ? lagnaSignIndex
+        : planets[contributor]?.signIndex;
+      if (typeof refSign !== 'number') continue;
+
+      const beneficHouses = rules[contributor] ?? [];
+      for (const houseFromRef of beneficHouses) {
+        const sign = (refSign + houseFromRef - 1) % 12;
+        points[sign] += 1;
+      }
+    }
+
+    bhinna[target] = {
+      points,
+      total: points.reduce((sum, value) => sum + value, 0),
+    };
+  }
+
+  const sarvaPoints = Array.from({ length: 12 }, () => 0);
+  for (const target of targetPlanets) {
+    const row = bhinna[target]?.points ?? [];
+    for (let i = 0; i < 12; i++) {
+      sarvaPoints[i] += row[i] ?? 0;
+    }
+  }
+
+  return {
+    bhinna,
+    sarva: {
+      points: sarvaPoints,
+      total: sarvaPoints.reduce((sum, value) => sum + value, 0),
+    },
+  };
 }
 
 // ─── Yoga Detection ─────────────────────────────────────────────────────────
@@ -1363,16 +1585,18 @@ function calcYogas(
 
 // ─── Chart Generation ────────────────────────────────────────────────────────
 
-function buildRasiChart(_lagnaSignIndex: number, planets: Record<string, { signIndex: number }>): string[][] {
+function buildRasiChart(lagnaSignIndex: number, planets: Record<string, { signIndex: number }>): string[][] {
   const chart: string[][] = Array.from({ length: 12 }, () => []);
+  chart[lagnaSignIndex].push('Asc');
   for (const [name, p] of Object.entries(planets)) {
     chart[p.signIndex].push(name);
   }
   return chart;
 }
 
-function buildNavamsaChart(planets: Record<string, { longitude: number }>): string[][] {
+function buildNavamsaChart(planets: Record<string, { longitude: number }>, lagnaNavamsaIndex: number): string[][] {
   const chart: string[][] = Array.from({ length: 12 }, () => []);
+  chart[lagnaNavamsaIndex].push('Asc');
   for (const [name, p] of Object.entries(planets)) {
     const navSign = getNavamsaSignIndex(p.longitude);
     chart[navSign].push(name);
@@ -1397,15 +1621,19 @@ export function calculateKundali(request: KundaliRequest): KundaliResponse {
   
   // Calculate Lagna using JD directly for accuracy
   const lagnaLongitude = calcLagna(jd, latitude, longitude, ayanamshaValue);
+  const mcLongitude = calcMidheaven(jd, longitude, ayanamshaValue);
   const lagnaSignIndex = getSignIndex(lagnaLongitude);
+  const lagnaNavamsaIndex = getNavamsaSignIndex(lagnaLongitude);
   const lagnaDeg = getDegInSign(lagnaLongitude);
-  // lagnaNavamsaIndex available if needed: getNavamsaSignIndex(lagnaLongitude)
   
   const lagnaInfo: LagnaInfo = {
     longitude: Math.round(lagnaLongitude * 10000) / 10000,
     sign: SIGNS_EN[lagnaSignIndex],
     sign_sanskrit: SIGNS_SANSKRIT[lagnaSignIndex],
     sign_index: lagnaSignIndex,
+    navamsa_sign_index: lagnaNavamsaIndex,
+    navamsa_sign: SIGNS_EN[lagnaNavamsaIndex],
+    navamsa_sign_sanskrit: SIGNS_SANSKRIT[lagnaNavamsaIndex],
     deg: lagnaDeg.deg,
     min: lagnaDeg.min,
     sec: lagnaDeg.sec,
@@ -1522,12 +1750,13 @@ export function calculateKundali(request: KundaliRequest): KundaliResponse {
   // Build charts
   const combinedRaw = { ...planetsRaw, ...upagrahasRaw };
   const rasiChart = buildRasiChart(lagnaSignIndex, combinedRaw);
-  const navamsaChart = buildNavamsaChart(combinedRaw);
+  const navamsaChart = buildNavamsaChart(planetsRaw, lagnaNavamsaIndex);
   
   // Calculate Shadbala
   const shadBala = calcShadBala(
     planetsRaw,
     lagnaSignIndex,
+    lagnaLongitude,
     utcDate,
     tz_offset_hours,
     latitude,
@@ -1536,7 +1765,10 @@ export function calculateKundali(request: KundaliRequest): KundaliResponse {
   );
   
   // Calculate Bhava Bala
-  const bhavaBala = calcBhavaBala(lagnaSignIndex, planetsRaw, shadBala);
+  const bhavaBala = calcBhavaBala(lagnaLongitude, mcLongitude, planetsRaw, shadBala);
+
+  // Calculate Ashtakavarga (Bhinna + Sarva)
+  const ashtakavarga = calcAshtakavarga(planetsRaw, lagnaSignIndex);
   
   // Calculate Vimshottari Dasha
   const moonLon = planetsRaw['Moon']?.longitude ?? 0;
@@ -1569,6 +1801,7 @@ export function calculateKundali(request: KundaliRequest): KundaliResponse {
     navamsa_chart: navamsaChart,
     shad_bala: shadBala,
     bhava_bala: bhavaBala,
+    ashtakavarga,
     dasha,
     yogas,
     signs: SIGNS_EN,

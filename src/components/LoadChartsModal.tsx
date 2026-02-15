@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from './ui/button';
 import { X, CheckCircle2, AlertCircle, Search, Trash2, Pencil, FolderOpen, Check } from 'lucide-react';
 import type { KundaliRequest, KundaliResponse } from '../types/kundali';
@@ -31,6 +31,9 @@ export function LoadChartsModal({ isOpen, charts, onLoad, onEdit, onDelete, onCl
   const [deleteNotice, setDeleteNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [isCloseHovered, setIsCloseHovered] = useState(false);
+
+  const actionButtonClass = 'h-8 w-8 p-0 border border-[hsl(220,8%,24%)] bg-[hsl(220,10%,10%)] text-white hover:bg-[hsl(220,10%,13%)] hover:border-[hsl(220,8%,30%)]';
 
   const sortedCharts = useMemo(() => {
     return [...charts].sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
@@ -46,6 +49,13 @@ export function LoadChartsModal({ isOpen, charts, onLoad, onEdit, onDelete, onCl
       return name.includes(q) || loc.includes(q) || date.includes(q);
     });
   }, [query, sortedCharts]);
+
+  useEffect(() => {
+    if (!deleteConfirmId) return;
+    if (!filteredCharts.some((c) => c.id === deleteConfirmId)) {
+      setDeleteConfirmId(null);
+    }
+  }, [deleteConfirmId, filteredCharts]);
 
   const handleDelete = async (chartId: string) => {
     if (deleteConfirmId !== chartId) {
@@ -89,60 +99,84 @@ export function LoadChartsModal({ isOpen, charts, onLoad, onEdit, onDelete, onCl
     onClose();
   };
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleClose();
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('keydown', onKeyDown);
+    }
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div className="bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl max-w-2xl mx-4 w-full max-h-[80vh] overflow-hidden shadow-2xl">
-          <div className="sticky top-0 z-10 bg-neutral-800/60 backdrop-blur-md border-b border-neutral-700/50 px-6 py-4">
+      <div className="fixed inset-0 z-[200] flex items-start sm:items-center justify-center bg-black/70 backdrop-blur-sm px-2 sm:px-4 py-[max(0.75rem,env(safe-area-inset-top))] sm:py-6" role="dialog" aria-modal="true" aria-label="Saved charts modal" onMouseDown={(e) => { if (e.target === e.currentTarget) handleClose(); }}>
+        <div className="w-full max-w-3xl bg-[hsl(220,10%,8%)] border border-amber-500/15 rounded-2xl shadow-2xl overflow-hidden h-[calc(100dvh-1.5rem-env(safe-area-inset-top))] sm:h-auto sm:max-h-[80vh] flex flex-col">
+          <div className="sticky top-0 z-10 bg-[linear-gradient(180deg,rgba(245,158,11,0.08),rgba(23,23,23,0.9))] backdrop-blur-md border-b border-amber-500/20 px-4 sm:px-6 py-3 sm:py-4">
             <div className="flex justify-between items-start">
               <div className="flex-1">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-start sm:items-center justify-between gap-3">
                   <div>
                     <h2 className="text-lg font-semibold text-white">Saved Charts</h2>
-                    <p className="text-xs text-neutral-400 mt-0.5">Load, edit, or delete your saved kundalis</p>
+                    <p className="text-xs text-neutral-300/80 mt-0.5">Load, edit, or delete your saved kundalis</p>
                   </div>
-                  {deleteNotice && (
-                    <div
-                      className={`rounded-lg border px-3 py-2 text-sm flex items-center gap-2 ${
-                        deleteNotice.type === 'success'
-                          ? 'border-green-500/50 text-green-200 bg-green-500/10'
-                          : 'border-error/50 text-error bg-error/10'
-                      }`}
-                    >
-                      {deleteNotice.type === 'success' ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4" />
-                      )}
-                      <div>{deleteNotice.message}</div>
-                    </div>
-                  )}
                   <Button
                     onClick={handleClose}
                     variant="ghost"
                     size="sm"
-                    className="h-9 w-9 p-0 text-neutral-400 hover:text-white hover:bg-neutral-700/50"
+                    className="h-9 w-9 p-0 text-neutral-400 hover:text-white hover:bg-[hsl(220,10%,10%)]"
+                    aria-label="Close saved charts modal"
+                    onMouseEnter={() => setIsCloseHovered(true)}
+                    onMouseLeave={() => setIsCloseHovered(false)}
                   >
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
+                <p className="text-[11px] text-neutral-500 mt-1">Tip: Press Esc to close this modal{isCloseHovered ? ' • or click outside' : ''}</p>
+
+                {deleteNotice && (
+                  <div
+                    className={`mt-3 rounded-lg border px-3 py-2 text-sm flex items-center gap-2 ${
+                      deleteNotice.type === 'success'
+                        ? 'border-amber-500/50 text-amber-200 bg-amber-500/10'
+                        : 'border-red-500/50 text-red-200 bg-red-500/10'
+                    }`}
+                  >
+                    {deleteNotice.type === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4" />
+                    )}
+                    <div className="flex-1">{deleteNotice.message}</div>
+                    <button type="button" className="text-neutral-300/80 hover:text-white" onClick={() => setDeleteNotice(null)} aria-label="Dismiss chart notice">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
 
                 <div className="mt-3">
-                  <div className="flex items-center gap-2 bg-neutral-800/60 border border-neutral-700/50 rounded-lg px-3 py-2">
-                    <Search className="w-4 h-4 text-neutral-400" />
+                  <div className="flex items-center gap-2 bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,22%)] rounded-lg px-3 h-9">
+                    <Search className="w-4 h-4 text-neutral-300/70" />
                     <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder="Search by name, location, or date…"
                       className="w-full bg-transparent text-sm text-white placeholder:text-neutral-400 outline-none"
+                      aria-label="Search saved charts"
+                      autoFocus
                     />
                     {query.trim() ? (
                       <button
                         type="button"
                         onClick={() => setQuery('')}
-                        className="text-xs text-neutral-400 hover:text-white"
+                        className="text-xs text-neutral-300/80 hover:text-white"
+                        aria-label="Clear chart search"
                       >
                         Clear
                       </button>
@@ -153,10 +187,8 @@ export function LoadChartsModal({ isOpen, charts, onLoad, onEdit, onDelete, onCl
             </div>
           </div>
 
-          <div className="p-6 overflow-y-auto max-h-[calc(80vh-96px)] scrollbar-thin">
-          {query.trim() && filteredCharts.length > 0 && (
-            <p className="text-neutral-500 text-xs mb-3">{filteredCharts.length} of {charts.length} charts</p>
-          )}
+          <div className="p-3 sm:p-6 overflow-y-auto flex-1 scrollbar-thin">
+          <p className="text-neutral-500 text-xs mb-3">{filteredCharts.length} of {charts.length} charts</p>
           
           {charts.length === 0 ? (
             <div className="text-center py-12 space-y-3">
@@ -170,17 +202,17 @@ export function LoadChartsModal({ isOpen, charts, onLoad, onEdit, onDelete, onCl
             <div className="text-center py-10">
               <p className="text-white font-medium">No matches</p>
               <p className="text-neutral-400 text-sm mt-1">Try a different search.</p>
-              <Button onClick={() => setQuery('')} variant="outline" className="mt-4 bg-transparent border border-neutral-700 text-white hover:bg-neutral-700/50 hover:border-neutral-600">Clear search</Button>
+              <Button onClick={() => setQuery('')} variant="outline" className="mt-4 border border-[hsl(220,8%,24%)] bg-[hsl(220,10%,10%)] text-white hover:bg-[hsl(220,10%,13%)] hover:border-[hsl(220,8%,30%)]">Clear search</Button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {filteredCharts.map((chart) => (
                 <div
                   key={chart.id}
-                  className="bg-neutral-800/40 border border-neutral-700/50 rounded-lg p-3 hover:border-neutral-600/80 hover:bg-neutral-800/60 transition-all duration-200"
+                  className="bg-[hsl(220,10%,10%)]/70 border border-[hsl(220,8%,22%)] rounded-xl p-3 hover:border-amber-500/30 hover:bg-[hsl(220,10%,11%)] transition-all duration-200"
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="flex-1 flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex-1 flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 rounded-lg bg-neutral-700/50 border border-neutral-600/50 flex items-center justify-center text-white font-semibold text-sm">
                         {(chart.name || 'C').trim().slice(0, 1).toUpperCase()}
                       </div>
@@ -196,11 +228,12 @@ export function LoadChartsModal({ isOpen, charts, onLoad, onEdit, onDelete, onCl
                       </div>
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                       <Button
                         size="sm"
                         onClick={() => handleLoadAndClose(chart.id)}
-                        className="bg-neutral-200 hover:bg-neutral-300 text-black gap-1.5 h-8"
+                        className="bg-amber-400 hover:bg-amber-300 text-black gap-1.5 h-8"
+                        aria-label={`Open chart ${chart.name}`}
                       >
                         <FolderOpen className="w-3.5 h-3.5" />
                         Open
@@ -209,7 +242,7 @@ export function LoadChartsModal({ isOpen, charts, onLoad, onEdit, onDelete, onCl
                         size="sm"
                         variant="outline"
                         onClick={() => handleEditAndClose(chart.id)}
-                        className="h-8 w-8 p-0 bg-transparent border border-neutral-700 text-white hover:bg-neutral-700/50 hover:border-neutral-600"
+                        className={actionButtonClass}
                         title="Edit"
                         aria-label="Edit"
                       >
@@ -219,7 +252,7 @@ export function LoadChartsModal({ isOpen, charts, onLoad, onEdit, onDelete, onCl
                         size="sm"
                         variant={deleteConfirmId === chart.id ? 'destructive' : 'outline'}
                         onClick={() => handleDelete(chart.id)}
-                        className={`h-8 w-8 p-0 bg-transparent border border-neutral-700 text-white hover:bg-neutral-700/50 hover:border-neutral-600 ${deleteConfirmId === chart.id ? 'animate-pulse' : ''}`}
+                        className={`${actionButtonClass} ${deleteConfirmId === chart.id ? 'animate-pulse' : ''}`}
                         disabled={deletingId === chart.id}
                         title={deleteConfirmId === chart.id ? 'Confirm delete' : 'Delete'}
                         aria-label={deleteConfirmId === chart.id ? 'Confirm delete' : 'Delete'}

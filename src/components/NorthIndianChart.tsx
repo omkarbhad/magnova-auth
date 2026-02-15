@@ -158,6 +158,14 @@ export function NorthIndianChart({ data, chartType = "rasi" }: NorthIndianChartP
     return normalizeRasiChart(raw, signsSanskrit);
   }, [dataObj, signsSanskrit, chartType]);
 
+  const planetsMap = React.useMemo(() => {
+    const planetsObj = dataObj["planets"];
+    if (planetsObj && typeof planetsObj === "object" && !Array.isArray(planetsObj)) {
+      return planetsObj as Record<string, unknown>;
+    }
+    return undefined;
+  }, [dataObj]);
+
   const lagnaSignIndex = React.useMemo(() => {
     const lagna = dataObj["lagna"];
     if (lagna && typeof lagna === "object" && !Array.isArray(lagna)) {
@@ -174,7 +182,7 @@ export function NorthIndianChart({ data, chartType = "rasi" }: NorthIndianChartP
   const getHouseSignIndex = React.useCallback(
     (houseNumber: number): number => {
       // House 1 = Lagna sign, House 2 = Lagna+1, etc.
-      // Signs progress clockwise (increasing sign index) as house number increases
+      // Signs progress anti-clockwise in North Indian layout as house number increases.
       const baseIndex = lagnaSignIndex;
       const step = houseNumber - 1;
       return (baseIndex + step + 12) % 12;
@@ -196,12 +204,10 @@ export function NorthIndianChart({ data, chartType = "rasi" }: NorthIndianChartP
   );
 
   const renderHouseContent = (houseNumber: number) => {
-    // Both Rasi and Navamsa charts show house numbers (1-12) starting from same position
+    // Both Rasi and Navamsa charts keep the same house positions.
     const signNum = getSignNumber(houseNumber);
     const planets = getPlanetsInHouse(houseNumber);
-
-    const isSmallScreen = typeof window !== "undefined" ? window.innerWidth < 640 : false;
-    const radius = isSmallScreen ? 22 : 28;
+    const radius = 26;
     const angleStep = planets.length > 0 ? (2 * Math.PI) / planets.length : 0;
     const startAngle = -Math.PI / 2;
 
@@ -209,7 +215,6 @@ export function NorthIndianChart({ data, chartType = "rasi" }: NorthIndianChartP
       <div className="relative flex h-full w-full items-center justify-center">
         <div className="flex flex-col items-center justify-center">
           <div className="text-[11px] sm:text-sm font-bold leading-none text-white">{signNum}</div>
-          {/* <div className="text-[9px] font-medium text-slate-400">{signName}</div> */}
         </div>
 
         {planets.map((planet, idx) => {
@@ -219,10 +224,6 @@ export function NorthIndianChart({ data, chartType = "rasi" }: NorthIndianChartP
           const y = Math.sin(angle) * radius;
 
           // Rasi/Lagna-style: show full details with indicators
-          const planetsObj = dataObj["planets"];
-          const planetsMap = (planetsObj && typeof planetsObj === "object" && !Array.isArray(planetsObj))
-            ? (planetsObj as Record<string, unknown>)
-            : undefined;
           const pData = planetsMap && (planetsMap[planet] && typeof planetsMap[planet] === "object" && !Array.isArray(planetsMap[planet]))
             ? (planetsMap[planet] as Record<string, unknown>)
             : undefined;
@@ -280,6 +281,9 @@ export function NorthIndianChart({ data, chartType = "rasi" }: NorthIndianChartP
 
   return (
     <div className="relative mx-auto aspect-square w-full max-w-lg select-none">
+      <div className="absolute top-1.5 left-1/2 -translate-x-1/2 z-10 text-[10px] tracking-wide text-neutral-400 uppercase">
+        {chartType === "navamsa" ? "D9 Navamsa" : "D1 Rasi"}
+      </div>
       <svg viewBox="0 0 400 400" className="h-full w-full">
         <defs>
           <linearGradient id="chartBg" x1="0%" y1="0%" x2="100%" y2="100%">
