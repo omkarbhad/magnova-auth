@@ -706,9 +706,9 @@ function ChartPage() {
                                 {/* Other controls below, right-aligned */}
                                 <div className="flex flex-col gap-2 w-full">
                                   {/* Controls on bottom/right - always right aligned */}
-                                  <div className="flex items-center justify-end w-full gap-1.5">
+                                  <div className="flex items-center justify-between w-full gap-1.5">
                                     {/* Shortcut text hidden on mobile, shown on larger screens */}
-                                    <p className="text-[10px] text-neutral-500 px-1 hidden lg:block">Shortcut: Ctrl/Cmd + S to save • Esc to cancel delete</p>
+                                    <p className="text-[10px] text-neutral-500 px-1 hidden lg:block text-left">Shortcut: Ctrl/Cmd + S to save • Esc to cancel delete</p>
                                     
                                     {/* Buttons */}
                                     <div className="flex items-center gap-1.5">
@@ -1073,13 +1073,13 @@ function ChartPage() {
             {/* Single backdrop for sidebar */}
             {sidebarOpen && (
               <div
-                className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+                className="fixed inset-0 bg-black/60 z-30 lg:hidden"
                 onClick={() => setSidebarOpen(false)}
               />
             )}
 
             {/* Astrova AI Sidebar - below navbar */}
-            <div className={`fixed top-14 bottom-0 right-0 w-full sm:w-[380px] lg:w-[420px] z-50 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className={`fixed top-14 bottom-0 right-0 w-full sm:w-[380px] lg:w-[420px] z-40 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
               <AstrovaSidebar
                 kundaliData={kundaliData}
                 chartName={currentChartName || undefined}
@@ -1132,16 +1132,16 @@ function ChartPage() {
     });
     if (matchData.chart1) {
       prompt += `\n\n--- ${matchData.chart1Name.toUpperCase()}'s CHART (Male) ---`;
-      prompt += `\nLagna: ${matchData.chart1.lagna.sign}`;
+      prompt += `\nLagna: R:${matchData.chart1.lagna.sign}`;
       for (const [name, p] of Object.entries(matchData.chart1.planets)) {
-        prompt += `\n${name}: ${p.sign} H${p.house_whole_sign}${p.nakshatra ? ` Nak:${p.nakshatra}` : ''}${p.retrograde ? ' [R]' : ''}`;
+        prompt += `\n${name}: R:${p.sign} H:${p.house_whole_sign}${p.nakshatra ? ` Nak:${p.nakshatra}` : ''}${p.retrograde ? ' [R]' : ''}`;
       }
     }
     if (matchData.chart2) {
       prompt += `\n\n--- ${matchData.chart2Name.toUpperCase()}'s CHART (Female) ---`;
-      prompt += `\nLagna: ${matchData.chart2.lagna.sign}`;
+      prompt += `\nLagna: R:${matchData.chart2.lagna.sign}`;
       for (const [name, p] of Object.entries(matchData.chart2.planets)) {
-        prompt += `\n${name}: ${p.sign} H${p.house_whole_sign}${p.nakshatra ? ` Nak:${p.nakshatra}` : ''}${p.retrograde ? ' [R]' : ''}`;
+        prompt += `\n${name}: R:${p.sign} H:${p.house_whole_sign}${p.nakshatra ? ` Nak:${p.nakshatra}` : ''}${p.retrograde ? ' [R]' : ''}`;
       }
     }
     prompt += `\n\nIMPORTANT: Always refer to the couple by their names (${matchData.chart1Name} and ${matchData.chart2Name}). Analyze their compatibility using both charts.`;

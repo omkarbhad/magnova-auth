@@ -17,7 +17,6 @@ interface ChatMessage {
   kbResults?: { title: string; category: string; content: string }[];
   isStreaming?: boolean;
   thinking?: string;
-  showThinking?: boolean;
   thinkingDuration?: number;
 }
 
@@ -114,12 +113,12 @@ export function buildMatchContextPrompt(matchData?: MatchDataRef | null): string
     text += `\nBirth: ${chart.birth.date} ${chart.birth.time} (UTC${chart.birth.tz_offset_hours >= 0 ? '+' : ''}${chart.birth.tz_offset_hours}, Adjusted UTC${chart.birth.adjusted_tz_offset_hours >= 0 ? '+' : ''}${chart.birth.adjusted_tz_offset_hours}${chart.birth.dst_applied ? ', DST applied' : ''})`;
     text += `\nLocation: ${formatCoordinate(chart.birth.latitude, 'N', 'S')}, ${formatCoordinate(chart.birth.longitude, 'E', 'W')}`;
     text += `\nAyanamsha: ${chart.meta.ayanamsha} (${chart.meta.ayanamsha_deg.toFixed(4)}°)`;
-    text += `\nLagna: ${chart.lagna.sign} (${chart.lagna.sign_sanskrit}) ${chart.lagna.deg}°${chart.lagna.min}'${chart.lagna.sec}"`;
-    if (chart.planets.Moon) text += `\nMoon: ${chart.planets.Moon.sign} H${chart.planets.Moon.house_whole_sign}${chart.planets.Moon.nakshatra ? ` Nak:${chart.planets.Moon.nakshatra} P${chart.planets.Moon.nakshatra_pada}` : ''}`;
-    if (chart.planets.Venus) text += `\nVenus: ${chart.planets.Venus.sign} H${chart.planets.Venus.house_whole_sign}`;
-    if (chart.planets.Mars) text += `\nMars: ${chart.planets.Mars.sign} H${chart.planets.Mars.house_whole_sign}`;
-    if (chart.planets.Jupiter) text += `\nJupiter: ${chart.planets.Jupiter.sign} H${chart.planets.Jupiter.house_whole_sign}`;
-    if (chart.planets.Saturn) text += `\nSaturn: ${chart.planets.Saturn.sign} H${chart.planets.Saturn.house_whole_sign}`;
+    text += `\nLagna: R:${chart.lagna.sign} (${chart.lagna.sign_sanskrit}) ${chart.lagna.deg}°${chart.lagna.min}'${chart.lagna.sec}"`;
+    if (chart.planets.Moon) text += `\nMoon: R:${chart.planets.Moon.sign} H:${chart.planets.Moon.house_whole_sign}${chart.planets.Moon.nakshatra ? ` Nak:${chart.planets.Moon.nakshatra} P${chart.planets.Moon.nakshatra_pada}` : ''}`;
+    if (chart.planets.Venus) text += `\nVenus: R:${chart.planets.Venus.sign} H:${chart.planets.Venus.house_whole_sign}`;
+    if (chart.planets.Mars) text += `\nMars: R:${chart.planets.Mars.sign} H:${chart.planets.Mars.house_whole_sign}`;
+    if (chart.planets.Jupiter) text += `\nJupiter: R:${chart.planets.Jupiter.sign} H:${chart.planets.Jupiter.house_whole_sign}`;
+    if (chart.planets.Saturn) text += `\nSaturn: R:${chart.planets.Saturn.sign} H:${chart.planets.Saturn.house_whole_sign}`;
 
     if (chart.dasha) {
       text += `\nCurrent Mahadasha: ${chart.dasha.current_dasha}`;
@@ -142,14 +141,14 @@ export function buildMatchContextPrompt(matchData?: MatchDataRef | null): string
       if (p.debilitated) flags.push('Debilitated');
       if (p.vargottama) flags.push('Vargottama');
       if (p.combust) flags.push('Combust');
-      text += `\n${name}: ${p.sign} H${p.house_whole_sign}${p.nakshatra ? ` Nak:${p.nakshatra}${p.nakshatra_pada ? ` P${p.nakshatra_pada}` : ''}${p.nakshatra_lord ? ` (Lord:${p.nakshatra_lord})` : ''}` : ''}${p.navamsa_sign ? ` Navamsa:${p.navamsa_sign}` : ''}${flags.length ? ` [${flags.join(', ')}]` : ''}`;
+      text += `\n${name}: R:${p.sign} H:${p.house_whole_sign}${p.nakshatra ? ` Nak:${p.nakshatra}${p.nakshatra_pada ? ` P${p.nakshatra_pada}` : ''}${p.nakshatra_lord ? ` (Lord:${p.nakshatra_lord})` : ''}` : ''}${p.navamsa_sign ? ` Navamsa:${p.navamsa_sign}` : ''}${flags.length ? ` [${flags.join(', ')}]` : ''}`;
     }
 
     // Include Upagrahas if present
     if (chart.upagrahas && Object.keys(chart.upagrahas).length > 0) {
       text += `\n\nUpagrahas:`;
       for (const [name, u] of Object.entries(chart.upagrahas)) {
-        text += `\n${name}: ${u.sign} H${u.house_whole_sign}${u.nakshatra ? ` Nak:${u.nakshatra}` : ''}`;
+        text += `\n${name}: R:${u.sign} H:${u.house_whole_sign}${u.nakshatra ? ` Nak:${u.nakshatra}` : ''}`;
       }
     }
 
@@ -282,6 +281,34 @@ const LOGO_SRC = '/Logo.png';
 const THINKING_ICON_SRC = '/star.png';
 const FALLBACK_MODEL = 'stepfun/step-3.5-flash:free';
 
+function extractThinkingDelta(delta: unknown): string {
+  if (!delta || typeof delta !== 'object') return '';
+
+  const candidate = delta as {
+    reasoning?: unknown;
+    thinking?: unknown;
+    reasoning_content?: unknown;
+  };
+
+  const raw = candidate.reasoning ?? candidate.thinking ?? candidate.reasoning_content;
+  if (typeof raw === 'string') return raw;
+
+  if (Array.isArray(raw)) {
+    return raw
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') {
+          const text = (item as { text?: unknown; content?: unknown }).text ?? (item as { text?: unknown; content?: unknown }).content;
+          return typeof text === 'string' ? text : '';
+        }
+        return '';
+      })
+      .join('');
+  }
+
+  return '';
+}
+
 function buildKbContextPrompt(query: string, kbArticles: { title: string; category: string; content: string }[]): string {
   if (!kbArticles.length) return '';
   const compactArticles = kbArticles.slice(0, 4).map((article, index) => {
@@ -300,6 +327,7 @@ RULES:
 - Only give long responses when user says "explain", "detail", "full", "elaborate", "tell me more".
 - Talk like a smart friend: "Your Mars in 10th is fire for career" not "Mars positioned in the 10th bhava indicates..."
 - Bold key placements. Keep it scannable.
+- Notation legend for compact chart refs: H = House, R = Rashi (sign).
 - Always cite actual planet, sign, house from chart data. Never fabricate.
 - Use Parashara system, Shadbala, Bhava Bala, Vimshottari Dasha, Nakshatras, Yogas.
 - Remedies: only modern practical ones (therapy, gym, journaling, meditation, skill-building, routines). No mantras, gemstones, pujas, rituals.
@@ -322,7 +350,7 @@ RULES:
     prompt += `\nLocation: ${formatCoordinate(kundaliData.birth.latitude, 'N', 'S')}, ${formatCoordinate(kundaliData.birth.longitude, 'E', 'W')}`;
     prompt += `\nAyanamsha: ${kundaliData.meta.ayanamsha} (${kundaliData.meta.ayanamsha_deg.toFixed(4)}°)`;
     
-    prompt += `\n\nLagna (Ascendant): ${kundaliData.lagna.sign} (${kundaliData.lagna.sign_sanskrit}) at ${kundaliData.lagna.deg}°${kundaliData.lagna.min}'${kundaliData.lagna.sec}"`;
+    prompt += `\n\nLagna (Ascendant): R:${kundaliData.lagna.sign} (${kundaliData.lagna.sign_sanskrit}) at ${kundaliData.lagna.deg}°${kundaliData.lagna.min}'${kundaliData.lagna.sec}"`;
 
     const strongPlanets = kundaliData.shad_bala
       ? Object.entries(kundaliData.shad_bala)
@@ -363,7 +391,7 @@ RULES:
       if (p.debilitated) flags.push('Debilitated');
       if (p.vargottama) flags.push('Vargottama');
       if (p.combust) flags.push('Combust');
-      prompt += `\n${name}: ${p.sign} (${p.sign_sanskrit}) ${p.deg}°${p.min}'${p.sec}" House-${p.house_whole_sign} ${flags.length ? `[${flags.join(', ')}]` : ''}`;
+      prompt += `\n${name}: R:${p.sign} (${p.sign_sanskrit}) ${p.deg}°${p.min}'${p.sec}" H:${p.house_whole_sign} ${flags.length ? `[${flags.join(', ')}]` : ''}`;
       if (p.nakshatra) prompt += ` Nakshatra: ${p.nakshatra} Pada-${p.nakshatra_pada} (Lord: ${p.nakshatra_lord})`;
       if (p.navamsa_sign) prompt += ` Navamsa: ${p.navamsa_sign}`;
     }
@@ -371,7 +399,7 @@ RULES:
     if (kundaliData.upagrahas && Object.keys(kundaliData.upagrahas).length > 0) {
       prompt += `\n\n--- UPAGRAHAS ---`;
       for (const [name, u] of Object.entries(kundaliData.upagrahas)) {
-        prompt += `\n${name}: ${u.sign} (${u.sign_sanskrit}) ${u.deg}°${u.min}'${u.sec}" House-${u.house_whole_sign}${u.nakshatra ? ` Nakshatra: ${u.nakshatra} Pada-${u.nakshatra_pada}` : ''}`;
+        prompt += `\n${name}: R:${u.sign} (${u.sign_sanskrit}) ${u.deg}°${u.min}'${u.sec}" H:${u.house_whole_sign}${u.nakshatra ? ` Nakshatra: ${u.nakshatra} Pada-${u.nakshatra_pada}` : ''}`;
       }
     }
     
@@ -546,6 +574,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
   const [isLoading, setIsLoading] = useState(false);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [insufficientCredits, setInsufficientCredits] = useState(false);
+  const [expandedThinkingById, setExpandedThinkingById] = useState<Record<string, boolean>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -609,6 +638,22 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
     setShowScrollDown(!isNearBottom && messages.length > 3);
   }, [messages.length]);
 
+  const resizeInput = useCallback((el: HTMLTextAreaElement | null) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    const nextHeight = Math.min(Math.max(el.scrollHeight, 48), 140);
+    el.style.height = `${nextHeight}px`;
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    resizeInput(e.target);
+  };
+
+  const toggleThinking = (id: string) => {
+    setExpandedThinkingById((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const sendMessage = async (messageText: string) => {
     if (!messageText.trim()) return;
 
@@ -627,7 +672,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
 
     setMessages(prev => [...prev, userMessage]);
     setInput('');
-    if (inputRef.current) inputRef.current.style.height = 'auto';
+    resizeInput(inputRef.current);
 
     // Auto-detect birth details and generate chart
     if (!kundaliData && onGenerateChart) {
@@ -740,9 +785,10 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
             try {
               const parsed = JSON.parse(data);
               const delta = parsed.choices?.[0]?.delta;
-              if (delta?.reasoning) {
+              const thinkingDelta = extractThinkingDelta(delta);
+              if (thinkingDelta) {
                 if (!thinkingStartTime) thinkingStartTime = Date.now();
-                thinkingContent += delta.reasoning;
+                thinkingContent += thinkingDelta;
                 setMessages(prev => prev.map(m => 
                   m.id === assistantId ? { ...m, thinking: thinkingContent } : m
                 ));
@@ -803,6 +849,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
       setIsLoading(false);
     }
     setMessages([]);
+    setExpandedThinkingById({});
   };
 
   const stopGeneration = () => {
@@ -889,7 +936,8 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
             try {
               const parsed = JSON.parse(data);
               const delta = parsed.choices?.[0]?.delta;
-              if (delta?.reasoning) { if (!thinkingStartTime) thinkingStartTime = Date.now(); thinkingContent += delta.reasoning; setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, thinking: thinkingContent } : m)); }
+              const thinkingDelta = extractThinkingDelta(delta);
+              if (thinkingDelta) { if (!thinkingStartTime) thinkingStartTime = Date.now(); thinkingContent += thinkingDelta; setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, thinking: thinkingContent } : m)); }
               if (delta?.content) { fullContent += delta.content; setMessages(prev => prev.map(m => m.id === assistantId ? { ...m, content: fullContent } : m)); }
             } catch { /* skip */ }
           }
@@ -1055,34 +1103,28 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                   <div className="mb-4">
                     {/* Thinking tokens - collapsible */}
                     {msg.thinking && (
-                      <div className="mb-1.5">
-                        {msg.isStreaming && !msg.content ? (
-                          <div className="flex items-center gap-1.5 text-[10px] text-amber-300/90">
-                            <img src={THINKING_ICON_SRC} alt="" className="w-4 h-4 animate-spin" style={{ animationDuration: '2s' }} />
-                            <span>Thinking...</span>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, showThinking: !m.showThinking } : m))}
-                            className="flex items-center gap-1 text-[10px] text-amber-300/75 hover:text-amber-200 transition-colors"
-                            onClickCapture={(e) => {
-                              e.stopPropagation();
-                              setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-                            }}
-                          >
-                            <ChevronRight className={`w-3 h-3 transition-transform ${msg.showThinking ? 'rotate-90' : ''}`} />
-                            <img src={THINKING_ICON_SRC} alt="" className="w-3 h-3 object-contain" />
-                            <span>Thought{msg.thinkingDuration ? ` for ${msg.thinkingDuration}s` : ''}</span>
-                          </button>
-                        )}
-                        {msg.showThinking && (
-                          <div className="mt-1.5 px-3 py-2.5 rounded-xl bg-amber-500/8 border border-amber-500/20 text-[11px] text-neutral-300 leading-relaxed max-h-[180px] overflow-y-auto whitespace-pre-wrap">
+                      <div className="mb-2 rounded-xl border border-amber-500/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.03)_55%,rgba(15,23,42,0.35))] px-2.5 py-2">
+                        <button
+                          onClick={() => toggleThinking(msg.id)}
+                          className="w-full flex items-center justify-between gap-2 text-left"
+                        >
+                          <span className="inline-flex items-center gap-1.5 min-w-0">
+                            <img src={THINKING_ICON_SRC} alt="" className={`w-3.5 h-3.5 object-contain ${msg.isStreaming ? 'animate-spin' : ''}`} style={msg.isStreaming ? { animationDuration: '2s' } : undefined} />
+                            <span className="text-xs text-amber-200">Thinking...</span>
+                            {msg.thinkingDuration ? <span className="text-[10px] text-amber-300/70">{msg.thinkingDuration}s</span> : null}
+                          </span>
+                          <ChevronRight className={`w-3.5 h-3.5 text-amber-200/80 transition-transform ${expandedThinkingById[msg.id] ? 'rotate-90' : ''}`} />
+                        </button>
+                        {expandedThinkingById[msg.id] || msg.isStreaming ? (
+                          <div className="mt-2 rounded-lg bg-black/20 border border-amber-500/15 px-2.5 py-2 text-[11px] text-amber-50/85 leading-relaxed max-h-[170px] overflow-y-auto whitespace-pre-wrap">
                             {msg.thinking}
                           </div>
+                        ) : (
+                          <p className="mt-1.5 text-[11px] text-amber-100/70 line-clamp-2">{msg.thinking}</p>
                         )}
                       </div>
                     )}
-                    <div className="group/msg rounded-2xl border border-[hsl(220,8%,18%)] bg-[hsl(220,10%,9%)] px-3 py-2.5">
+                    <div className="group/msg px-0.5 py-0">
                       <div 
                         className="prose prose-invert prose-sm max-w-none text-neutral-200
                           [&_h1]:text-white [&_h1]:text-base [&_h1]:font-semibold [&_h1]:mb-2 [&_h1]:mt-0
@@ -1155,24 +1197,24 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
       </div>
 
       {/* Input Area */}
-      <form onSubmit={handleSubmit} className="px-3 pb-2 pt-2">
+      <form onSubmit={handleSubmit} className="px-3 pt-0.5 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] bg-[linear-gradient(180deg,transparent,rgba(9,11,16,0.9)_30%,rgba(9,11,16,0.98))]">
         {insufficientCredits && (
           <div className="mb-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-[10px] text-center">
             Insufficient credits. Purchase more to continue.
           </div>
         )}
-        <div className="relative bg-[hsl(220,10%,11%)] border border-[hsl(220,8%,20%)] rounded-full focus-within:border-amber-500/40 focus-within:ring-2 focus-within:ring-amber-500/10 transition-all flex items-center">
+        <div className="relative bg-[hsl(220,10%,11%)] border border-[hsl(220,8%,20%)] rounded-[26px] focus-within:border-amber-500/40 focus-within:ring-2 focus-within:ring-amber-500/10 transition-all flex items-end shadow-[0_8px_26px_rgba(0,0,0,0.3)]">
           <textarea
             ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={kundaliData ? 'Ask Astrova anything...' : 'Ask about Vedic astrology...'}
             disabled={isLoading}
             rows={1}
-            className="flex-1 bg-transparent px-6 py-0 text-sm text-white placeholder-neutral-500 focus:outline-none resize-none disabled:opacity-40 disabled:cursor-not-allowed h-[48px] leading-[48px]"
+            className="flex-1 bg-transparent pl-4 pr-14 py-3.5 text-base sm:text-sm leading-5 text-white placeholder-neutral-500 focus:outline-none resize-none disabled:opacity-40 disabled:cursor-not-allowed min-h-[50px] max-h-[140px]"
           />
-          <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center">
+          <div className="absolute right-2 bottom-2 flex items-center">
             {isLoading ? (
               <Button
                 type="button"
