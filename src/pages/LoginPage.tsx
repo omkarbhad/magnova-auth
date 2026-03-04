@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Eye, EyeOff, Lock, Mail, X } from 'lucide-react';
@@ -16,8 +16,15 @@ const LoginPage = () => {
   const [focusedInput, setFocusedInput] = useState<'email' | 'password' | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const { signIn, signInWithGoogle, isLoaded } = useAuth();
+  const { signIn, signInWithGoogle, isLoaded, isSessionUser } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect when session is confirmed (already logged in, or just signed in)
+  useEffect(() => {
+    if (isLoaded && isSessionUser) {
+      navigate('/chart', { replace: true });
+    }
+  }, [isLoaded, isSessionUser, navigate]);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -51,9 +58,9 @@ const LoginPage = () => {
       if (result.error) {
         setError(result.error);
         setLoading(false);
-      } else {
-        navigate('/chart', { replace: true });
       }
+      // On success: keep loading=true. The useEffect watching isSessionUser
+      // will redirect to /chart once the session is confirmed.
     } catch {
       setError('Sign-in failed. Please check your credentials.');
       setLoading(false);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
@@ -19,8 +19,15 @@ const RegisterPage = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [focusedInput, setFocusedInput] = useState<'name' | 'email' | 'password' | 'confirmPassword' | 'code' | null>(null);
 
-  const { signUp, signInWithGoogle, isLoaded } = useAuth();
+  const { signUp, signInWithGoogle, isLoaded, isSessionUser } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect when session is confirmed (already logged in, or just signed up)
+  useEffect(() => {
+    if (isLoaded && isSessionUser && !pendingVerification) {
+      navigate('/chart', { replace: true });
+    }
+  }, [isLoaded, isSessionUser, pendingVerification, navigate]);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -64,9 +71,9 @@ const RegisterPage = () => {
         setPendingVerification(true);
         setSuccessMessage('Check your email for a confirmation link!');
         setLoading(false);
-      } else {
-        navigate('/chart', { replace: true });
       }
+      // On success: keep loading=true. The useEffect watching isSessionUser
+      // will redirect to /chart once the session is confirmed.
     } catch {
       setError('Sign-up failed. Please try again.');
       setLoading(false);
