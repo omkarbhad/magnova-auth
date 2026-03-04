@@ -22,7 +22,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isLoaded = !session.isPending;
   const sessionUser = session.data?.user;
-  const sessionToken = (session.data as { session?: { token?: string } } | null)?.session?.token;
+  // Neon Auth stores the JWT in session.access_token (not session.token which is opaque)
+  const sessionData = session.data as { session?: { token?: string; access_token?: string } } | null;
+  const sessionToken = sessionData?.session?.access_token ?? sessionData?.session?.token;
 
   // A user is truly signed in only when we have both a user AND a valid token
   const isSignedIn = !!sessionUser && !!sessionToken;
