@@ -1,3 +1,5 @@
+import { createRemoteJWKSet, jwtVerify } from 'jose';
+
 export interface AuthPayload {
   sub: string;
   email?: string;
@@ -5,28 +7,25 @@ export interface AuthPayload {
   picture?: string;
 }
 
+const JWKS = createRemoteJWKSet(
+  new URL(`${process.env.NEON_AUTH_BASE_URL}/.well-known/jwks.json`)
+);
+
 export async function requireAuth(req: Request): Promise<AuthPayload> {
   const authHeader = req.headers.get('Authorization') ?? '';
   const token = authHeader.replace(/^Bearer\s+/, '');
   if (!token) throw new Response('Unauthorized', { status: 401 });
 
   try {
-    // Validate session with Neon Auth's get-session endpoint
-    const authBaseUrl = process.env.NEON_AUTH_BASE_URL!;
-    const res = await fetch(`${authBaseUrl}/api/auth/get-session`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const { payload } = await jwtVerify(token, JWKS);
 
-    if (!res.ok) throw new Error('Invalid session');
-
-    const data = await res.json();
-    if (!data?.user?.id) throw new Error('No user in session');
+    if (!payload.sub) throw new Error('No sub in token');
 
     return {
-      sub: data.user.id,
-      email: data.user.email,
-      name: data.user.name,
-      picture: data.user.image,
+      sub: payload.sub,
+      email: payload.email as string | undefined,
+      name: payload.name as string | undefined,
+      picture: payload.picture as string | undefined,
     };
   } catch {
     throw new Response('Unauthorized', { status: 401 });
