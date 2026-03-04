@@ -16,18 +16,8 @@ const LoginPage = () => {
   const [focusedInput, setFocusedInput] = useState<'email' | 'password' | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const { signIn, signInWithGoogle, isLoaded, isSessionUser } = useAuth();
+  const { signIn, signInWithGoogle, isLoaded } = useAuth();
   const navigate = useNavigate();
-
-  // Redirect if already signed in (or just signed in successfully)
-  useEffect(() => {
-    if (isLoaded && isSessionUser) {
-      navigate('/chart', { replace: true });
-    }
-  }, [isLoaded, isSessionUser, navigate]);
-
-  // Don't render the login form if already authenticated — avoids flash
-  if (isSessionUser) return null;
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -61,6 +51,8 @@ const LoginPage = () => {
       if (result.error) {
         setError(result.error);
         setLoading(false);
+      } else {
+        navigate('/chart', { replace: true });
       }
     } catch {
       setError('Sign-in failed. Please check your credentials.');
@@ -77,6 +69,8 @@ const LoginPage = () => {
       if (result.error) {
         setError(result.error);
         setLoading(false);
+      } else {
+        navigate('/chart', { replace: true });
       }
     } catch {
       setError('Google sign-in failed.');

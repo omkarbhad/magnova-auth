@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
@@ -19,17 +19,8 @@ const RegisterPage = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [focusedInput, setFocusedInput] = useState<'name' | 'email' | 'password' | 'confirmPassword' | 'code' | null>(null);
 
-  const { signUp, signInWithGoogle, isLoaded, isSessionUser } = useAuth();
+  const { signUp, signInWithGoogle, isLoaded } = useAuth();
   const navigate = useNavigate();
-
-  // Redirect if already signed in (or just signed up successfully)
-  useEffect(() => {
-    if (isLoaded && isSessionUser) {
-      navigate('/chart', { replace: true });
-    }
-  }, [isLoaded, isSessionUser, navigate]);
-
-  if (isSessionUser) return null;
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -68,9 +59,13 @@ const RegisterPage = () => {
       const result = await signUp(email, password, name);
       if (result.error) {
         setError(result.error);
+        setLoading(false);
       } else if (result.needsVerification) {
         setPendingVerification(true);
         setSuccessMessage('Check your email for a confirmation link!');
+        setLoading(false);
+      } else {
+        navigate('/chart', { replace: true });
       }
     } catch {
       setError('Sign-up failed. Please try again.');
@@ -93,6 +88,8 @@ const RegisterPage = () => {
       if (result.error) {
         setError(result.error);
         setLoading(false);
+      } else {
+        navigate('/chart', { replace: true });
       }
     } catch {
       setError('Google sign-up failed.');
