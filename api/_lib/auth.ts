@@ -20,12 +20,18 @@ function getJWKS() {
 
 async function verifyOpaqueToken(token: string): Promise<AuthPayload | null> {
   const baseUrl = process.env.NEON_AUTH_BASE_URL;
-  if (!baseUrl) return null;
+  if (!baseUrl) {
+    console.error('[auth] NEON_AUTH_BASE_URL not set');
+    return null;
+  }
+  
+  console.log(`[auth] Attempting opaque token verification with baseUrl: ${baseUrl}`);
   
   try {
-    // For Neon Auth opaque tokens, we need to use the token as a Bearer token
-    // to get the current session info
-    const response = await fetch(`${baseUrl}/session`, {
+    // Try multiple approaches for Neon Auth opaque token verification
+    
+    // Approach 1: Use /session endpoint with Bearer token
+    const response1 = await fetch(`${baseUrl}/session`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -33,28 +39,77 @@ async function verifyOpaqueToken(token: string): Promise<AuthPayload | null> {
       },
     });
     
-    if (!response.ok) {
-      console.error(`[auth] Session endpoint returned ${response.status}`);
-      return null;
+    console.log(`[auth] Approach 1 - /session endpoint status: ${response1.status}`);
+    
+    if (response1.ok) {
+      const session = await response1.json();
+      console.log('[auth] Approach 1 - Session response:', session);
+      
+      if (session && session.user) {
+        return {
+          sub: session.user.id,
+          email: session.user.email,
+          name: session.user.name,
+          picture: session.user.image,
+        };
+      }
     }
     
-    const session = await response.json();
-    console.log('[auth] Session response:', session);
+    // Approach 2: Try /me endpoint
+    const response2 = await fetch(`${baseUrl}/me`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    });
     
-    // The session structure should have user data
-    if (!session || !session.user) {
-      console.error('[auth] No user data in session response');
-      return null;
+    console.log(`[auth] Approach 2 - /me endpoint status: ${response2.status}`);
+    
+    if (response2.ok) {
+      const user = await response2.json();
+      console.log('[auth] Approach 2 - User response:', user);
+      
+      if (user) {
+        return {
+          sub: user.id,
+          email: user.email,
+          name: user.name,
+          picture: user.image,
+        };
+      }
     }
     
-    return {
-      sub: session.user.id,
-      email: session.user.email,
-      name: session.user.name,
-      picture: session.user.image,
-    };
+    // Approach 3: Try /user endpoint
+    const response3 = await fetch(`${baseUrl}/user`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    });
+    
+    console.log(`[auth] Approach 3 - /user endpoint status: ${response3.status}`);
+    
+    if (response3.ok) {
+      const user = await response3.json();
+      console.log('[auth] Approach 3 - User response:', user);
+      
+      if (user) {
+        return {
+          sub: user.id,
+          email: user.email,
+          name: user.name,
+          picture: user.image,
+        };
+      }
+    }
+    
+    console.error(`[auth] All opaque token verification approaches failed for token prefix: ${token.substring(0, 10)}`);
+    return null;
+    
   } catch (e) {
-    console.error('[auth] Opaque token verification failed:', e);
+    console.error('[auth] Opaque token verification error:', e);
     return null;
   }
 }
