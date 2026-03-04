@@ -19,7 +19,6 @@ interface CreditsContextType {
 }
 
 const CreditsContext = createContext<CreditsContextType | null>(null);
-const CREDITS_STORAGE_KEY = 'astrova_dakshina_credits';
 const INITIAL_CREDITS = 20;
 
 const DEFAULT_CREDIT_COSTS: CreditCosts = {
@@ -30,19 +29,11 @@ const DEFAULT_CREDIT_COSTS: CreditCosts = {
 
 export function CreditsProvider({ children }: { children: React.ReactNode }) {
   const { astrovaUser, isSignedIn } = useAuth();
-  const [credits, setCredits] = useState<number>(() => {
-    try {
-      const stored = localStorage.getItem(CREDITS_STORAGE_KEY);
-      return stored ? parseInt(stored, 10) : INITIAL_CREDITS;
-    } catch {
-      return INITIAL_CREDITS;
-    }
-  });
+  // No localStorage — credits come from DB only
+  const [credits, setCredits] = useState<number>(INITIAL_CREDITS);
   const [creditCosts, setCreditCosts] = useState<CreditCosts>(DEFAULT_CREDIT_COSTS);
   const [showBuyModal, setShowBuyModal] = useState(false);
-  // [FIX #15] Track mounted state to prevent setState after unmount
   const mountedRef = useRef(true);
-  // [FIX #16] Store userId in ref so callbacks don't recreate on every credit change
   const userIdRef = useRef<string | null>(null);
   useEffect(() => { userIdRef.current = astrovaUser?.id ?? null; }, [astrovaUser?.id]);
   useEffect(() => { return () => { mountedRef.current = false; }; }, []);
@@ -68,25 +59,15 @@ export function CreditsProvider({ children }: { children: React.ReactNode }) {
     return () => { cancelled = true; };
   }, [isSignedIn]);
 
-  // [FIX #12] Sync credits from DB user on login, reset on sign-out
+  // Sync credits from DB user — no localStorage
   useEffect(() => {
     if (astrovaUser) {
       setCredits(astrovaUser.credits);
-      localStorage.setItem(CREDITS_STORAGE_KEY, astrovaUser.credits.toString());
-    } else {
-      // Don't flash INITIAL_CREDITS when signed in but user not yet loaded
-      if (!isSignedIn) {
-        setCredits(INITIAL_CREDITS);
-        localStorage.removeItem(CREDITS_STORAGE_KEY);
-      }
+    } else if (!isSignedIn) {
+      setCredits(INITIAL_CREDITS);
     }
   }, [astrovaUser?.id, astrovaUser?.credits, isSignedIn]);
 
-  useEffect(() => {
-    localStorage.setItem(CREDITS_STORAGE_KEY, credits.toString());
-  }, [credits]);
-
-  // [FIX #13, #15, #16] Deduct with proper error handling and unmount safety
   const deductCredits = useCallback((amount: number, action?: string): boolean => {
     if (amount <= 0) return true;
     if (credits < amount) {
@@ -95,18 +76,15 @@ export function CreditsProvider({ children }: { children: React.ReactNode }) {
     }
     const newCredits = credits - amount;
     setCredits(newCredits);
-    localStorage.setItem(CREDITS_STORAGE_KEY, newCredits.toString());
     const uid = userIdRef.current;
     if (uid) {
       deductUserCredits(uid, amount, action || 'ai_message').then(async () => {
         const fresh = await getAstrovaUserById(uid);
         if (mountedRef.current && fresh && typeof fresh.credits === 'number') {
           setCredits(fresh.credits);
-          localStorage.setItem(CREDITS_STORAGE_KEY, fresh.credits.toString());
         }
       }).catch((err) => {
         console.error('[credits] deduct sync failed:', err);
-        // Revert optimistic update on failure
         if (mountedRef.current) {
           setCredits(prev => prev + amount);
         }
@@ -115,19 +93,16 @@ export function CreditsProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, [credits]);
 
-  // [FIX #14, #15, #16] Add credits with proper error handling and unmount safety
   const addCredits = useCallback((amount: number) => {
     if (amount <= 0) return;
     const newCredits = credits + amount;
     setCredits(newCredits);
-    localStorage.setItem(CREDITS_STORAGE_KEY, newCredits.toString());
     const uid = userIdRef.current;
     if (uid) {
       updateUserCredits(uid, amount, 'credit_purchase').then(async () => {
         const fresh = await getAstrovaUserById(uid);
         if (mountedRef.current && fresh && typeof fresh.credits === 'number') {
           setCredits(fresh.credits);
-          localStorage.setItem(CREDITS_STORAGE_KEY, fresh.credits.toString());
         }
       }).catch((err) => {
         console.error('[credits] add sync failed:', err);

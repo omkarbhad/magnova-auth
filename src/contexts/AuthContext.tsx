@@ -15,21 +15,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// [FIX #11] Centralized localStorage keys — prevents missed cleanup on logout
-const USER_STORAGE_KEYS = [
-  'astrova_saved_charts',
-  'astrova_dakshina_credits',
-  'astrova_auth_token',
-  'astrova_user_preferences',
-  'astrova_chart_cache',
-  'astrova_charts',
-] as const;
-
-function clearUserData() {
-  for (const key of USER_STORAGE_KEYS) {
-    try { localStorage.removeItem(key); } catch { /* storage unavailable */ }
-  }
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const session = authClient.useSession();
@@ -56,7 +41,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (prevSessionUserId.current !== undefined) {
         setAstrovaUser(null);
         setJwtToken(null);
-        clearUserData();
       }
       prevSessionUserId.current = sessionUser?.id;
     }
@@ -114,7 +98,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setAstrovaUser(null);
       setJwtToken(null);
-      clearUserData();
     }
   }, []);
 
@@ -145,10 +128,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     try {
-      await authClient.signIn.social({
+      const data = await authClient.signIn.social({
         provider: 'google',
         callbackURL: '/chart',
       });
+      // Better Auth's redirectPlugin normally handles this, but if the redirect
+      // didn't fire (e.g. plugin mismatch), handle it explicitly.
+      if (data?.data?.url) {
+        window.location.href = data.data.url;
+      }
       return {};
     } catch (e) {
       return { error: (e as Error).message };

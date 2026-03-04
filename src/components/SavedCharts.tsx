@@ -11,25 +11,13 @@ interface SavedChart {
 }
 
 interface SavedChartsProps {
+  charts: SavedChart[];
   onLoadChart: (chartId: string) => void;
   onDeleteChart: (chartId: string) => void;
-  refreshKey?: number;
 }
 
-export function SavedCharts({ onLoadChart, onDeleteChart, refreshKey }: SavedChartsProps) {
+export function SavedCharts({ charts, onLoadChart, onDeleteChart }: SavedChartsProps) {
   const [showList, setShowList] = useState(false);
-
-  // Read directly; refreshKey is used by the parent to trigger a re-render when storage changes.
-  void refreshKey;
-  const savedCharts: SavedChart[] = (() => {
-    const raw = localStorage.getItem('astrova_charts') || '[]';
-    try {
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? (parsed as SavedChart[]) : [];
-    } catch {
-      return [];
-    }
-  })();
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -47,19 +35,19 @@ export function SavedCharts({ onLoadChart, onDeleteChart, refreshKey }: SavedCha
           onClick={() => setShowList(!showList)}
           className="text-xs px-2 py-1 bg-[hsl(24,18%,9%)] rounded border border-amber-500/20 hover:bg-[hsl(24,20%,12%)] transition-colors"
         >
-          {showList ? "Hide" : "Show"} ({savedCharts.length})
+          {showList ? "Hide" : "Show"} ({charts.length})
         </button>
       </div>
 
       {showList && (
         <div className="space-y-2">
-          {savedCharts.length === 0 ? (
+          {charts.length === 0 ? (
             <div className="text-center py-8 text-neutral-500">
               <div className="text-sm">No saved charts yet</div>
               <div className="text-xs mt-1">Generate a chart and save it to see it here</div>
             </div>
           ) : (
-            savedCharts.map((chart) => (
+            charts.map((chart) => (
               <div key={chart.id} className="bg-[hsl(24,18%,9%)]/80 rounded-lg p-3 border border-amber-500/20">
                 <div className="flex items-center justify-between mb-2">
                   <div>
@@ -85,7 +73,7 @@ export function SavedCharts({ onLoadChart, onDeleteChart, refreshKey }: SavedCha
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-4 text-xs text-neutral-500">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />

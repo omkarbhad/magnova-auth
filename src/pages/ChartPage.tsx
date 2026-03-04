@@ -35,20 +35,6 @@ type SavedChart = {
   };
 };
 
-const STORAGE_KEY = 'astrova_saved_charts';
-
-function loadChartsFromStorage(): SavedChart[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-
-function saveChartsToStorage(charts: SavedChart[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(charts));
-}
-
-
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const GRAHA_DISPLAY_ORDER = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
 const UPAGRAHA_DISPLAY_ORDER = ['Dhuma', 'Vyatipata', 'Parivesha', 'Indrachapa', 'Upaketu', 'Kaala', 'Mrityu', 'ArthaPrahara', 'YamaGhantaka', 'Gulika', 'Mandi'];
@@ -76,7 +62,7 @@ function ChartPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentRequest, setCurrentRequest] = useState<KundaliRequest | null>(CHART_CONSTANTS.DEFAULT_REQUEST);
-  const [savedCharts, setSavedCharts] = useState<SavedChart[]>(() => loadChartsFromStorage());
+  const [savedCharts, setSavedCharts] = useState<SavedChart[]>([]);
   const { astrovaUser } = useAuth();
   const astrovaUserId = astrovaUser?.id || '';
 
@@ -257,9 +243,8 @@ function ChartPage() {
             coordinates: c.coordinates,
           }));
           setSavedCharts(mapped);
-          saveChartsToStorage(mapped);
         }
-      } catch { /* fallback to localStorage */ }
+      } catch { /* ignore — will retry on next mount */ }
     })();
   }, [astrovaUserId, generateKundali]);
 
@@ -328,15 +313,14 @@ function ChartPage() {
     setShowLoadChartsModal(true);
   };
 
-  // Save chart to localStorage
+  // Save chart to DB (no localStorage)
   const saveNewChart = useCallback((payload: {
     name: string;
     birthData: KundaliRequest;
     locationName?: string;
   }) => {
-    const charts = loadChartsFromStorage();
     const normalized = payload.name.trim().toLowerCase();
-    if (charts.find(c => c.name.trim().toLowerCase() === normalized)) {
+    if (savedCharts.find(c => c.name.trim().toLowerCase() === normalized)) {
       throw new Error('A chart with this name already exists');
     }
 
@@ -355,13 +339,11 @@ function ChartPage() {
       },
     };
 
-    const updated = [...charts, newChart];
-    saveChartsToStorage(updated);
-    setSavedCharts(updated);
+    setSavedCharts(prev => [...prev, newChart]);
     setSelectedChartId(newChart.id);
     setCurrentChartName(newChart.name);
 
-    // Sync to Supabase
+    // Save to DB
     if (astrovaUserId) {
       saveChartToSupabase(astrovaUserId, {
         name: payload.name,
@@ -375,16 +357,13 @@ function ChartPage() {
         },
       }).then(result => {
         if (result && typeof result === 'object' && 'id' in result) {
-          // Update local chart with Supabase ID for future sync
           const supaId = (result as { id: string }).id;
           setSavedCharts(prev => prev.map(c => c.id === newChart.id ? { ...c, id: supaId } : c));
           setSelectedChartId(supaId);
-          const updatedWithId = updated.map(c => c.id === newChart.id ? { ...c, id: supaId } : c);
-          saveChartsToStorage(updatedWithId);
         }
-      }).catch(() => { /* localStorage is the fallback */ });
+      }).catch(() => { /* optimistic update stays in state */ });
     }
-  }, [generateKundali, astrovaUserId]);
+  }, [generateKundali, astrovaUserId, savedCharts]);
 
   const handleSaveChart = useCallback(() => {
     if (!kundaliData || !currentRequest) return;
@@ -467,9 +446,7 @@ function ChartPage() {
   };
 
   const deleteChartFromStorageFn = (chartId: string) => {
-    const charts = loadChartsFromStorage().filter(c => c.id !== chartId);
-    saveChartsToStorage(charts);
-    setSavedCharts(charts);
+    setSavedCharts(prev => prev.filter(c => c.id !== chartId));
     if (selectedChartId === chartId) {
       setSelectedChartId('');
       setCurrentChartName('');
@@ -477,7 +454,7 @@ function ChartPage() {
       setNameInputError(false);
       setIsEditingName(false);
     }
-    // Sync delete to Supabase
+    // Delete from DB
     if (astrovaUserId) {
       deleteChartFromSupabase(chartId).catch(() => {});
     }
@@ -1059,11 +1036,7 @@ function ChartPage() {
                           locationName,
                           coordinates: { latitude: birthData.latitude, longitude: birthData.longitude, timezone: birthData.tz_offset_hours },
                         };
-                        setSavedCharts(prev => {
-                          const next = [...prev, newChart];
-                          saveChartsToStorage(next);
-                          return next;
-                        });
+                        setSavedCharts(prev => [...prev, newChart]);
                         if (astrovaUserId) {
                           saveChartToSupabase(astrovaUserId, {
                             name,
