@@ -22,8 +22,16 @@ export default async function handler(req: Request): Promise<Response> {
       const existing = await sql`SELECT * FROM astrova_users WHERE auth_id = ${payload.sub} LIMIT 1`;
 
       if (existing[0]) {
-        await sql`UPDATE astrova_users SET last_login_at = now(), updated_at = now() WHERE auth_id = ${payload.sub}`;
-        const updated = await sql`SELECT * FROM astrova_users WHERE auth_id = ${payload.sub} LIMIT 1`;
+        // Refresh profile from auth provider on each login
+        const updated = await sql`
+          UPDATE astrova_users
+          SET email = COALESCE(${email}, email),
+              display_name = COALESCE(${displayName ?? null}, display_name),
+              avatar_url = COALESCE(${avatarUrl ?? null}, avatar_url),
+              last_login_at = now(),
+              updated_at = now()
+          WHERE auth_id = ${payload.sub}
+          RETURNING *`;
         return json(updated[0]);
       }
 
