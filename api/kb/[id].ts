@@ -1,5 +1,5 @@
-import { getDb, json } from '../_lib/db';
-import { requireAuth } from '../_lib/auth';
+import { getDb, json } from '../_lib/db.js';
+import { requireAuth } from '../_lib/auth.js';
 
 export const config = { runtime: 'edge' };
 

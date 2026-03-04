@@ -38,7 +38,7 @@ export async function requireAuth(req: Request): Promise<AuthPayload> {
  * then verify the requested userId matches (or the user is an admin).
  */
 export async function requireOwnership(
-  sql: import('./db').Sql,
+  sql: import('./db.js').Sql,
   authPayload: AuthPayload,
   requestedUserId: string,
 ): Promise<void> {
