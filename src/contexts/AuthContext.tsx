@@ -7,7 +7,7 @@ import {
   signUpWithEmail,
   signOutUser,
 } from '@/lib/firebase';
-import { getOrCreateAstrovaUser, setTokenProvider, type AstrovaUser } from '@/lib/api';
+import { setTokenProvider, type AstrovaUser } from '@/lib/api';
 
 export interface AuthContextType {
   astrovaUser: AstrovaUser | null;
@@ -40,8 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTokenProvider(() => () => tokenRef.current);
   }, []);
 
-  const syncServerSession = useCallback(async (idToken: string) => {
-    if (sessionSyncTokenRef.current === idToken) return;
+  const syncServerSession = useCallback(async (idToken: string, force = false) => {
+    if (!force && sessionSyncTokenRef.current === idToken) return null;
     try {
       const res = await fetch('/api/auth/session', {
         method: 'POST',
@@ -53,24 +53,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (!res.ok) {
         console.error('[auth] session sync failed', res.status, await res.text());
-        return;
+        sessionSyncTokenRef.current = null;
+        setAstrovaUser(null);
+        return null;
       }
+      const data = await res.json();
+      const user = data?.user ?? null;
+      setAstrovaUser(user);
       sessionSyncTokenRef.current = idToken;
+      return user;
     } catch (error) {
       console.error('[auth] session sync error', error);
+      sessionSyncTokenRef.current = null;
+      setAstrovaUser(null);
+      return null;
     }
   }, []);
-
-  const syncAstrovaUser = useCallback(async () => {
-    if (!firebaseUser || !token || !firebaseUser.email) return;
-    const au = await getOrCreateAstrovaUser(
-      firebaseUser.uid,
-      firebaseUser.email,
-      firebaseUser.displayName ?? undefined,
-      firebaseUser.photoURL ?? undefined,
-    );
-    if (au) setAstrovaUser(au);
-  }, [firebaseUser, token]);
 
   useEffect(() => {
     const unsubscribe = onIdTokenChanged(auth, async (nextUser) => {
@@ -100,14 +98,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => unsubscribe();
   }, [syncServerSession]);
-
-  useEffect(() => {
-    if (token && firebaseUser) {
-      syncAstrovaUser();
-    } else {
-      setAstrovaUser(null);
-    }
-  }, [token, firebaseUser, syncAstrovaUser]);
 
   useEffect(() => {
     const currentUserId = firebaseUser?.uid;
@@ -148,6 +138,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOutFn = useCallback(async () => {
     try {
+      await fetch('/api/auth/signout', { method: 'DELETE' });
+    } catch (error) {
+      console.error('[auth] session sign out failed', error);
+    }
+    try {
       await signOutUser();
     } catch (error) {
       console.error('[auth] sign out failed', error);
@@ -161,8 +156,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refreshUser = useCallback(async () => {
-    await syncAstrovaUser();
-  }, [syncAstrovaUser]);
+    if (!token) return;
+    await syncServerSession(token, true);
+  }, [token, syncServerSession]);
 
   return (
     <AuthContext.Provider value={{
