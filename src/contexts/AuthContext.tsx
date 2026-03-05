@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isSignedIn = !!firebaseUser;
 
   useEffect(() => {
-    setTokenProvider(() => () => tokenRef.current);
+    setTokenProvider(() => tokenRef.current);
   }, []);
 
   const syncServerSession = useCallback(async (idToken: string, force = false) => {
