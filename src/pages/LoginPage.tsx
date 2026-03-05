@@ -1,9 +1,11 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoginForm } from '@/components/auth/LoginForm';
 
 export default function LoginPage() {
   const { isSignedIn, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect');
 
   if (loading) return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-950">
@@ -11,7 +13,10 @@ export default function LoginPage() {
     </div>
   );
 
-  if (isSignedIn) return <Navigate to="/dashboard" replace />;
+  if (isSignedIn) {
+    if (redirectTo) { window.location.href = decodeURIComponent(redirectTo); return null; }
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-950 px-4">

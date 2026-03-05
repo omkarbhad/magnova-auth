@@ -1,15 +1,23 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { onIdTokenChanged, type User } from 'firebase/auth';
+import {
+  auth,
+  signInWithGoogle as firebaseSignInWithGoogle,
+  signInWithEmail,
+  signUpWithEmail,
+  signOutUser,
+} from '@/lib/firebase';
 import { getOrCreateAstrovaUser, setTokenProvider, type AstrovaUser } from '@/lib/api';
-import type { Session } from '@supabase/supabase-js';
 
-interface AuthContextType {
+export interface AuthContextType {
   astrovaUser: AstrovaUser | null;
+  user: User | null;
+  loading: boolean;
   isLoaded: boolean;
   isSignedIn: boolean;
-  signIn: (email: string, password: string) => Promise<{ error?: string }>;
-  signUp: (email: string, password: string, name?: string) => Promise<{ error?: string; needsVerification?: boolean }>;
   signInWithGoogle: () => Promise<{ error?: string }>;
+  signInWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
+  signUp: (email: string, password: string, name?: string) => Promise<{ error?: string; needsVerification?: boolean }>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -17,127 +25,138 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [sessionLoading, setSessionLoading] = useState(true);
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [astrovaUser, setAstrovaUser] = useState<AstrovaUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
   const prevUserId = useRef<string | undefined>(undefined);
+  const tokenRef = useRef<string | null>(null);
+  const sessionSyncTokenRef = useRef<string | null>(null);
 
-  // With Supabase, session.access_token IS the JWT — no separate fetch needed
-  const isLoaded = !sessionLoading;
-  const isSignedIn = !!session?.user;
+  const isLoaded = !loading;
+  const isSignedIn = !!firebaseUser;
 
-  // Bootstrap: get initial session + subscribe to auth changes
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setSessionLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        setSession(newSession);
-        setSessionLoading(false);
-      },
-    );
-
-    return () => subscription.unsubscribe();
+    setTokenProvider(() => () => tokenRef.current);
   }, []);
 
-  // When session user changes, clear stale data
+  const syncServerSession = useCallback(async (idToken: string) => {
+    if (sessionSyncTokenRef.current === idToken) return;
+    try {
+      const res = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ token: idToken }),
+      });
+      if (!res.ok) {
+        console.error('[auth] session sync failed', res.status, await res.text());
+        return;
+      }
+      sessionSyncTokenRef.current = idToken;
+    } catch (error) {
+      console.error('[auth] session sync error', error);
+    }
+  }, []);
+
+  const syncAstrovaUser = useCallback(async () => {
+    if (!firebaseUser || !token || !firebaseUser.email) return;
+    const au = await getOrCreateAstrovaUser(
+      firebaseUser.uid,
+      firebaseUser.email,
+      firebaseUser.displayName ?? undefined,
+      firebaseUser.photoURL ?? undefined,
+    );
+    if (au) setAstrovaUser(au);
+  }, [firebaseUser, token]);
+
   useEffect(() => {
-    const currentUserId = session?.user?.id;
+    const unsubscribe = onIdTokenChanged(auth, async (nextUser) => {
+      setFirebaseUser(nextUser);
+      if (!nextUser) {
+        tokenRef.current = null;
+        sessionSyncTokenRef.current = null;
+        setToken(null);
+        setAstrovaUser(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const idToken = await nextUser.getIdToken();
+        tokenRef.current = idToken;
+        setToken(idToken);
+        await syncServerSession(idToken);
+      } catch (error) {
+        console.error('[auth] failed to refresh token', error);
+        tokenRef.current = null;
+        setToken(null);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [syncServerSession]);
+
+  useEffect(() => {
+    if (token && firebaseUser) {
+      syncAstrovaUser();
+    } else {
+      setAstrovaUser(null);
+    }
+  }, [token, firebaseUser, syncAstrovaUser]);
+
+  useEffect(() => {
+    const currentUserId = firebaseUser?.uid;
     if (currentUserId !== prevUserId.current) {
       if (prevUserId.current !== undefined) {
         setAstrovaUser(null);
       }
       prevUserId.current = currentUserId;
     }
-  }, [session?.user?.id]);
-
-  // Keep api.ts token provider in sync with the Supabase access_token
-  useEffect(() => {
-    setTokenProvider(() => session?.access_token ?? null);
-  }, [session?.access_token]);
-
-  // Sync astrova user from Neon DB once we have a valid session
-  const syncAstrovaUser = useCallback(async () => {
-    const user = session?.user;
-    if (!user || !session?.access_token) return;
-    const au = await getOrCreateAstrovaUser(
-      user.id,
-      user.email ?? '',
-      user.user_metadata?.name ?? user.user_metadata?.full_name ?? undefined,
-      user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? undefined,
-    );
-    if (au) setAstrovaUser(au);
-  }, [session?.user?.id, session?.access_token]);
-
-  useEffect(() => {
-    if (isSignedIn) {
-      syncAstrovaUser();
-    } else if (isLoaded && !session) {
-      setAstrovaUser(null);
-    }
-  }, [isSignedIn, isLoaded, session, syncAstrovaUser]);
-
-  // Auth methods
-  const signIn = useCallback(async (email: string, password: string) => {
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return { error: error.message };
-      return {};
-    } catch (e) {
-      return { error: (e as Error).message };
-    }
-  }, []);
-
-  const signUp = useCallback(async (email: string, password: string, name?: string): Promise<{ error?: string; needsVerification?: boolean }> => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { name: name ?? email.split('@')[0] },
-        },
-      });
-      if (error) return { error: error.message };
-      // Supabase returns user with identities=[] when email already exists
-      if (data.user && data.user.identities?.length === 0) {
-        return { error: 'An account with this email already exists.' };
-      }
-      // Email confirmation required — session is null
-      if (data.user && !data.session) {
-        return { needsVerification: true };
-      }
-      return {};
-    } catch (e) {
-      return { error: (e as Error).message };
-    }
-  }, []);
+  }, [firebaseUser?.uid]);
 
   const signInWithGoogle = useCallback(async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/chart`,
-        },
-      });
-      if (error) return { error: error.message };
+      await firebaseSignInWithGoogle();
       return {};
-    } catch (e) {
-      return { error: (e as Error).message };
+    } catch (error) {
+      return { error: (error as Error).message || 'Google sign-in failed' };
+    }
+  }, []);
+
+  const signInWithEmailFn = useCallback(async (email: string, password: string) => {
+    try {
+      await signInWithEmail(email, password);
+      return {};
+    } catch (error) {
+      return { error: (error as Error).message || 'Sign-in failed' };
+    }
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string) => {
+    try {
+      await signUpWithEmail(email, password);
+      return {};
+    } catch (error) {
+      return { error: (error as Error).message || 'Sign-up failed' };
     }
   }, []);
 
   const signOutFn = useCallback(async () => {
     try {
-      await supabase.auth.signOut();
-    } catch {
-      // Sign out may fail if session already expired
+      await signOutUser();
+    } catch (error) {
+      console.error('[auth] sign out failed', error);
     } finally {
+      tokenRef.current = null;
+      sessionSyncTokenRef.current = null;
+      setToken(null);
       setAstrovaUser(null);
-      setSession(null);
+      setFirebaseUser(null);
     }
   }, []);
 
@@ -148,11 +167,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{
       astrovaUser,
+      user: firebaseUser,
+      loading,
       isLoaded,
       isSignedIn,
-      signIn,
-      signUp,
       signInWithGoogle,
+      signInWithEmail: signInWithEmailFn,
+      signUp,
       signOut: signOutFn,
       refreshUser,
     }}>
