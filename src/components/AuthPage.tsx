@@ -47,15 +47,35 @@ export default function AuthPage({ app = 'default' }: { app?: string }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [error, setError] = useState('');
 
+  // First, check if already authenticated via existing session cookie
   useEffect(() => {
+    async function checkExistingSession() {
+      try {
+        const res = await fetch('/api/auth/session', { method: 'GET', credentials: 'include' });
+        if (res.ok) {
+          // Already authenticated — redirect immediately
+          window.location.href = decodeURIComponent(redirectTo);
+          return;
+        }
+      } catch {
+        // Not authenticated, continue to show login form
+      }
+      setChecking(false);
+    }
+    checkExistingSession();
+  }, [redirectTo]);
+
+  useEffect(() => {
+    if (checking) return; // Don't listen to Firebase until we've checked existing session
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (user) { const t = await user.getIdToken(); await createSession(t); }
     });
     return unsub;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [checking]);
 
   async function createSession(token: string) {
     try {
@@ -95,6 +115,18 @@ export default function AuthPage({ app = 'default' }: { app?: string }) {
   }
 
   const isDefault = app === 'default';
+
+  // Show loading while checking existing session
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
+        <div className="text-center">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent mx-auto mb-2" />
+          <p className="text-sm text-zinc-500">Checking session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-950 px-4">
