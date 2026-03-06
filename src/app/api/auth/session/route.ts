@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/firebase-admin';
-import { upsertUser } from '@/lib/db';
+import { getUserByFirebaseUid, upsertUser } from '@/lib/db';
 
 const COOKIE_NAME = 'magnova_session';
 const COOKIE_MAX_AGE = 60 * 60; // 1 hour
+const COOKIE_DOMAIN = '.magnova.ai';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,22 +13,25 @@ export async function POST(req: NextRequest) {
 
     // Verify Firebase token
     const decoded = await verifyToken(token);
+    if (!decoded.email) {
+      return NextResponse.json({ error: 'Token missing email' }, { status: 400 });
+    }
 
     // Upsert user in Neon
     const user = await upsertUser(
       decoded.uid,
       decoded.email!,
-      decoded.name,
-      decoded.picture,
+      decoded.name ?? undefined,
+      decoded.picture ?? undefined,
     );
 
     // Set cookie on .magnova.ai (works across all subdomains)
-    const res = NextResponse.json({ user });
-    res.cookies.set(COOKIE_NAME, token, {
+    const res = NextResponse.json({ ok: true, user });
+    res.cookies.set(COOKIE_NAME, decoded.uid, {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
-      domain: process.env.NODE_ENV === 'production' ? '.magnova.ai' : 'localhost',
+      domain: COOKIE_DOMAIN,
       maxAge: COOKIE_MAX_AGE,
       path: '/',
     });
@@ -41,10 +45,10 @@ export async function POST(req: NextRequest) {
 // Verify existing session (used by Graphini/CodeCity to check auth)
 export async function GET(req: NextRequest) {
   try {
-    const token = req.cookies.get(COOKIE_NAME)?.value;
-    if (!token) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    const decoded = await verifyToken(token);
-    const user = await import('@/lib/db').then(m => m.getUserByFirebaseUid(decoded.uid));
+    const firebaseUid = req.cookies.get(COOKIE_NAME)?.value;
+    if (!firebaseUid) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const user = await getUserByFirebaseUid(firebaseUid);
+    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 401 });
     return NextResponse.json({ user });
   } catch {
     return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
