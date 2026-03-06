@@ -25,10 +25,19 @@ export async function POST(req: NextRequest) {
       decoded.picture ?? undefined,
     );
 
-    // Set cookie on .magnova.ai (works across all subdomains)
+    // Set httpOnly session cookie on .magnova.ai (works across all subdomains)
     const res = NextResponse.json({ ok: true, user });
     res.cookies.set(COOKIE_NAME, decoded.uid, {
       httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      domain: COOKIE_DOMAIN,
+      maxAge: COOKIE_MAX_AGE,
+      path: '/',
+    });
+    // Also set a non-httpOnly flag so JavaScript can detect auth status
+    res.cookies.set('magnova_auth', '1', {
+      httpOnly: false,
       secure: true,
       sameSite: 'lax',
       domain: COOKIE_DOMAIN,
