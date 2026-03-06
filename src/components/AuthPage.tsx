@@ -4,18 +4,18 @@ import { useSearchParams } from 'next/navigation';
 import { auth, signInWithGoogle, signInWithEmail, signUpWithEmail } from '@/lib/firebase-client';
 import { onAuthStateChanged } from 'firebase/auth';
 
-export type AppConfig = {
+type AppConfig = {
   name: string;
   description: string;
   defaultRedirect: string;
-  accent: string; // tailwind color class for glow
+  accent: string; // tailwind bg color for glow blob
 };
 
 export const APP_CONFIGS: Record<string, AppConfig> = {
   astrova: {
     name: 'Astrova',
     description: 'Your cosmic intelligence layer',
-    defaultRedirect: 'https://astrova.magnova.ai/dashboard',
+    defaultRedirect: 'https://astrova.magnova.ai/chart',
     accent: 'bg-amber-500/10',
   },
   graphini: {
@@ -33,16 +33,12 @@ export const APP_CONFIGS: Record<string, AppConfig> = {
   default: {
     name: 'Magnova',
     description: 'Sign in to continue',
-    defaultRedirect: 'https://astrova.magnova.ai/dashboard',
+    defaultRedirect: 'https://astrova.magnova.ai/chart',
     accent: 'bg-indigo-500/10',
   },
 };
 
-interface AuthPageProps {
-  app?: string;
-}
-
-export default function AuthPage({ app = 'default' }: AuthPageProps) {
+export default function AuthPage({ app = 'default' }: { app?: string }) {
   const searchParams = useSearchParams();
   const config = APP_CONFIGS[app] ?? APP_CONFIGS.default;
   const redirectTo = searchParams.get('redirect') ?? config.defaultRedirect;
@@ -54,13 +50,10 @@ export default function AuthPage({ app = 'default' }: AuthPageProps) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const token = await user.getIdToken();
-        await createSession(token);
-      }
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) { const t = await user.getIdToken(); await createSession(t); }
     });
-    return unsubscribe;
+    return unsub;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -80,42 +73,50 @@ export default function AuthPage({ app = 'default' }: AuthPageProps) {
   async function handleGoogle() {
     setLoading(true); setError('');
     try {
-      const result = await signInWithGoogle();
-      const token = await result.user.getIdToken();
-      await createSession(token);
+      const r = await signInWithGoogle();
+      await createSession(await r.user.getIdToken());
     } catch (e: unknown) {
       setError((e as Error).message ?? 'Google sign-in failed');
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true); setError('');
+    e.preventDefault(); setLoading(true); setError('');
     try {
-      const result = mode === 'login'
+      const r = mode === 'login'
         ? await signInWithEmail(email, password)
         : await signUpWithEmail(email, password);
-      const token = await result.user.getIdToken();
-      await createSession(token);
+      await createSession(await r.user.getIdToken());
     } catch (e: unknown) {
       setError((e as Error).message ?? 'Authentication failed');
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   const isDefault = app === 'default';
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-950 px-4">
+
+      {/* per-app glow */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
         <div className={`h-[500px] w-[500px] rounded-full ${config.accent} blur-[120px]`} />
       </div>
+
+      {/* dot grid */}
       <div
         className="pointer-events-none absolute inset-0 opacity-20"
-        style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '40px 40px' }}
+        style={{
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+        }}
       />
+
+      {/* card */}
       <div className="relative z-10 w-full max-w-sm space-y-6 rounded-2xl border border-white/10 bg-zinc-900/80 p-8 shadow-2xl backdrop-blur-md">
+
+        {/* logo + title */}
         <div className="space-y-1 text-center">
           <div className="flex items-center justify-center gap-2">
             <span className="text-2xl">✦</span>
@@ -130,9 +131,13 @@ export default function AuthPage({ app = 'default' }: AuthPageProps) {
           </p>
         </div>
 
-        <button onClick={handleGoogle} disabled={loading}
-          className="flex w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50">
-          <svg viewBox="0 0 24 24" className="h-4 w-4">
+        {/* google */}
+        <button
+          onClick={handleGoogle}
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50"
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
             <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -141,39 +146,72 @@ export default function AuthPage({ app = 'default' }: AuthPageProps) {
           Continue with Google
         </button>
 
+        {/* divider */}
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-white/10" />
           <span className="text-xs text-zinc-500">or</span>
           <div className="h-px flex-1 bg-white/10" />
         </div>
 
+        {/* form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-zinc-400">Email</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required
-              className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20" />
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition focus:border-white/30 focus:ring-1 focus:ring-white/20"
+            />
           </div>
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-zinc-400">Password</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={8}
-              className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20" />
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              minLength={8}
+              className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition focus:border-white/30 focus:ring-1 focus:ring-white/20"
+            />
           </div>
-          {error && <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</p>}
-          <button type="submit" disabled={loading}
-            className="w-full rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-100 disabled:opacity-50">
+
+          {error && (
+            <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-100 disabled:opacity-50"
+          >
             {loading ? 'Loading…' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
         </form>
 
+        {/* toggle */}
         <p className="text-center text-xs text-zinc-500">
           {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
-          <button onClick={() => { setMode(m => m === 'login' ? 'signup' : 'login'); setError(''); }}
-            className="text-white underline underline-offset-2 hover:no-underline">
+          <button
+            onClick={() => { setMode(m => m === 'login' ? 'signup' : 'login'); setError(''); }}
+            className="text-white underline underline-offset-2 hover:no-underline"
+          >
             {mode === 'login' ? 'Sign up' : 'Sign in'}
           </button>
         </p>
+
+        <p className="text-center text-[10px] text-zinc-600">
+          By continuing, you agree to Magnova&apos;s{' '}
+          <a href="https://magnova.ai/terms" className="underline underline-offset-1 hover:text-zinc-400">Terms</a>
+          {' '}and{' '}
+          <a href="https://magnova.ai/privacy" className="underline underline-offset-1 hover:text-zinc-400">Privacy Policy</a>
+        </p>
       </div>
-      <p className="mt-6 text-xs text-zinc-600">Secure auth powered by Firebase × Magnova</p>
     </div>
   );
 }
