@@ -56,7 +56,7 @@ export default function AuthPage({ app = 'default' }: { app?: string }) {
       try {
         const res = await fetch('/api/auth/session', { method: 'GET', credentials: 'include' });
         if (res.ok) {
-          // Already authenticated — redirect immediately
+          // Already authenticated — GET also sets magnova_auth cookie if missing
           window.location.href = decodeURIComponent(redirectTo);
           return;
         }

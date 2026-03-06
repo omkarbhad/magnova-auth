@@ -58,7 +58,23 @@ export async function GET(req: NextRequest) {
     if (!firebaseUid) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     const user = await getUserByFirebaseUid(firebaseUid);
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 401 });
-    return NextResponse.json({ user });
+    
+    const res = NextResponse.json({ user });
+    
+    // Ensure magnova_auth cookie exists (for old sessions that predate this cookie)
+    const hasAuthCookie = req.cookies.get('magnova_auth')?.value;
+    if (!hasAuthCookie) {
+      res.cookies.set('magnova_auth', '1', {
+        httpOnly: false,
+        secure: true,
+        sameSite: 'lax',
+        domain: COOKIE_DOMAIN,
+        maxAge: COOKIE_MAX_AGE,
+        path: '/',
+      });
+    }
+    
+    return res;
   } catch {
     return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
   }
