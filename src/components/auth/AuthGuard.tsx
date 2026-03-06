@@ -1,5 +1,4 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
 interface AuthGuardProps {
