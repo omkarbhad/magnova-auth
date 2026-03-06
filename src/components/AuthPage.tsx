@@ -4,14 +4,52 @@ import { useSearchParams } from 'next/navigation';
 import { auth, signInWithGoogle, signInWithEmail, signUpWithEmail } from '@/lib/firebase-client';
 import { onAuthStateChanged } from 'firebase/auth';
 
-export default function AuthPage() {
+export type AppConfig = {
+  name: string;
+  description: string;
+  defaultRedirect: string;
+  accent: string; // tailwind color class for glow
+};
+
+export const APP_CONFIGS: Record<string, AppConfig> = {
+  astrova: {
+    name: 'Astrova',
+    description: 'Your cosmic intelligence layer',
+    defaultRedirect: 'https://astrova.magnova.ai/dashboard',
+    accent: 'bg-amber-500/10',
+  },
+  graphini: {
+    name: 'Graphini',
+    description: 'Diagram as code, beautifully',
+    defaultRedirect: 'https://graphini.magnova.ai/dashboard',
+    accent: 'bg-violet-500/10',
+  },
+  codecity: {
+    name: 'CodeCity',
+    description: 'Visualize your codebase in 3D',
+    defaultRedirect: 'https://codecity.magnova.ai/dashboard',
+    accent: 'bg-cyan-500/10',
+  },
+  default: {
+    name: 'Magnova',
+    description: 'Sign in to continue',
+    defaultRedirect: 'https://astrova.magnova.ai/dashboard',
+    accent: 'bg-indigo-500/10',
+  },
+};
+
+interface AuthPageProps {
+  app?: string;
+}
+
+export default function AuthPage({ app = 'default' }: AuthPageProps) {
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') ?? 'https://astrova.magnova.ai/dashboard';
+  const config = APP_CONFIGS[app] ?? APP_CONFIGS.default;
+  const redirectTo = searchParams.get('redirect') ?? config.defaultRedirect;
 
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -66,10 +104,12 @@ export default function AuthPage() {
     setLoading(false);
   }
 
+  const isDefault = app === 'default';
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-950 px-4">
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="h-[500px] w-[500px] rounded-full bg-indigo-500/10 blur-[120px]" />
+        <div className={`h-[500px] w-[500px] rounded-full ${config.accent} blur-[120px]`} />
       </div>
       <div
         className="pointer-events-none absolute inset-0 opacity-20"
@@ -79,12 +119,17 @@ export default function AuthPage() {
         <div className="space-y-1 text-center">
           <div className="flex items-center justify-center gap-2">
             <span className="text-2xl">✦</span>
-            <span className="text-xl font-semibold tracking-tight text-white">Magnova</span>
+            <span className="text-xl font-semibold tracking-tight text-white">
+              {isDefault ? 'Magnova' : (
+                <><span className="text-zinc-400">Magnova /</span> {config.name}</>
+              )}
+            </span>
           </div>
           <p className="text-sm text-zinc-400">
-            {mode === 'login' ? 'Sign in to continue' : 'Create your account'}
+            {mode === 'login' ? config.description : 'Create your account'}
           </p>
         </div>
+
         <button onClick={handleGoogle} disabled={loading}
           className="flex w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50">
           <svg viewBox="0 0 24 24" className="h-4 w-4">
@@ -95,19 +140,14 @@ export default function AuthPage() {
           </svg>
           Continue with Google
         </button>
+
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-white/10" />
           <span className="text-xs text-zinc-500">or</span>
           <div className="h-px flex-1 bg-white/10" />
         </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === 'signup' && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-400">Name</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name"
-                className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-white/30 focus:ring-1 focus:ring-white/20" />
-            </div>
-          )}
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-zinc-400">Email</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required
@@ -124,6 +164,7 @@ export default function AuthPage() {
             {loading ? 'Loading…' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
         </form>
+
         <p className="text-center text-xs text-zinc-500">
           {mode === 'login' ? "Don't have an account?" : 'Already have an account?'}{' '}
           <button onClick={() => { setMode(m => m === 'login' ? 'signup' : 'login'); setError(''); }}
