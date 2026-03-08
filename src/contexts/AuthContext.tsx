@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const sessionSyncTokenRef = useRef<string | null>(null);
 
   const isLoaded = !loading;
-  const isSignedIn = !!firebaseUser;
+  const isSignedIn = !!firebaseUser || !!astrovaUser;
 
   const syncServerSession = useCallback(async (idToken: string, force = false) => {
     if (!force && sessionSyncTokenRef.current === idToken) return null;
@@ -78,30 +78,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Check existing session first (for cross-subdomain SSO), then listen to Firebase
   useEffect(() => {
-    const unsubscribe = onIdTokenChanged(auth, async (nextUser) => {
-      setFirebaseUser(nextUser);
-      if (!nextUser) {
-        sessionSyncTokenRef.current = null;
-        setToken(null);
-        setAstrovaUser(null);
-        setLoading(false);
-        return;
-      }
-
+    let unsubscribe: (() => void) | undefined;
+    let sessionChecked = false;
+    
+    async function init() {
+      // Check if magnova_auth cookie exists (set by auth.magnova.ai)
       try {
-        const idToken = await nextUser.getIdToken();
-        setToken(idToken);
-        await syncServerSession(idToken);
-      } catch (error) {
-        console.error('[auth] failed to refresh token', error);
-        setToken(null);
-      } finally {
-        setLoading(false);
+        const hasAuthCookie = document.cookie.includes('magnova_auth=1');
+        if (hasAuthCookie) {
+          const res = await fetch('/api/auth/session', { method: 'GET', credentials: 'include' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.user) {
+              setAstrovaUser(data.user);
+              sessionChecked = true;
+            }
+          }
+        }
+      } catch {
+        // Continue to Firebase
       }
-    });
+      
+      // Also listen to Firebase for direct sign-ins
+      unsubscribe = onIdTokenChanged(auth, async (nextUser) => {
+        setFirebaseUser(nextUser);
+        if (!nextUser) {
+          sessionSyncTokenRef.current = null;
+          setToken(null);
+          if (!sessionChecked) setAstrovaUser(null);
+          setLoading(false);
+          return;
+        }
 
-    return () => unsubscribe();
+        try {
+          const idToken = await nextUser.getIdToken();
+          setToken(idToken);
+          await syncServerSession(idToken);
+        } catch (error) {
+          console.error('[auth] failed to refresh token', error);
+          setToken(null);
+        } finally {
+          setLoading(false);
+        }
+      });
+    }
+    
+    init();
+    return () => unsubscribe?.();
   }, [syncServerSession]);
 
   useEffect(() => {
