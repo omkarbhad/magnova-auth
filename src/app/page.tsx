@@ -1,10 +1,10 @@
 'use client';
 import { Suspense } from 'react';
-import AuthPage from '@/components/AuthPage';
+import AuthPage, { AuthPageFallback } from '@/components/AuthPage';
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-zinc-950" />}>
+    <Suspense fallback={<AuthPageFallback />}>
       <AuthPage />
     </Suspense>
   );

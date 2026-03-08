@@ -6,27 +6,33 @@ const COOKIE_NAME = 'magnova_session';
 const COOKIE_MAX_AGE = 60 * 60; // 1 hour
 const COOKIE_DOMAIN = '.magnova.ai';
 
-export async function POST(req: NextRequest) {
-  try {
-    const { token } = await req.json();
-    if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 });
+function buildResponse(body: unknown, status = 200) {
+  return new NextResponse(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
+}
 
-    // Verify Firebase token
+export async function POST(req: NextRequest) {
+  const payload = await req.json().catch(() => null);
+  if (!payload || typeof payload !== 'object') {
+    return buildResponse({ error: 'Missing token' }, 400);
+  }
+
+  const token = (payload as { token?: string }).token;
+  if (!token) {
+    return buildResponse({ error: 'Missing token' }, 400);
+  }
+
+  try {
     const decoded = await verifyToken(token);
     if (!decoded.email) {
-      return NextResponse.json({ error: 'Token missing email' }, { status: 400 });
+      return buildResponse({ error: 'Token missing email' }, 400);
     }
 
-    // Upsert user in Neon
-    const user = await upsertUser(
-      decoded.uid,
-      decoded.email!,
-      decoded.name ?? undefined,
-      decoded.picture ?? undefined,
-    );
+    const user = await upsertUser(decoded.uid, decoded.email);
 
-    // Set httpOnly session cookie on .magnova.ai (works across all subdomains)
-    const res = NextResponse.json({ ok: true, user });
+    const res = buildResponse({ ok: true, user });
     res.cookies.set(COOKIE_NAME, decoded.uid, {
       httpOnly: true,
       secure: true,
@@ -35,47 +41,24 @@ export async function POST(req: NextRequest) {
       maxAge: COOKIE_MAX_AGE,
       path: '/',
     });
-    // Also set a non-httpOnly flag so JavaScript can detect auth status
-    res.cookies.set('magnova_auth', '1', {
-      httpOnly: false,
-      secure: true,
-      sameSite: 'lax',
-      domain: COOKIE_DOMAIN,
-      maxAge: COOKIE_MAX_AGE,
-      path: '/',
-    });
+
     return res;
-  } catch (err) {
-    console.error('Session error:', err);
-    return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  } catch (error) {
+    console.error('Session error:', error);
+    return buildResponse({ error: 'Invalid token' }, 401);
   }
 }
 
-// Verify existing session (used by Graphini/CodeCity to check auth)
 export async function GET(req: NextRequest) {
-  try {
-    const firebaseUid = req.cookies.get(COOKIE_NAME)?.value;
-    if (!firebaseUid) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    const user = await getUserByFirebaseUid(firebaseUid);
-    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 401 });
-    
-    const res = NextResponse.json({ user });
-    
-    // Ensure magnova_auth cookie exists (for old sessions that predate this cookie)
-    const hasAuthCookie = req.cookies.get('magnova_auth')?.value;
-    if (!hasAuthCookie) {
-      res.cookies.set('magnova_auth', '1', {
-        httpOnly: false,
-        secure: true,
-        sameSite: 'lax',
-        domain: COOKIE_DOMAIN,
-        maxAge: COOKIE_MAX_AGE,
-        path: '/',
-      });
-    }
-    
-    return res;
-  } catch {
-    return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+  const firebaseUid = req.cookies.get(COOKIE_NAME)?.value;
+  if (!firebaseUid) {
+    return buildResponse({ error: 'Not authenticated' }, 401);
   }
+
+  const user = await getUserByFirebaseUid(firebaseUid);
+  if (!user) {
+    return buildResponse({ error: 'User not found' }, 401);
+  }
+
+  return buildResponse({ user });
 }

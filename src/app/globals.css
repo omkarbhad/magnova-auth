@@ -1,5 +1,54 @@
 @import "tailwindcss";
 @source "../../**/*.{ts,tsx}";
 
+@theme inline {
+  --color-background: oklch(0.0905 0.008 285.82);
+  --color-foreground: oklch(0.985 0 0);
+  --color-card: oklch(0.0905 0.008 285.82);
+  --color-card-foreground: oklch(0.985 0 0);
+  --color-popover: oklch(0.141 0.024 285.82);
+  --color-popover-foreground: oklch(0.985 0 0);
+  --color-primary: oklch(0.985 0 0);
+  --color-primary-foreground: oklch(0.141 0.024 285.82);
+  --color-secondary: oklch(0.218 0.024 285.82);
+  --color-secondary-foreground: oklch(0.985 0 0);
+  --color-muted: oklch(0.218 0.024 285.82);
+  --color-muted-foreground: oklch(0.63 0.016 285.82);
+  --color-accent: oklch(0.218 0.024 285.82);
+  --color-accent-foreground: oklch(0.985 0 0);
+  --color-destructive: oklch(0.396 0.141 25.72);
+  --color-destructive-foreground: oklch(0.985 0 0);
+  --color-border: oklch(0.278 0.024 285.82);
+  --color-input: oklch(0.278 0.024 285.82);
+  --color-ring: oklch(0.551 0.027 285.82);
+  --radius: 0.625rem;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+html { color-scheme: dark; }
+body {
+  min-height: 100vh;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}

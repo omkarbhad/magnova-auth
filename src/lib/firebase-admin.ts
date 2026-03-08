@@ -8,25 +8,27 @@ function getAdminApp() {
   if (!serviceAccountJson) {
     throw new Error(`${SERVICE_ACCOUNT_ENV} is not defined`);
   }
-  const serviceAccount = JSON.parse(serviceAccountJson);
+
+  let serviceAccount: admin.ServiceAccount;
+  try {
+    serviceAccount = JSON.parse(serviceAccountJson);
+  } catch (error) {
+    throw new Error('Unable to parse Firebase service account JSON');
+  }
+
   return admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 }
 
-type FirebaseTokenPayload = {
+type FirebaseTokenResult = {
   uid: string;
   email?: string;
-  name?: string | null;
-  picture?: string | null;
 };
 
-export async function verifyToken(idToken: string) {
+export async function verifyToken(idToken: string): Promise<FirebaseTokenResult> {
   const app = getAdminApp();
   const decoded = await admin.auth(app).verifyIdToken(idToken);
-  const token: FirebaseTokenPayload = {
+  return {
     uid: decoded.uid,
     email: decoded.email ?? undefined,
-    name: decoded.name ?? null,
-    picture: decoded.picture ?? null,
   };
-  return token;
 }

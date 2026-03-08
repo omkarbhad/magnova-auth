@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
-import AuthPage from '@/components/AuthPage';
+import AuthPage, { AuthPageFallback } from '@/components/AuthPage';
 
 export default function GraphiniAuthPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<AuthPageFallback app="graphini" />}>
       <AuthPage app="graphini" />
     </Suspense>
   );
