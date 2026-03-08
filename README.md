@@ -1,90 +1,114 @@
-# Astrova - Vedic Birth Chart Generator
+# Astrova ✨
 
-A modern React + TypeScript application for generating and analyzing Vedic astrology birth charts using Swiss Ephemeris calculations.
+**AI-powered Vedic Astrology platform** — Generate birth charts (Kundali), get AI interpretations, and explore compatibility matching.
 
-## Features
+![Astrova](https://img.shields.io/badge/Vedic-Astrology-orange) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![React](https://img.shields.io/badge/React-18-61dafb) ![License](https://img.shields.io/badge/License-MIT-green)
 
-- **Birth Chart Generation**: Create accurate Vedic birth charts (Rasi and Navamsa)
-- **Planetary Analysis**: Detailed Shad Bala (planetary strength) calculations
-- **House Analysis**: Bhava Bala (house strength) assessments
-- **Aspect Calculations**: Complete planetary aspect analysis including Upagrahas
-- **Real-time Updates**: Live chart generation as you modify birth details
-- **Chart Management**: Save, load, and manage multiple birth charts
-- **Professional UI**: Modern dark theme with responsive design
+## 🌟 Features
 
-## Technology Stack
+- **Birth Chart Generation** — Accurate Vedic astrology charts using Swiss Ephemeris calculations
+- **AI Interpretations** — Get detailed readings powered by advanced language models
+- **Compatibility Matching** — Traditional Kundali matching with Ashtakoot scoring
+- **Save & Manage Charts** — Persistent storage for multiple birth charts
+- **Real-time Charts** — Live planetary positions with auto-refresh
+- **Knowledge Base** — Learn about Vedic astrology concepts
 
-- **Frontend**: React 19 + TypeScript + Vite
-- **Styling**: Tailwind CSS + shadcn/ui components
-- **Calculations**: Swiss Ephemeris via Python FastAPI backend
-- **Charts**: Custom SVG-based North Indian chart rendering
+## 🛠️ Tech Stack
 
-Currently, two official plugins are available:
+- **Frontend:** React 18, TypeScript, Vite, TailwindCSS
+- **Backend:** Vercel Edge Functions, Neon PostgreSQL
+- **Auth:** Firebase Authentication (centralized via Magnova)
+- **AI:** OpenRouter (GPT-4, Claude, etc.)
+- **Ephemeris:** Swiss Ephemeris for astronomical calculations
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Getting Started
 
-## React Compiler
+### Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 18+
+- pnpm (recommended) or npm
+- Neon PostgreSQL database
+- Firebase project
 
-## Expanding the ESLint configuration
+### Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Clone the repository
+git clone https://github.com/omkarbhad/astrova.git
+cd astrova
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Install dependencies
+pnpm install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# Set up environment variables
+cp .env.example .env.local
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Run development server
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a `.env.local` file with:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+# Database
+DATABASE_URL=postgresql://...
+
+# OpenRouter API
+VITE_OPENROUTER_API_KEY=sk-or-...
+
+# Firebase (optional - uses centralized auth)
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_PROJECT_ID=...
 ```
+
+## 📁 Project Structure
+
+```
+astrova/
+├── src/
+│   ├── components/     # React components
+│   ├── contexts/       # React contexts (Auth, Credits)
+│   ├── pages/          # Page components
+│   ├── lib/            # Utilities and API clients
+│   └── styles/         # Global styles
+├── api/                # Vercel Edge Functions
+│   ├── _lib/           # Shared utilities
+│   ├── charts.ts       # Chart CRUD
+│   ├── kundali.ts      # Chart generation
+│   └── chat.ts         # AI chat
+└── public/             # Static assets
+```
+
+## 🔐 Authentication
+
+Astrova uses centralized authentication via [Magnova Auth](https://auth.magnova.ai). Users sign in once and get access to all Magnova apps.
+
+## 📊 API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/kundali` | POST | Generate birth chart |
+| `/api/charts` | GET/POST | List/save charts |
+| `/api/charts/[id]` | GET/PUT/DELETE | Chart operations |
+| `/api/chat` | POST | AI interpretation |
+| `/api/models` | GET | Available AI models |
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our contributing guidelines before submitting PRs.
+
+## 📄 License
+
+MIT License — see [LICENSE](LICENSE) for details.
+
+## 🔗 Links
+
+- **Live App:** [astrova.magnova.ai](https://astrova.magnova.ai)
+- **Magnova:** [magnova.ai](https://magnova.ai)
+- **Author:** [@omkarbhad](https://github.com/omkarbhad)
+
+---
+
+Built with ❤️ by [Magnova](https://magnova.ai)
