@@ -5,7 +5,7 @@
 ![Astrova](https://img.shields.io/badge/Vedic-Astrology-orange) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![React](https://img.shields.io/badge/React-18-61dafb) ![License](https://img.shields.io/badge/License-MIT-green)
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="Astrova" width="400">
+  <img src="docs/astrova-preview.png" alt="Astrova Birth Chart Preview" width="600">
 </p>
 
 ## 🌟 Features
