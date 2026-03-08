@@ -57,18 +57,44 @@ function formatDashaDate(dateStr?: string): string {
   } catch { return dateStr; }
 }
 
+const LOCAL_STORAGE_KEY = 'astrova_chart_state';
+
+function getStoredChartState(): { request: KundaliRequest | null; data: KundaliResponse | null; name: string; location: string } | null {
+  try {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch { /* ignore */ }
+  return null;
+}
+
 function ChartPage() {
-  const [kundaliData, setKundaliData] = useState<KundaliResponse | null>(null);
+  // Restore from localStorage on mount
+  const storedState = getStoredChartState();
+  
+  const [kundaliData, setKundaliData] = useState<KundaliResponse | null>(storedState?.data ?? null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentRequest, setCurrentRequest] = useState<KundaliRequest | null>(CHART_CONSTANTS.DEFAULT_REQUEST);
+  const [currentRequest, setCurrentRequest] = useState<KundaliRequest | null>(storedState?.request ?? CHART_CONSTANTS.DEFAULT_REQUEST);
   const [savedCharts, setSavedCharts] = useState<SavedChart[]>([]);
   const { astrovaUser } = useAuth();
   const astrovaUserId = astrovaUser?.id || '';
 
   const [selectedChartId, setSelectedChartId] = useState<string>('');
-  const [currentChartName, setCurrentChartName] = useState<string>('');
-  const [currentLocationName, setCurrentLocationName] = useState<string>('');
+  const [currentChartName, setCurrentChartName] = useState<string>(storedState?.name ?? '');
+  const [currentLocationName, setCurrentLocationName] = useState<string>(storedState?.location ?? '');
+  
+  // Persist chart state to localStorage
+  useEffect(() => {
+    const state = {
+      request: currentRequest,
+      data: kundaliData,
+      name: currentChartName,
+      location: currentLocationName,
+    };
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
+    } catch { /* quota exceeded or private mode */ }
+  }, [currentRequest, kundaliData, currentChartName, currentLocationName]);
   const [showLoadChartsModal, setShowLoadChartsModal] = useState(false);
   const [activeView, setActiveView] = useState<'kundali' | 'matcher'>('kundali');
   const [realtimeEnabled, setRealtimeEnabled] = useState(false);
