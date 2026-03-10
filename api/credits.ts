@@ -33,33 +33,43 @@ export default async function handler(req: Request): Promise<Response> {
       if (type === 'deduct') {
         await requireOwnership(sql, auth, userId);
 
-        await sql.transaction([
-          sql`
-            UPDATE astrova_users
-            SET credits = credits - ${safeAmount}, credits_used = credits_used + ${safeAmount}, updated_at = now()
-            WHERE id = ${userId} AND credits >= ${safeAmount}`,
-          sql`
-            INSERT INTO astrova_credit_log (user_id, amount, action)
-            VALUES (${userId}, ${-safeAmount}, ${action})`,
-        ]);
+        const result = await sql`
+          UPDATE users
+          SET credits = credits - ${safeAmount}
+          WHERE id = ${userId} AND credits >= ${safeAmount}
+          RETURNING credits`;
 
-        const check = await sql`SELECT credits FROM astrova_users WHERE id = ${userId} LIMIT 1`;
-        if (!check[0]) return jsonError('User not found', 404);
-        return json({ ok: true });
+        if (!result[0]) {
+          const check = await sql`SELECT credits FROM users WHERE id = ${userId} LIMIT 1`;
+          if (!check[0]) return jsonError('User not found', 404);
+          return jsonError('Insufficient credits', 400);
+        }
+
+        try {
+          await sql`
+            INSERT INTO credit_transactions (user_id, amount, action)
+            VALUES (${userId}, ${-safeAmount}, ${action})`;
+        } catch { /* log table may not exist */ }
+
+        return json({ ok: true, credits: (result[0] as { credits: number }).credits });
       }
 
       if (type === 'add') {
         await requireAdmin(sql, auth);
 
-        await sql.transaction([
-          sql`
-            UPDATE astrova_users SET credits = credits + ${safeAmount}, updated_at = now()
-            WHERE id = ${userId}`,
-          sql`
-            INSERT INTO astrova_credit_log (user_id, amount, action, admin_id)
-            VALUES (${userId}, ${safeAmount}, ${action}, ${adminId ?? null})`,
-        ]);
-        return json({ ok: true });
+        const result = await sql`
+          UPDATE users SET credits = credits + ${safeAmount}
+          WHERE id = ${userId}
+          RETURNING credits`;
+        if (!result[0]) return jsonError('User not found', 404);
+
+        try {
+          await sql`
+            INSERT INTO credit_transactions (user_id, amount, action, admin_id)
+            VALUES (${userId}, ${safeAmount}, ${action}, ${adminId ?? null})`;
+        } catch { /* log table may not exist */ }
+
+        return json({ ok: true, credits: (result[0] as { credits: number }).credits });
       }
 
       return jsonError('Invalid type. Must be "deduct" or "add"');

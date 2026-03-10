@@ -75,16 +75,16 @@ export default async function handler(req: Request): Promise<Response> {
       INSERT INTO auth_events (user_id, event, app)
       VALUES (${magnovaUserId}, 'login', ${APP_NAME})`;
 
-    // Look up the astrova_users record (keyed by auth_id = Firebase UID).
+    // Look up the users record (keyed by firebase_uid).
     // This is the table all credit/user endpoints use — its id and credits
     // must be returned so the frontend uses the correct userId for API calls.
     let [astrovaRow] = await sql`
-      SELECT id, credits FROM astrova_users WHERE auth_id = ${decoded.uid} LIMIT 1`;
+      SELECT id, credits FROM users WHERE firebase_uid = ${decoded.uid} LIMIT 1`;
     if (!astrovaRow) {
       // First time using Astrova — auto-create the record
       const inserted = await sql`
-        INSERT INTO astrova_users (auth_id, email, display_name, avatar_url, credits)
-        VALUES (${decoded.uid}, ${email}, ${displayName}, ${avatarUrl}, 100)
+        INSERT INTO users (firebase_uid, email, name, credits)
+        VALUES (${decoded.uid}, ${email}, ${displayName}, 100)
         RETURNING id, credits`;
       astrovaRow = inserted[0];
     }
