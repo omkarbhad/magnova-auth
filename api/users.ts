@@ -27,16 +27,27 @@ export default async function handler(req: Request): Promise<Response> {
       const existing = await sql`SELECT * FROM users WHERE firebase_uid = ${payload.firebase_uid} LIMIT 1`;
 
       if (existing[0]) {
-        const updated = await sql`
-          UPDATE users
-          SET email = COALESCE(${email}, email),
-              name = COALESCE(${displayName ?? null}, name),
-              updated_at = now()
-          WHERE firebase_uid = ${payload.firebase_uid}
-          RETURNING *`;
-        // [FIX #40] Null check on returned data
-        if (!updated[0]) return jsonError('User update failed', 500);
-        return json(updated[0]);
+        // Only update if values are provided
+        if (displayName) {
+          const updated = await sql`
+            UPDATE users
+            SET email = ${email},
+                name = ${displayName},
+                updated_at = CURRENT_TIMESTAMP
+            WHERE firebase_uid = ${payload.firebase_uid}
+            RETURNING *`;
+          if (!updated[0]) return jsonError('User update failed', 500);
+          return json(updated[0]);
+        } else {
+          const updated = await sql`
+            UPDATE users
+            SET email = ${email},
+                updated_at = CURRENT_TIMESTAMP
+            WHERE firebase_uid = ${payload.firebase_uid}
+            RETURNING *`;
+          if (!updated[0]) return jsonError('User update failed', 500);
+          return json(updated[0]);
+        }
       }
 
       // Safely extract display name from email

@@ -16,27 +16,10 @@ export default async function handler(req: Request): Promise<Response> {
         const keywords = search.toLowerCase().split(/\s+/).filter(w => w.length > 2);
         if (keywords.length === 0) return json([]);
 
-        // FTS path (works if the backing DB supports these functions).
-        try {
-          const ftsRows = await sql`
-            SELECT id, title, category, content, tags
-            FROM knowledge_base
-            WHERE is_active = true
-              AND to_tsvector('english', title || ' ' || content) @@ websearch_to_tsquery('english', ${search})
-            ORDER BY ts_rank(to_tsvector('english', title || ' ' || content), websearch_to_tsquery('english', ${search})) DESC
-            LIMIT 5`;
-          if (ftsRows.length > 0) {
-            return json(ftsRows);
-          }
-        } catch (ftsErr) {
-          console.warn('[kb] FTS search failed, falling back to keyword scan:', ftsErr instanceof Error ? ftsErr.message : 'unknown');
-        }
-
-        // Cross-DB fallback: scan active articles in memory and score by keyword hits.
+        // Cross-DB fallback: scan articles in memory and score by keyword hits.
         const allRows = await sql`
           SELECT id, title, category, content, tags
           FROM knowledge_base
-          WHERE is_active = true
           ORDER BY updated_at DESC
           LIMIT 200`;
 
@@ -65,11 +48,10 @@ export default async function handler(req: Request): Promise<Response> {
         );
       }
 
-      // List all active
+      // List all articles
       const rows = await sql`
         SELECT id, title, category, content, tags
         FROM knowledge_base
-        WHERE is_active = true
         ORDER BY category ASC`;
       return json(rows);
     }
