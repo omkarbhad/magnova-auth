@@ -1,17 +1,17 @@
-import { createClient, type InValue } from '@libsql/client/web';
+import { Pool, type QueryResult } from 'pg';
 
-type SqlValue = string | number | boolean | null | Uint8Array | unknown[] | Record<string, unknown>;
+type SqlValue = string | number | boolean | null | unknown[] | Record<string, unknown>;
 type SqlRow = Record<string, unknown>;
 export type Sql = (strings: TemplateStringsArray, ...values: SqlValue[]) => Promise<SqlRow[]>;
 
-const dbUrl = process.env.TURSO_DATABASE_URL ?? process.env.DATABASE_URL;
+const dbUrl = process.env.DATABASE_URL;
 if (!dbUrl) {
-  throw new Error('Missing database URL. Set TURSO_DATABASE_URL (or DATABASE_URL).');
+  throw new Error('Missing DATABASE_URL environment variable.');
 }
 
-const client = createClient({
-  url: dbUrl,
-  authToken: process.env.TURSO_AUTH_TOKEN ?? process.env.DATABASE_AUTH_TOKEN,
+const pool = new Pool({
+  connectionString: dbUrl,
+  ssl: { rejectUnauthorized: false },
 });
 
 const JSON_COLUMNS = new Set([
@@ -32,19 +32,12 @@ const BOOLEAN_COLUMNS = new Set([
 
 let initPromise: Promise<void> | null = null;
 
-function normalizeSql(sqlText: string): string {
-  return sqlText
-    .replace(/::jsonb\b/gi, '')
-    .replace(/::text\[\]/gi, '')
-    .replace(/\bnow\(\)/gi, 'CURRENT_TIMESTAMP');
-}
-
-function mapValue(value: SqlValue): InValue {
+function mapValue(value: SqlValue): unknown {
   if (Array.isArray(value)) return JSON.stringify(value);
-  if (value && typeof value === 'object' && !(value instanceof Uint8Array)) {
+  if (value && typeof value === 'object') {
     return JSON.stringify(value);
   }
-  return value as InValue;
+  return value;
 }
 
 function parseMaybeJson(value: unknown): unknown {
@@ -67,25 +60,25 @@ function normalizeRow(row: SqlRow): SqlRow {
       if (key === 'tags' && !Array.isArray(value)) value = [];
     }
     if (BOOLEAN_COLUMNS.has(key)) {
-      if (value === 0 || value === '0') value = false;
-      else if (value === 1 || value === '1') value = true;
+      if (value === false || value === 0) value = false;
+      else if (value === true || value === 1) value = true;
     }
     out[key] = value;
   }
   return out;
 }
 
-function buildQuery(strings: TemplateStringsArray, values: SqlValue[]): { sql: string; args: InValue[] } {
+function buildQuery(strings: TemplateStringsArray, values: SqlValue[]): { text: string; values: unknown[] } {
   let text = strings[0] ?? '';
-  const args: InValue[] = [];
+  const args: unknown[] = [];
 
   for (let i = 0; i < values.length; i += 1) {
-    text += '?';
-    text += strings[i + 1] ?? '';
     args.push(mapValue(values[i]!));
+    text += `$${i + 1}`;
+    text += strings[i + 1] ?? '';
   }
 
-  return { sql: normalizeSql(text), args };
+  return { text, values: args };
 }
 
 async function ensureSchema(): Promise<void> {
@@ -93,9 +86,8 @@ async function ensureSchema(): Promise<void> {
 
   initPromise = (async () => {
     const statements = [
-      'PRAGMA foreign_keys = ON',
       `CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
         firebase_uid TEXT UNIQUE,
         auth_id TEXT UNIQUE,
         email TEXT NOT NULL DEFAULT '',
@@ -111,7 +103,7 @@ async function ensureSchema(): Promise<void> {
         updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
       )`,
       `CREATE TABLE IF NOT EXISTS credit_transactions (
-        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
         user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         amount INTEGER NOT NULL,
         action TEXT NOT NULL,
@@ -120,7 +112,7 @@ async function ensureSchema(): Promise<void> {
       )`,
       'CREATE INDEX IF NOT EXISTS idx_credit_transactions_user ON credit_transactions(user_id, created_at DESC)',
       `CREATE TABLE IF NOT EXISTS knowledge_base (
-        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
         title TEXT NOT NULL,
         category TEXT NOT NULL,
         content TEXT NOT NULL,
@@ -135,7 +127,7 @@ async function ensureSchema(): Promise<void> {
         updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
       )`,
       `CREATE TABLE IF NOT EXISTS user_settings (
-        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
         user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         setting_key TEXT NOT NULL,
         setting_value TEXT,
@@ -143,7 +135,7 @@ async function ensureSchema(): Promise<void> {
         UNIQUE(user_id, setting_key)
       )`,
       `CREATE TABLE IF NOT EXISTS chat_sessions (
-        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
         user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         title TEXT NOT NULL DEFAULT 'New Chat',
         messages TEXT NOT NULL DEFAULT '[]',
@@ -154,7 +146,7 @@ async function ensureSchema(): Promise<void> {
       )`,
       'CREATE INDEX IF NOT EXISTS idx_chat_sessions_user ON chat_sessions(user_id, updated_at DESC)',
       `CREATE TABLE IF NOT EXISTS saved_charts (
-        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
         user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         name TEXT NOT NULL,
         birth_data TEXT NOT NULL,
@@ -166,7 +158,7 @@ async function ensureSchema(): Promise<void> {
       )`,
       'CREATE INDEX IF NOT EXISTS idx_saved_charts_user ON saved_charts(user_id, created_at DESC)',
       `CREATE TABLE IF NOT EXISTS enabled_models (
-        id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
+        id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
         model_id TEXT NOT NULL UNIQUE,
         display_name TEXT NOT NULL,
         provider TEXT NOT NULL,
@@ -176,7 +168,14 @@ async function ensureSchema(): Promise<void> {
     ];
 
     for (const statement of statements) {
-      await client.execute(statement);
+      try {
+        await pool.query(statement);
+      } catch (e) {
+        // Ignore "already exists" errors
+        if (!String(e).includes('already exists')) {
+          console.error('Schema init error:', e);
+        }
+      }
     }
   })();
 
@@ -186,8 +185,8 @@ async function ensureSchema(): Promise<void> {
 export const sql: Sql = async (strings, ...values) => {
   await ensureSchema();
   const query = buildQuery(strings, values);
-  const result = await client.execute(query);
-  return result.rows.map((row) => normalizeRow(row as SqlRow));
+  const result = await pool.query(query.text, query.values);
+  return result.rows.map((row) => normalizeRow(row));
 };
 
 export function getDb(): Sql {
