@@ -49,7 +49,7 @@ export async function requireAuth(req: Request): Promise<AuthPayload> {
     // This happens on first use of astrova after signing in via auth.magnova.ai
     const newUser = await sql`
       INSERT INTO users (firebase_uid, email, credits)
-      VALUES (${firebaseUid}, '', 100)
+      VALUES (${firebaseUid}, '', 10)
       RETURNING id, email, name, credits`;
     const created = newUser[0] as { id: string; email: string; name: string | null; credits: number };
     return {
