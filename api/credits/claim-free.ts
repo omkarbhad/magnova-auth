@@ -12,20 +12,9 @@ export default async function handler(req: Request): Promise<Response> {
     const auth = await requireAuth(req);
     const sql = getDb();
 
-    // Check if user already claimed via credit_transactions log
-    let alreadyClaimed = false;
-    try {
-      const log = await sql`
-        SELECT id FROM credit_transactions
-        WHERE user_id = ${auth.id} AND type = 'free_claim'
-        LIMIT 1`;
-      alreadyClaimed = log.length > 0;
-    } catch { /* credit_transactions may not exist — allow claim */ }
-
-    if (alreadyClaimed) {
-      return jsonError('Free credits already claimed', 400);
-    }
-
+    // Add FREE_CREDITS to the user's balance unconditionally
+    // Simple: no claim tracking, users get 20 credits whenever they click claim
+    // TODO: add one-time claim tracking once credit_transactions table is confirmed in prod
     const result = await sql`
       UPDATE users
       SET credits = credits + ${FREE_CREDITS}
@@ -33,12 +22,6 @@ export default async function handler(req: Request): Promise<Response> {
       RETURNING credits`;
 
     if (!result[0]) return jsonError('User not found', 404);
-
-    try {
-      await sql`
-        INSERT INTO credit_transactions (user_id, amount, type, description)
-        VALUES (${auth.id}, ${FREE_CREDITS}, 'free_claim', 'Free credits claimed')`;
-    } catch { /* log table may not exist — credits still added */ }
 
     return json({ ok: true, credits: (result[0] as { credits: number }).credits });
   } catch (e) {
