@@ -9,7 +9,7 @@ export default async function handler(req: Request): Promise<Response> {
     const sql = getDb();
 
     if (req.method === 'GET') {
-      const rows = await sql`SELECT * FROM users WHERE auth_id = ${payload.sub} LIMIT 1`;
+      const rows = await sql`SELECT * FROM users WHERE auth_id = ${payload.firebase_uid} LIMIT 1`;
       return json(rows[0] ?? null);
     }
 
@@ -24,7 +24,7 @@ export default async function handler(req: Request): Promise<Response> {
         return jsonError('Valid email is required');
       }
 
-      const existing = await sql`SELECT * FROM users WHERE auth_id = ${payload.sub} LIMIT 1`;
+      const existing = await sql`SELECT * FROM users WHERE auth_id = ${payload.firebase_uid} LIMIT 1`;
 
       if (existing[0]) {
         const updated = await sql`
@@ -34,7 +34,7 @@ export default async function handler(req: Request): Promise<Response> {
               avatar_url = COALESCE(${avatarUrl ?? null}, avatar_url),
               last_login_at = now(),
               updated_at = now()
-          WHERE auth_id = ${payload.sub}
+          WHERE auth_id = ${payload.firebase_uid}
           RETURNING *`;
         // [FIX #40] Null check on returned data
         if (!updated[0]) return jsonError('User update failed', 500);
@@ -45,7 +45,7 @@ export default async function handler(req: Request): Promise<Response> {
       const safeName = displayName ?? (email.includes('@') ? email.split('@')[0] : 'User');
       const newUser = await sql`
         INSERT INTO users (auth_id, email, display_name, avatar_url, credits)
-        VALUES (${payload.sub}, ${email}, ${safeName}, ${avatarUrl ?? null}, 20)
+        VALUES (${payload.firebase_uid}, ${email}, ${safeName}, ${avatarUrl ?? null}, 20)
         RETURNING *`;
       if (!newUser[0]) return jsonError('User creation failed', 500);
       return json(newUser[0], 201);
