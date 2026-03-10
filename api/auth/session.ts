@@ -73,7 +73,7 @@ export default async function handler(req: Request): Promise<Response> {
       // First time using Astrova — auto-create the record
       const inserted = await sql`
         INSERT INTO users (firebase_uid, email, name, credits)
-        VALUES (${decoded.uid}, ${email}, ${displayName}, 100)
+        VALUES (${decoded.uid}, ${email}, ${displayName}, 10)
         RETURNING id, credits`;
       astrovaRow = inserted[0];
     }

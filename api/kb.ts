@@ -94,7 +94,7 @@ export default async function handler(req: Request): Promise<Response> {
         const updated = await sql`
           UPDATE knowledge_base
           SET title = ${article.title}, category = ${article.category}, content = ${article.content},
-              tags = ${tags}::text[], updated_at = now()
+              tags = ${tags}, updated_at = now()
           WHERE id = ${article.id}
           RETURNING *`;
         // [FIX #40] Null check
@@ -104,7 +104,7 @@ export default async function handler(req: Request): Promise<Response> {
 
       const inserted = await sql`
         INSERT INTO knowledge_base (title, category, content, tags)
-        VALUES (${article.title}, ${article.category}, ${article.content}, ${tags}::text[])
+        VALUES (${article.title}, ${article.category}, ${article.content}, ${tags})
         RETURNING *`;
       return json(inserted[0], 201);
     }

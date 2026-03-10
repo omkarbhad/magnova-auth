@@ -43,7 +43,7 @@ export default async function handler(req: Request): Promise<Response> {
       const safeName = displayName ?? (email.includes('@') ? email.split('@')[0] : 'User');
       const newUser = await sql`
         INSERT INTO users (firebase_uid, email, name, credits)
-        VALUES (${payload.firebase_uid}, ${email}, ${safeName}, 20)
+        VALUES (${payload.firebase_uid}, ${email}, ${safeName}, 10)
         RETURNING *`;
       if (!newUser[0]) return jsonError('User creation failed', 500);
       return json(newUser[0], 201);

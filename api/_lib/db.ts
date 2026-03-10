@@ -148,6 +148,9 @@ async function ensureSchema(): Promise<void> {
           is_enabled INTEGER NOT NULL DEFAULT 1,
           sort_order INTEGER NOT NULL DEFAULT 99
         )`,
+        // Migrations: fix existing schema
+        `ALTER TABLE users ALTER COLUMN credits SET NOT NULL`,
+        `ALTER TABLE users ALTER COLUMN credits SET DEFAULT 10`,
       ];
 
       for (const statement of statements) {
