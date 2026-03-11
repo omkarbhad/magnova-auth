@@ -3,8 +3,6 @@ import { onIdTokenChanged, type User } from 'firebase/auth';
 import {
   auth,
   signInWithGoogle as firebaseSignInWithGoogle,
-  signInWithEmail,
-  signUpWithEmail,
   signOutUser,
 } from '@/lib/firebase';
 import { normalizeAstrovaUser, type AstrovaUser } from '@/lib/api';
@@ -16,8 +14,6 @@ export interface AuthContextType {
   isLoaded: boolean;
   isSignedIn: boolean;
   signInWithGoogle: () => Promise<{ error?: string }>;
-  signInWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
-  signUp: (email: string, password: string, name?: string) => Promise<{ error?: string; needsVerification?: boolean }>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -159,23 +155,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const signInWithEmailFn = useCallback(async (email: string, password: string) => {
-    try {
-      await signInWithEmail(email, password);
-      return {};
-    } catch (error) {
-      return { error: (error as Error).message || 'Sign-in failed' };
-    }
-  }, []);
-
-  const signUp = useCallback(async (email: string, password: string) => {
-    try {
-      await signUpWithEmail(email, password);
-      return {};
-    } catch (error) {
-      return { error: (error as Error).message || 'Sign-up failed' };
-    }
-  }, []);
 
   const signOutFn = useCallback(async () => {
     try {
@@ -208,8 +187,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoaded,
       isSignedIn,
       signInWithGoogle,
-      signInWithEmail: signInWithEmailFn,
-      signUp,
       signOut: signOutFn,
       refreshUser,
     }}>

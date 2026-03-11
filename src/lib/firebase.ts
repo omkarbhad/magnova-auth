@@ -4,9 +4,6 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
   signOut as firebaseSignOut,
 } from 'firebase/auth';
 
@@ -62,22 +59,6 @@ export const isFirebaseConfigured = hasFirebaseConfig;
 export function signInWithGoogle() {
   const currentAuth = requireFirebaseAuth();
   return signInWithPopup(currentAuth, googleProvider!);
-}
-
-export function signInWithEmail(email: string, password: string) {
-  const currentAuth = requireFirebaseAuth();
-  return signInWithEmailAndPassword(currentAuth, email, password);
-}
-
-export function signUpWithEmail(email: string, password: string) {
-  const currentAuth = requireFirebaseAuth();
-  return createUserWithEmailAndPassword(currentAuth, email, password);
-}
-
-export function resetPassword(email: string, redirectUrl?: string) {
-  const currentAuth = requireFirebaseAuth();
-  const options = redirectUrl ? { url: redirectUrl } : undefined;
-  return sendPasswordResetEmail(currentAuth, email, options);
 }
 
 export function signOutUser() {
