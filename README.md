@@ -1,118 +1,36 @@
-# Astrova ✨
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-**AI-powered Vedic Astrology platform** — Generate birth charts (Kundali), get AI interpretations, and explore compatibility matching.
+## Getting Started
 
-![Astrova](https://img.shields.io/badge/Vedic-Astrology-orange) ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue) ![React](https://img.shields.io/badge/React-18-61dafb) ![License](https://img.shields.io/badge/License-MIT-green)
-
-<p align="center">
-  <img src="docs/astrova-preview.png" alt="Astrova Birth Chart Preview" width="600">
-</p>
-
-## 🌟 Features
-
-- **Birth Chart Generation** — Accurate Vedic astrology charts using Swiss Ephemeris calculations
-- **AI Interpretations** — Get detailed readings powered by advanced language models
-- **Compatibility Matching** — Traditional Kundali matching with Ashtakoot scoring
-- **Save & Manage Charts** — Persistent storage for multiple birth charts
-- **Real-time Charts** — Live planetary positions with auto-refresh
-- **Knowledge Base** — Learn about Vedic astrology concepts
-
-## 🛠️ Tech Stack
-
-- **Frontend:** React 18, TypeScript, Vite, TailwindCSS
-- **Backend:** Vercel Edge Functions, Neon PostgreSQL
-- **Auth:** Firebase Authentication (centralized via Magnova)
-- **AI:** OpenRouter (GPT-4, Claude, etc.)
-- **Ephemeris:** Swiss Ephemeris for astronomical calculations
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- pnpm (recommended) or npm
-- Neon PostgreSQL database
-- Firebase project
-
-### Installation
+First, run the development server:
 
 ```bash
-# Clone the repository
-git clone https://github.com/omkarbhad/astrova.git
-cd astrova
-
-# Install dependencies
-pnpm install
-
-# Set up environment variables
-cp .env.example .env.local
-
-# Run development server
+npm run dev
+# or
+yarn dev
+# or
 pnpm dev
+# or
+bun dev
 ```
 
-### Environment Variables
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Create a `.env.local` file with:
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```env
-# Database
-DATABASE_URL=postgresql://...
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-# OpenRouter API
-VITE_OPENROUTER_API_KEY=sk-or-...
+## Learn More
 
-# Firebase (optional - uses centralized auth)
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_PROJECT_ID=...
-```
+To learn more about Next.js, take a look at the following resources:
 
-## 📁 Project Structure
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-```
-astrova/
-├── src/
-│   ├── components/     # React components
-│   ├── contexts/       # React contexts (Auth, Credits)
-│   ├── pages/          # Page components
-│   ├── lib/            # Utilities and API clients
-│   └── styles/         # Global styles
-├── api/                # Vercel Edge Functions
-│   ├── _lib/           # Shared utilities
-│   ├── charts.ts       # Chart CRUD
-│   ├── kundali.ts      # Chart generation
-│   └── chat.ts         # AI chat
-└── public/             # Static assets
-```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## 🔐 Authentication
+## Deploy on Vercel
 
-Astrova uses centralized authentication via [Magnova Auth](https://auth.magnova.ai). Users sign in once and get access to all Magnova apps.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-## 📊 API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/kundali` | POST | Generate birth chart |
-| `/api/charts` | GET/POST | List/save charts |
-| `/api/charts/[id]` | GET/PUT/DELETE | Chart operations |
-| `/api/chat` | POST | AI interpretation |
-| `/api/models` | GET | Available AI models |
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
-
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
-## 🔗 Links
-
-- **Live App:** [astrova.magnova.ai](https://astrova.magnova.ai)
-- **Magnova:** [magnova.ai](https://magnova.ai)
-- **Author:** [@omkarbhad](https://github.com/omkarbhad)
-
----
-
-Built with ❤️ by [Magnova](https://magnova.ai)
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

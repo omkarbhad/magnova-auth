@@ -1,0 +1,376 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { auth, signInWithGoogle, getGoogleRedirectResult, signInWithEmail, signUpWithEmail } from '@/lib/firebase-client';
+import { onAuthStateChanged } from 'firebase/auth';
+import { cn } from '@/lib/utils';
+
+type AppConfig = {
+  name: string;
+  tagline: string;
+  defaultRedirect: string;
+  accent: string;
+  accentText: string;
+  glow: string;
+};
+
+export const APP_CONFIGS: Record<string, AppConfig> = {
+  astrova: {
+    name: 'Astrova',
+    tagline: 'Your cosmic intelligence layer',
+    defaultRedirect: 'https://astrova.magnova.ai/chart',
+    accent: 'ring-amber-500/40',
+    accentText: 'text-amber-400',
+    glow: 'from-amber-500/20 via-orange-500/10 to-transparent',
+  },
+  graphini: {
+    name: 'Graphini',
+    tagline: 'Diagram as code, beautifully',
+    defaultRedirect: 'https://graphini.magnova.ai/dashboard',
+    accent: 'ring-violet-500/40',
+    accentText: 'text-violet-400',
+    glow: 'from-violet-500/20 via-fuchsia-500/10 to-transparent',
+  },
+  codecity: {
+    name: 'CodeCity',
+    tagline: 'Visualize your codebase in 3D',
+    defaultRedirect: 'https://codecity.magnova.ai/dashboard',
+    accent: 'ring-cyan-500/40',
+    accentText: 'text-cyan-400',
+    glow: 'from-cyan-500/20 via-sky-500/10 to-transparent',
+  },
+  default: {
+    name: 'Magnova',
+    tagline: 'Sign in to continue',
+    defaultRedirect: 'https://magnova.ai',
+    accent: 'ring-zinc-500/40',
+    accentText: 'text-zinc-400',
+    glow: 'from-zinc-500/10 via-zinc-500/5 to-transparent',
+  },
+};
+
+export default function AuthPage({ app = 'default' }: { app?: string }) {
+  const searchParams = useSearchParams();
+  const config = APP_CONFIGS[app] ?? APP_CONFIGS.default;
+  const redirectTo = searchParams.get('redirect') ?? config.defaultRedirect;
+
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [error, setError] = useState('');
+  const [storageError, setStorageError] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+
+  // Check for storage availability on mount
+  useEffect(() => {
+    try {
+      const test = '__storage_test__';
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+    } catch {
+      setStorageError(true);
+    }
+  }, []);
+
+  // Check if already authenticated via session cookie OR returning from Google redirect
+  useEffect(() => {
+    async function checkAuth() {
+      console.log('[Auth] Starting auth check...');
+      
+      try {
+        // First check existing session
+        const res = await fetch('/api/auth/session', { method: 'GET', credentials: 'include' });
+        if (res.ok) {
+          console.log('[Auth] Session exists, redirecting...');
+          window.location.href = decodeURIComponent(redirectTo);
+          return;
+        }
+        console.log('[Auth] No existing session');
+      } catch {
+        console.log('[Auth] Session check failed');
+      }
+
+      // Check if returning from Google redirect
+      try {
+        console.log('[Auth] Checking for redirect result...');
+        const result = await getGoogleRedirectResult();
+        console.log('[Auth] Redirect result:', result);
+        
+        if (result?.user) {
+          console.log('[Auth] Got user from redirect:', result.user.email);
+          setLoading(true);
+          const token = await result.user.getIdToken();
+          console.log('[Auth] Got ID token, creating session...');
+          
+          const sessionRes = await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ token }),
+          });
+          
+          console.log('[Auth] Session response:', sessionRes.status);
+          
+          if (sessionRes.ok) {
+            console.log('[Auth] Session created, redirecting to:', redirectTo);
+            window.location.href = decodeURIComponent(redirectTo);
+          } else {
+            const errText = await sessionRes.text();
+            console.error('[Auth] Session creation failed:', errText);
+            setError('Failed to create session');
+          }
+          return;
+        }
+        console.log('[Auth] No redirect result');
+      } catch (e: unknown) {
+        console.error('[Auth] Redirect check error:', e);
+        const err = e as { code?: string; message?: string };
+        if (err.code !== 'auth/popup-closed-by-user') {
+          setError(err.message ?? 'Google sign-in failed');
+        }
+      }
+
+      setChecking(false);
+    }
+    checkAuth();
+  }, [redirectTo]);
+
+  async function createSession(token: string) {
+    try {
+      await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ token }),
+      });
+      window.location.href = decodeURIComponent(redirectTo);
+    } catch {
+      setError('Failed to create session');
+    }
+  }
+
+  async function handleGoogle() {
+    setLoading(true);
+    setError('');
+    try {
+      // This will redirect to Google - user won't see loading state
+      await signInWithGoogle();
+    } catch (e: unknown) {
+      const err = e as { code?: string; message?: string };
+      setError(err.message ?? 'Google sign-in failed');
+      setLoading(false);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      if (mode === 'signup') {
+        await signUpWithEmail(email, password);
+        setVerificationSent(true);
+        setLoading(false);
+        return;
+      }
+      const r = await signInWithEmail(email, password);
+      if (!r.user.emailVerified) {
+        await r.user.sendEmailVerification();
+        setError('Please verify your email before signing in. A new verification email has been sent.');
+        setLoading(false);
+        return;
+      }
+      await createSession(await r.user.getIdToken());
+    } catch (e: unknown) {
+      setError((e as Error).message ?? 'Authentication failed');
+      setLoading(false);
+    }
+  }
+
+  if (verificationSent) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
+        <div className="w-full max-w-sm bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-8 shadow-2xl text-center">
+          <div className="text-4xl mb-4">✉️</div>
+          <h2 className="text-lg font-semibold text-white mb-2">Check your email</h2>
+          <p className="text-sm text-zinc-400 mb-6">
+            We sent a verification link to <span className="text-white">{email}</span>. Click the link to verify your account, then come back to sign in.
+          </p>
+          <button
+            onClick={() => { setVerificationSent(false); setMode('login'); }}
+            className="w-full px-4 py-3 rounded-xl text-sm font-medium bg-white text-zinc-900 hover:bg-zinc-100 transition-colors"
+          >
+            Back to sign in
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-5 w-5 border-2 border-zinc-700 border-t-zinc-400 rounded-full animate-spin" />
+          <p className="text-sm text-zinc-500">Checking session...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const isDefault = app === 'default';
+
+  return (
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Glow */}
+      <div className={cn(
+        "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-radial blur-3xl opacity-60",
+        config.glow
+      )} />
+
+      {/* Grid pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}
+      />
+
+      {/* Card */}
+      <div className="relative z-10 w-full max-w-sm">
+        <div className="bg-zinc-900/80 backdrop-blur-xl border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="text-2xl">✦</span>
+              <span className="text-xl font-semibold text-white">
+                {isDefault ? 'Magnova' : (
+                  <>
+                    <span className="text-zinc-500">Magnova /</span>{' '}
+                    <span className={config.accentText}>{config.name}</span>
+                  </>
+                )}
+              </span>
+            </div>
+            <p className="text-sm text-zinc-500">{config.tagline}</p>
+          </div>
+
+          {/* Google Button */}
+          <button
+            onClick={handleGoogle}
+            disabled={loading}
+            className={cn(
+              "w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl",
+              "bg-white text-zinc-900 font-medium text-sm",
+              "hover:bg-zinc-100 transition-colors",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900",
+              config.accent
+            )}
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
+          </button>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-zinc-800" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-zinc-900 px-3 text-zinc-500">or</span>
+            </div>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className={cn(
+                  "w-full px-4 py-3 rounded-xl text-sm",
+                  "bg-zinc-800/50 border border-zinc-700/50 text-white placeholder-zinc-500",
+                  "focus:outline-none focus:ring-2 focus:ring-offset-0",
+                  config.accent,
+                  "transition-colors"
+                )}
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className={cn(
+                  "w-full px-4 py-3 rounded-xl text-sm",
+                  "bg-zinc-800/50 border border-zinc-700/50 text-white placeholder-zinc-500",
+                  "focus:outline-none focus:ring-2 focus:ring-offset-0",
+                  config.accent,
+                  "transition-colors"
+                )}
+              />
+            </div>
+
+            {storageError && (
+              <p className="text-amber-400 text-sm text-center">
+                Private browsing detected. Please disable private mode or enable cookies to sign in.
+              </p>
+            )}
+
+            {error && (
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={cn(
+                "w-full px-4 py-3 rounded-xl text-sm font-medium",
+                "bg-white text-zinc-900",
+                "hover:bg-zinc-100 transition-colors",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900",
+                config.accent
+              )}
+            >
+              {loading ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create account'}
+            </button>
+          </form>
+
+          {/* Toggle */}
+          <p className="mt-6 text-center text-sm text-zinc-500">
+            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+            <button
+              onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+              className={cn("font-medium hover:underline", config.accentText)}
+            >
+              {mode === 'login' ? 'Sign up' : 'Sign in'}
+            </button>
+          </p>
+        </div>
+
+        {/* Footer */}
+        <p className="mt-6 text-center text-xs text-zinc-600">
+          By continuing, you agree to our{' '}
+          <a href="https://magnova.ai/terms" className="underline hover:text-zinc-400">Terms</a>
+          {' '}and{' '}
+          <a href="https://magnova.ai/privacy" className="underline hover:text-zinc-400">Privacy Policy</a>
+        </p>
+      </div>
+    </div>
+  );
+}
