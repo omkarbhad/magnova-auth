@@ -50,7 +50,8 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ ok: true, credits: (result[0] as { credits: number }).credits });
   } catch (e) {
     if (e instanceof Response) return e;
-    console.error('[credits/claim-free]', e);
-    return new Response('Internal Server Error', { status: 500 });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error('[credits/claim-free] error:', msg);
+    return new Response(JSON.stringify({ error: msg }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 }

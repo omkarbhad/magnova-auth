@@ -97,9 +97,10 @@ export default async function handler(req: Request): Promise<Response> {
     response.headers.set('Set-Cookie', buildCookie(req, decoded.uid));
     return response;
   } catch (error) {
-    console.error('[auth][session]', error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error('[auth][session]', msg);
     if (error instanceof Response) return error;
-    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
