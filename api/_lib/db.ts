@@ -1,8 +1,10 @@
-import { Pool } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 
 type SqlValue = string | number | boolean | null | unknown[] | Record<string, unknown>;
 type SqlRow = Record<string, unknown>;
 export type Sql = (strings: TemplateStringsArray, ...values: SqlValue[]) => Promise<SqlRow[]>;
+
+neonConfig.poolQueryViaFetch = true;
 
 const dbUrl = process.env.DATABASE_URL;
 if (!dbUrl) {
@@ -19,6 +21,7 @@ const JSON_COLUMNS = new Set([
   'setting_value',
   'config_value',
   'tags',
+  'preferences',
 ]);
 
 let initPromise: Promise<void> | null = null;
@@ -72,7 +75,6 @@ async function ensureSchema(): Promise<void> {
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
-    const client = await pool.connect();
     try {
       const statements = [
         `CREATE TABLE IF NOT EXISTS users (
@@ -80,8 +82,13 @@ async function ensureSchema(): Promise<void> {
           firebase_uid TEXT UNIQUE,
           email TEXT NOT NULL DEFAULT '',
           name TEXT,
+          display_name TEXT,
+          avatar_url TEXT,
           role TEXT NOT NULL DEFAULT 'user',
+          is_banned BOOLEAN NOT NULL DEFAULT false,
           credits INTEGER NOT NULL DEFAULT 10,
+          credits_used INTEGER NOT NULL DEFAULT 0,
+          last_login_at TIMESTAMPTZ,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )`,
@@ -99,29 +106,30 @@ async function ensureSchema(): Promise<void> {
           title TEXT NOT NULL,
           category TEXT NOT NULL,
           content TEXT NOT NULL,
-          tags TEXT NOT NULL DEFAULT '[]',
+          tags JSONB NOT NULL DEFAULT '[]'::jsonb,
           is_active INTEGER NOT NULL DEFAULT 1,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )`,
         `CREATE TABLE IF NOT EXISTS admin_config (
           config_key TEXT PRIMARY KEY,
-          config_value TEXT NOT NULL,
+          config_value JSONB NOT NULL DEFAULT 'null'::jsonb,
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )`,
         `CREATE TABLE IF NOT EXISTS user_settings (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-          setting_key TEXT NOT NULL,
-          setting_value TEXT,
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-          UNIQUE(user_id, setting_key)
+          user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+          default_timezone TEXT,
+          chart_style TEXT,
+          ayanamsa TEXT,
+          preferences JSONB NOT NULL DEFAULT '{}'::jsonb,
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )`,
         `CREATE TABLE IF NOT EXISTS chat_sessions (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           title TEXT NOT NULL DEFAULT 'New Chat',
-          messages TEXT NOT NULL DEFAULT '[]',
+          messages JSONB NOT NULL DEFAULT '[]'::jsonb,
           model_used TEXT,
           session_type TEXT NOT NULL DEFAULT 'astrology',
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -132,10 +140,10 @@ async function ensureSchema(): Promise<void> {
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
           name TEXT NOT NULL,
-          birth_data TEXT NOT NULL,
-          kundali_data TEXT,
+          birth_data JSONB NOT NULL,
+          kundali_data JSONB,
           location_name TEXT,
-          coordinates TEXT,
+          coordinates JSONB,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )`,
@@ -148,20 +156,23 @@ async function ensureSchema(): Promise<void> {
           is_enabled INTEGER NOT NULL DEFAULT 1,
           sort_order INTEGER NOT NULL DEFAULT 99
         )`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name TEXT`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN NOT NULL DEFAULT false`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS credits_used INTEGER NOT NULL DEFAULT 0`,
+        `ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ`,
       ];
 
       for (const statement of statements) {
         try {
-          await client.query(statement);
+          await pool.query(statement);
         } catch (e) {
-          // Ignore "already exists" errors
           if (!String(e).includes('already exists')) {
             console.error('Schema init error:', e);
           }
         }
       }
     } finally {
-      await client.release();
     }
   })();
 

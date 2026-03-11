@@ -38,10 +38,10 @@ export default async function handler(req: Request): Promise<Response> {
         VALUES (
           ${auth.id},
           ${name},
-          ${JSON.stringify(birth_data)}::jsonb,
-          ${kundali_data ? JSON.stringify(kundali_data) : null}::jsonb,
+          ${JSON.stringify(birth_data)},
+          ${kundali_data ? JSON.stringify(kundali_data) : null},
           ${location_name ?? null},
-          ${coordinates ? JSON.stringify(coordinates) : null}::jsonb
+          ${coordinates ? JSON.stringify(coordinates) : null}
         )
         RETURNING *`;
       return json(inserted[0], 201);

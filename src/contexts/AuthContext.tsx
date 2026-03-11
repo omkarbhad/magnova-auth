@@ -7,7 +7,7 @@ import {
   signUpWithEmail,
   signOutUser,
 } from '@/lib/firebase';
-import { type AstrovaUser } from '@/lib/api';
+import { normalizeAstrovaUser, type AstrovaUser } from '@/lib/api';
 
 export interface AuthContextType {
   astrovaUser: AstrovaUser | null;
@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
       const data = await res.json();
-      const user = data?.user ?? null;
+      const user = normalizeAstrovaUser(data?.user ?? null);
       setAstrovaUser(user);
       sessionSyncTokenRef.current = idToken;
 
@@ -95,8 +95,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
           if (res.ok) {
             const data = await res.json();
-            if (data.user) {
-              setAstrovaUser(data.user);
+            const user = normalizeAstrovaUser(data?.user ?? null);
+            if (user) {
+              setAstrovaUser(user);
               sessionChecked = true;
             }
           }

@@ -29,7 +29,7 @@ export default async function handler(req: Request): Promise<Response> {
       if (name !== undefined && kundali_data !== undefined) {
         await sql`
           UPDATE saved_charts
-          SET name = ${name}, kundali_data = ${JSON.stringify(kundali_data)}::jsonb, updated_at = now()
+          SET name = ${name}, kundali_data = ${JSON.stringify(kundali_data)}, updated_at = now()
           WHERE id = ${id}`;
       } else if (name !== undefined) {
         await sql`
@@ -37,7 +37,7 @@ export default async function handler(req: Request): Promise<Response> {
           WHERE id = ${id}`;
       } else if (kundali_data !== undefined) {
         await sql`
-          UPDATE saved_charts SET kundali_data = ${JSON.stringify(kundali_data)}::jsonb, updated_at = now()
+          UPDATE saved_charts SET kundali_data = ${JSON.stringify(kundali_data)}, updated_at = now()
           WHERE id = ${id}`;
       } else {
         await sql`UPDATE saved_charts SET updated_at = now() WHERE id = ${id}`;

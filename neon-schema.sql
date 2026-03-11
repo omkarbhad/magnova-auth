@@ -5,13 +5,13 @@
 -- ── astrova_users ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS astrova_users (
   id            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  auth_id       TEXT NOT NULL UNIQUE,
-  email         TEXT NOT NULL,
+  firebase_uid  TEXT NOT NULL UNIQUE,
+  email         TEXT NOT NULL DEFAULT '',
   display_name  TEXT,
   avatar_url    TEXT,
   role          TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('user','admin')),
   is_banned     BOOLEAN NOT NULL DEFAULT false,
-  credits       INTEGER NOT NULL DEFAULT 20,
+  credits       INTEGER NOT NULL DEFAULT 10,
   credits_used  INTEGER NOT NULL DEFAULT 0,
   last_login_at TIMESTAMPTZ,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS astrova_credit_log (
   id          TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   user_id     TEXT NOT NULL REFERENCES astrova_users(id) ON DELETE CASCADE,
   amount      INTEGER NOT NULL,
-  action      TEXT NOT NULL,
+  type        TEXT NOT NULL,
   description TEXT,
   admin_id    TEXT,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS astrova_knowledge_base (
   title      TEXT NOT NULL,
   category   TEXT NOT NULL,
   content    TEXT NOT NULL,
-  tags       TEXT[] NOT NULL DEFAULT '{}',
-  is_active  BOOLEAN NOT NULL DEFAULT true,
+  tags       JSONB NOT NULL DEFAULT '[]'::jsonb,
+  is_active  INTEGER NOT NULL DEFAULT 1,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -49,14 +49,15 @@ CREATE TABLE IF NOT EXISTS astrova_admin_config (
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ── astrova_user_settings ────────────────────────────────────────
+-- ── astrova_user_settings ───────────────────────────────────────
 CREATE TABLE IF NOT EXISTS astrova_user_settings (
-  id            TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  user_id       TEXT NOT NULL REFERENCES astrova_users(id) ON DELETE CASCADE,
-  setting_key   TEXT NOT NULL,
-  setting_value JSONB,
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  UNIQUE(user_id, setting_key)
+  id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user_id         TEXT NOT NULL REFERENCES astrova_users(id) ON DELETE CASCADE UNIQUE,
+  default_timezone TEXT,
+  chart_style     TEXT,
+  ayanamsa        TEXT,
+  preferences     JSONB NOT NULL DEFAULT '{}',
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ── astrova_chat_sessions ────────────────────────────────────────
@@ -92,7 +93,7 @@ CREATE TABLE IF NOT EXISTS enabled_models (
   model_id     TEXT NOT NULL UNIQUE,
   display_name TEXT NOT NULL,
   provider     TEXT NOT NULL,
-  is_enabled   BOOLEAN NOT NULL DEFAULT true,
+  is_enabled   INTEGER NOT NULL DEFAULT 1,
   sort_order   INTEGER NOT NULL DEFAULT 99
 );
 

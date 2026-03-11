@@ -53,6 +53,14 @@ export interface AstrovaUser {
   created_at: string;
 }
 
+type RawAstrovaUser = Partial<AstrovaUser> & {
+  authId?: string;
+  displayName?: string | null;
+  avatarUrl?: string | null;
+  firebase_uid?: string;
+  name?: string | null;
+};
+
 export interface KBArticle {
   id: string;
   title: string;
@@ -82,8 +90,52 @@ export interface ChatSession {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────
-function castUser(data: AstrovaUser): AstrovaUser {
-  return { ...data, is_banned: Boolean(data.is_banned) };
+export function normalizeAstrovaUser(data: RawAstrovaUser | null | undefined): AstrovaUser | null {
+  if (!data) return null;
+
+  const displayName = typeof data.display_name === 'string'
+    ? data.display_name
+    : typeof data.displayName === 'string'
+      ? data.displayName
+      : typeof data.name === 'string'
+        ? data.name
+        : null;
+
+  const avatarUrl = typeof data.avatar_url === 'string'
+    ? data.avatar_url
+    : typeof data.avatarUrl === 'string'
+      ? data.avatarUrl
+      : null;
+
+  return {
+    id: String(data.id ?? ''),
+    auth_id: String(data.auth_id ?? data.authId ?? data.firebase_uid ?? ''),
+    email: String(data.email ?? ''),
+    display_name: displayName,
+    avatar_url: avatarUrl,
+    role: data.role === 'admin' ? 'admin' : 'user',
+    is_banned: Boolean(data.is_banned),
+    credits: Number.isFinite(Number(data.credits)) ? Number(data.credits) : 0,
+    credits_used: Number.isFinite(Number(data.credits_used)) ? Number(data.credits_used) : 0,
+    last_login_at: typeof data.last_login_at === 'string' ? data.last_login_at : null,
+    created_at: typeof data.created_at === 'string' ? data.created_at : '',
+  };
+}
+
+function castUser(data: RawAstrovaUser): AstrovaUser {
+  return normalizeAstrovaUser(data) ?? {
+    id: '',
+    auth_id: '',
+    email: '',
+    display_name: null,
+    avatar_url: null,
+    role: 'user',
+    is_banned: false,
+    credits: 0,
+    credits_used: 0,
+    last_login_at: null,
+    created_at: '',
+  };
 }
 
 function parseTagsIfNeeded(tags: unknown): string[] {
@@ -117,9 +169,10 @@ export async function getAllAstrovaUsers(): Promise<AstrovaUser[]> {
 export async function updateUserCredits(
   userId: string, amount: number, action: string, adminId?: string
 ): Promise<boolean> {
+  const type = amount < 0 ? 'deduct' : 'add';
   const res = await apiFetch<{ ok: boolean }>('/api/credits', {
     method: 'POST',
-    body: JSON.stringify({ userId, amount, action, adminId, type: 'add' }),
+    body: JSON.stringify({ userId, amount: Math.abs(amount), action, adminId, type }),
   });
   return !!res?.ok;
 }

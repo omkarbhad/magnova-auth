@@ -13,7 +13,7 @@ interface CreditsContextType {
   credits: number;
   creditCosts: CreditCosts;
   deductCredits: (amount: number, action?: string) => boolean;
-  addCredits: (amount: number) => void;
+  addCredits: (amount: number, syncWithServer?: boolean) => void;
   showBuyModal: boolean;
   setShowBuyModal: (show: boolean) => void;
 }
@@ -98,10 +98,11 @@ export function CreditsProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, [credits]);
 
-  const addCredits = useCallback((amount: number) => {
+  const addCredits = useCallback((amount: number, syncWithServer = true) => {
     if (amount <= 0) return;
     const newCredits = credits + amount;
     setCredits(newCredits);
+    if (!syncWithServer) return;
     const uid = userIdRef.current;
     if (uid) {
       updateUserCredits(uid, amount, 'credit_purchase').then(async () => {

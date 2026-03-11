@@ -36,7 +36,7 @@ export async function requireAuth(req: Request): Promise<AuthPayload> {
 
   // Query the astrova-db users table (not magnova_users)
   const rows = await sql`
-    SELECT id, email, name, credits
+    SELECT id, email, COALESCE(display_name, name) AS name, credits
     FROM users
     WHERE firebase_uid = ${firebaseUid}
     LIMIT 1`;
@@ -80,11 +80,20 @@ export async function requireAdmin(sqlClient: Sql, authPayload: AuthPayload): Pr
 
 export async function requireNotBanned(sqlClient: Sql, authPayload: AuthPayload): Promise<void> {
   // Simplified: no is_banned column yet - just verify user exists
-  const rows = await sqlClient`SELECT id FROM users WHERE firebase_uid = ${authPayload.firebase_uid} LIMIT 1`;
+  const rows = await sqlClient`SELECT id, is_banned FROM users WHERE firebase_uid = ${authPayload.firebase_uid} LIMIT 1`;
   if (!rows[0]) throw new Response('Forbidden', { status: 403 });
+  if (Boolean((rows[0] as { is_banned?: boolean }).is_banned)) {
+    throw new Response('Forbidden', { status: 403 });
+  }
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function requireOwnership(sqlClient: Sql, authPayload: AuthPayload, requestedUserId: string): Promise<void> {
+  // Validate UUID format to prevent SQL issues
+  if (!UUID_REGEX.test(requestedUserId)) {
+    throw new Response('Invalid user ID', { status: 400 });
+  }
   // Check if the authenticated user owns the requested resource
   const rows = await sqlClient`SELECT id FROM users WHERE firebase_uid = ${authPayload.firebase_uid} LIMIT 1`;
   const me = rows[0] as { id: string } | undefined;

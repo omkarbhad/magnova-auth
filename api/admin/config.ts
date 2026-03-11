@@ -52,7 +52,7 @@ export default async function handler(req: Request): Promise<Response> {
 
       await sql`
         INSERT INTO admin_config (config_key, config_value, updated_at)
-        VALUES (${key}, ${serialized}::jsonb, now())
+        VALUES (${key}, ${serialized}, now())
         ON CONFLICT(config_key) DO UPDATE SET config_value = excluded.config_value, updated_at = excluded.updated_at`;
       return json({ ok: true });
     }

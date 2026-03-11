@@ -9,7 +9,6 @@ export default async function handler(req: Request): Promise<Response> {
     const sql = getDb();
 
     if (req.method === 'POST') {
-      // [FIX #21] Safe JSON parsing
       const { userId, amount, action, type, description } = await parseBody<{
         userId: string;
         amount: number;
@@ -18,20 +17,22 @@ export default async function handler(req: Request): Promise<Response> {
         description?: string;
       }>(req);
 
-      // [FIX #22] Validate amount is a positive finite integer
-      if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {
-        return jsonError('Amount must be a positive number');
+      if (typeof amount !== 'number' || !Number.isFinite(amount) || amount === 0) {
+        return jsonError('Amount must be a non-zero number');
       }
-      const safeAmount = Math.floor(amount); // No fractional credits
+      const safeAmount = Math.abs(Math.floor(amount));
       if (safeAmount > 100000) return jsonError('Amount exceeds maximum');
 
-      // [FIX #31] Validate action string length
       if (!action || typeof action !== 'string' || action.length > 100) {
         return jsonError('Action must be a non-empty string (max 100 chars)');
       }
 
       if (type === 'deduct') {
-        await requireOwnership(sql, auth, userId);
+        if (auth.id === userId) {
+          await requireOwnership(sql, auth, userId);
+        } else {
+          await requireAdmin(sql, auth);
+        }
 
         const result = await sql`
           UPDATE users
@@ -48,14 +49,13 @@ export default async function handler(req: Request): Promise<Response> {
         try {
           await sql`
             INSERT INTO credit_transactions (user_id, amount, type, description)
-            VALUES (${userId}, ${-safeAmount}, ${action}, ${description ?? null})`;
-        } catch { /* log table may not exist */ }
+            VALUES (${userId}, ${-safeAmount}, 'deduct', ${description ?? action})`;
+        } catch { }
 
         return json({ ok: true, credits: (result[0] as { credits: number }).credits });
       }
 
       if (type === 'add') {
-        // Admin-only: add credits to any user (used from AdminPage or future payment webhook)
         await requireAdmin(sql, auth);
 
         const result = await sql`
@@ -67,8 +67,8 @@ export default async function handler(req: Request): Promise<Response> {
         try {
           await sql`
             INSERT INTO credit_transactions (user_id, amount, type, description)
-            VALUES (${userId}, ${safeAmount}, ${action}, ${description ?? null})`;
-        } catch { /* log table may not exist */ }
+            VALUES (${userId}, ${safeAmount}, 'add', ${description ?? action})`;
+        } catch { }
 
         return json({ ok: true, credits: (result[0] as { credits: number }).credits });
       }

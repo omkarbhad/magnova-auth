@@ -1,23 +1,33 @@
 import { json, parseBody, sql } from '../_lib/db.js';
 import { verifyToken } from '../_lib/firebaseAdmin.js';
 
-const APP_NAME = 'astrova';
-const COOKIE_NAME = 'magnova_session';
-const COOKIE_DOMAIN = '.magnova.ai';
+const COOKIE_NAME = 'astrova_session';
 const COOKIE_MAX_AGE = 3600;
 
 export const config = { runtime: 'edge' };
 
-function buildCookie(token: string): string {
-  return [
+function buildCookie(req: Request, token: string): string {
+  const { hostname, protocol } = new URL(req.url);
+  const cookieParts = [
     `${COOKIE_NAME}=${encodeURIComponent(token)}`,
     'HttpOnly',
-    'Secure',
-    `Domain=${COOKIE_DOMAIN}`,
     'SameSite=Lax',
     `Max-Age=${COOKIE_MAX_AGE}`,
     'Path=/',
-  ].join('; ');
+  ];
+
+  if (protocol === 'https:') {
+    cookieParts.push('Secure');
+  }
+
+  const configuredDomain = process.env.SESSION_COOKIE_DOMAIN;
+  if (configuredDomain) {
+    cookieParts.push(`Domain=${configuredDomain}`);
+  } else if (hostname.endsWith('.magnova.ai')) {
+    cookieParts.push('Domain=.magnova.ai');
+  }
+
+  return cookieParts.join('; ');
 }
 
 export default async function handler(req: Request): Promise<Response> {
@@ -41,55 +51,50 @@ export default async function handler(req: Request): Promise<Response> {
     const displayName = decoded.name ?? null;
     const avatarUrl = decoded.picture ?? null;
 
-    // Legacy Magnova cross-app tracking (optional — fail gracefully if tables don't exist)
-    try {
-      const existing = await sql`SELECT id FROM magnova_users WHERE firebase_uid = ${decoded.uid} LIMIT 1`;
-      const isNewUser = !existing[0];
-      const [userRow] = await sql`
-        INSERT INTO magnova_users (firebase_uid, email, display_name, avatar_url)
-        VALUES (${decoded.uid}, ${email}, ${displayName}, ${avatarUrl})
-        ON CONFLICT(firebase_uid)
-        DO UPDATE SET
-          email = EXCLUDED.email,
-          display_name = EXCLUDED.display_name,
-          avatar_url = EXCLUDED.avatar_url
-        RETURNING id`;
-      if (userRow) {
-        const magnovaUserId = (userRow as { id: string }).id;
-        await sql`INSERT INTO app_access (user_id, app) VALUES (${magnovaUserId}, ${APP_NAME}) ON CONFLICT (user_id, app) DO NOTHING`;
-        if (isNewUser) {
-          await sql`INSERT INTO user_credits (user_id, app, balance) VALUES (${magnovaUserId}, ${APP_NAME}, 10) ON CONFLICT (user_id, app) DO NOTHING`;
-        }
-        await sql`INSERT INTO auth_events (user_id, event, app) VALUES (${magnovaUserId}, 'login', ${APP_NAME})`;
-      }
-    } catch { /* legacy tables may not exist in this DB */ }
-
-    // Look up the users record (keyed by firebase_uid).
-    // This is the table all credit/user endpoints use — its id and credits
-    // must be returned so the frontend uses the correct userId for API calls.
-    let [astrovaRow] = await sql`
-      SELECT id, credits FROM users WHERE firebase_uid = ${decoded.uid} LIMIT 1`;
-    if (!astrovaRow) {
-      // First time using Astrova — auto-create the record
-      const inserted = await sql`
-        INSERT INTO users (firebase_uid, email, name, credits)
-        VALUES (${decoded.uid}, ${email}, ${displayName}, 10)
-        RETURNING id, credits`;
-      astrovaRow = inserted[0];
-    }
-    const astrovaUserId = (astrovaRow as { id: string; credits: number }).id;
-    const credits = (astrovaRow as { id: string; credits: number }).credits ?? 0;
-
-    const response = json({
-      user: {
-        id: astrovaUserId,
+    const [astrovaUser] = await sql`
+      INSERT INTO users (
+        firebase_uid,
         email,
-        displayName: displayName ?? '',
+        name,
+        display_name,
+        avatar_url,
         credits,
-      },
-    });
-    // Store the Firebase UID (not the JWT) — requireAuth reads this directly
-    response.headers.set('Set-Cookie', buildCookie(decoded.uid));
+        last_login_at,
+        updated_at
+      )
+      VALUES (
+        ${decoded.uid},
+        ${email},
+        ${displayName},
+        ${displayName},
+        ${avatarUrl},
+        10,
+        now(),
+        now()
+      )
+      ON CONFLICT(firebase_uid)
+      DO UPDATE SET
+        email = EXCLUDED.email,
+        name = COALESCE(EXCLUDED.name, users.name),
+        display_name = COALESCE(EXCLUDED.display_name, users.display_name, users.name),
+        avatar_url = COALESCE(EXCLUDED.avatar_url, users.avatar_url),
+        last_login_at = now(),
+        updated_at = now()
+      RETURNING
+        id,
+        firebase_uid AS auth_id,
+        email,
+        COALESCE(display_name, name) AS display_name,
+        avatar_url,
+        role,
+        is_banned,
+        credits,
+        credits_used,
+        last_login_at,
+        created_at`;
+
+    const response = json({ user: astrovaUser ?? null });
+    response.headers.set('Set-Cookie', buildCookie(req, decoded.uid));
     return response;
   } catch (error) {
     console.error('[auth][session]', error);

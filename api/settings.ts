@@ -7,10 +7,25 @@ export const config = { runtime: 'edge' };
 const ALLOWED_SETTINGS_KEYS = [
   'theme', 'language', 'notifications', 'default_model',
   'birth_data', 'chart_preferences', 'ai_preferences',
+  'default_timezone', 'chart_style', 'ayanamsa',
 ] as const;
+const DIRECT_SETTING_COLUMNS = new Set(['default_timezone', 'chart_style', 'ayanamsa']);
 const MAX_KEY_LEN = 100;
 // [FIX #35] Max value size (50KB serialized)
 const MAX_VALUE_SIZE = 50_000;
+
+function parsePreferences(value: unknown): Record<string, unknown> {
+  if (!value) return {};
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed && typeof parsed === 'object' ? parsed as Record<string, unknown> : {};
+    } catch {
+      return {};
+    }
+  }
+  return value && typeof value === 'object' ? value as Record<string, unknown> : {};
+}
 
 export default async function handler(req: Request): Promise<Response> {
   try {
@@ -25,10 +40,20 @@ export default async function handler(req: Request): Promise<Response> {
       await requireOwnership(sql, auth, userId);
 
       const rows = await sql`
-        SELECT setting_value FROM user_settings
-        WHERE user_id = ${userId} AND setting_key = ${key} LIMIT 1`;
+        SELECT id, default_timezone, chart_style, ayanamsa, preferences
+        FROM user_settings
+        WHERE user_id = ${userId}
+        ORDER BY updated_at DESC
+        LIMIT 1`;
       if (!rows[0]) return json({ value: null });
-      return json({ value: rows[0].setting_value });
+
+      const row = rows[0] as Record<string, unknown>;
+      if (DIRECT_SETTING_COLUMNS.has(key)) {
+        return json({ value: row[key] ?? null });
+      }
+
+      const preferences = parsePreferences(row.preferences);
+      return json({ value: preferences[key] ?? null });
     }
 
     if (req.method === 'POST') {
@@ -40,17 +65,72 @@ export default async function handler(req: Request): Promise<Response> {
       if (!key || typeof key !== 'string' || key.length > MAX_KEY_LEN) {
         return jsonError(`Setting key must be a string (max ${MAX_KEY_LEN} chars)`);
       }
+      if (!(ALLOWED_SETTINGS_KEYS as readonly string[]).includes(key)) {
+        return jsonError('Unsupported setting key');
+      }
       // [FIX #35] Validate value size
       const serialized = JSON.stringify(value);
       if (serialized.length > MAX_VALUE_SIZE) {
         return jsonError('Setting value too large');
       }
 
-      await sql`
-        INSERT INTO user_settings (user_id, setting_key, setting_value, updated_at)
-        VALUES (${userId}, ${key}, ${serialized}::jsonb, now())
-        ON CONFLICT(user_id, setting_key)
-        DO UPDATE SET setting_value = excluded.setting_value, updated_at = excluded.updated_at`;
+      const existing = await sql`
+        SELECT id
+        FROM user_settings
+        WHERE user_id = ${userId}
+        ORDER BY updated_at DESC
+        LIMIT 1`;
+
+      if (DIRECT_SETTING_COLUMNS.has(key)) {
+        const stringValue = value == null ? null : String(value);
+
+        if (existing[0]) {
+          if (key === 'default_timezone') {
+            await sql`
+              UPDATE user_settings
+              SET default_timezone = ${stringValue}, updated_at = now()
+              WHERE id = ${existing[0].id as string}`;
+          } else if (key === 'chart_style') {
+            await sql`
+              UPDATE user_settings
+              SET chart_style = ${stringValue}, updated_at = now()
+              WHERE id = ${existing[0].id as string}`;
+          } else {
+            await sql`
+              UPDATE user_settings
+              SET ayanamsa = ${stringValue}, updated_at = now()
+              WHERE id = ${existing[0].id as string}`;
+          }
+        } else if (key === 'default_timezone') {
+          await sql`
+            INSERT INTO user_settings (user_id, default_timezone, preferences, created_at, updated_at)
+            VALUES (${userId}, ${stringValue}, ${JSON.stringify({})}::jsonb, now(), now())`;
+        } else if (key === 'chart_style') {
+          await sql`
+            INSERT INTO user_settings (user_id, chart_style, preferences, created_at, updated_at)
+            VALUES (${userId}, ${stringValue}, ${JSON.stringify({})}::jsonb, now(), now())`;
+        } else {
+          await sql`
+            INSERT INTO user_settings (user_id, ayanamsa, preferences, created_at, updated_at)
+            VALUES (${userId}, ${stringValue}, ${JSON.stringify({})}::jsonb, now(), now())`;
+        }
+
+        return json({ ok: true });
+      }
+
+      const patch = JSON.stringify({ [key]: value });
+
+      if (existing[0]) {
+        await sql`
+          UPDATE user_settings
+          SET preferences = COALESCE(preferences, '{}'::jsonb) || ${patch}::jsonb,
+              updated_at = now()
+          WHERE id = ${existing[0].id as string}`;
+      } else {
+        await sql`
+          INSERT INTO user_settings (user_id, preferences, created_at, updated_at)
+          VALUES (${userId}, ${patch}::jsonb, now(), now())`;
+      }
       return json({ ok: true });
     }
 

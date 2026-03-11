@@ -16,7 +16,7 @@ export default async function handler(req: Request): Promise<Response> {
     if (req.method === 'PATCH') {
       // [FIX #21] Safe JSON parsing
       const { is_enabled } = await parseBody<{ is_enabled: boolean }>(req);
-      await sql`UPDATE enabled_models SET is_enabled = ${Boolean(is_enabled)} WHERE id = ${id}`;
+      await sql`UPDATE enabled_models SET is_enabled = ${is_enabled ? 1 : 0} WHERE id = ${id}`;
       return json({ ok: true });
     }
 

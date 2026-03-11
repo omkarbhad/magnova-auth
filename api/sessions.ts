@@ -17,11 +17,13 @@ export default async function handler(req: Request): Promise<Response> {
 
       const rows = type
         ? await sql`
-            SELECT * FROM chat_sessions
-            WHERE user_id = ${userId} AND session_type = ${type}
+            SELECT id, user_id, title, messages, NULL::text AS model_used, ${type} AS session_type, created_at, updated_at
+            FROM chat_sessions
+            WHERE user_id = ${userId}
             ORDER BY updated_at DESC LIMIT 50`
         : await sql`
-            SELECT * FROM chat_sessions
+            SELECT id, user_id, title, messages, NULL::text AS model_used, 'astrology'::text AS session_type, created_at, updated_at
+            FROM chat_sessions
             WHERE user_id = ${userId}
             ORDER BY updated_at DESC LIMIT 50`;
 
@@ -52,10 +54,13 @@ export default async function handler(req: Request): Promise<Response> {
           UPDATE chat_sessions
           SET title = ${title},
               messages = ${JSON.stringify(messages)}::jsonb,
-              model_used = ${session.model_used ?? null},
               updated_at = now()
           WHERE id = ${session.id} AND user_id = ${session.user_id}`;
-        const rows = await sql`SELECT * FROM chat_sessions WHERE id = ${session.id} LIMIT 1`;
+        const rows = await sql`
+          SELECT id, user_id, title, messages, NULL::text AS model_used, 'astrology'::text AS session_type, created_at, updated_at
+          FROM chat_sessions
+          WHERE id = ${session.id}
+          LIMIT 1`;
         if (!rows[0]) return jsonError('Session not found', 404);
         return json(rows[0]);
       }
@@ -63,15 +68,13 @@ export default async function handler(req: Request): Promise<Response> {
       // Insert new
       const inserted = await sql`
         INSERT INTO chat_sessions
-        (user_id, title, messages, model_used, session_type)
+        (user_id, title, messages)
         VALUES (
           ${session.user_id},
           ${title},
-          ${JSON.stringify(messages)}::jsonb,
-          ${session.model_used ?? null},
-          ${session.session_type ?? 'astrology'}
+          ${JSON.stringify(messages)}::jsonb
         )
-        RETURNING *`;
+        RETURNING id, user_id, title, messages, NULL::text AS model_used, 'astrology'::text AS session_type, created_at, updated_at`;
       return json(inserted[0], 201);
     }
 

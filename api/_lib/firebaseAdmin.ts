@@ -5,7 +5,11 @@
  */
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
-const FIREBASE_PROJECT_ID = process.env.VITE_FIREBASE_PROJECT_ID ?? process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? '';
+const FIREBASE_PROJECT_ID =
+  process.env.FIREBASE_PROJECT_ID
+  ?? process.env.VITE_FIREBASE_PROJECT_ID
+  ?? process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  ?? '';
 const JWKS_URI = 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';
 const ISSUER = `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`;
 
