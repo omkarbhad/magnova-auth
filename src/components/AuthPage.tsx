@@ -197,7 +197,8 @@ export default function AuthPage({ app = 'default' }: { app?: string }) {
       if (sessionRes.ok) {
         window.location.href = decodeURIComponent(redirectTo);
       } else {
-        setError('Failed to create session');
+        const errData = await sessionRes.json().catch(() => ({}));
+        setError(errData.details ?? errData.error ?? 'Failed to create session');
         setLoading(false);
       }
     } catch (e: unknown) {

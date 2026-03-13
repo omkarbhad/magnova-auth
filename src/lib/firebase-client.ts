@@ -6,6 +6,7 @@ import {
   OAuthCredential,
   signInWithRedirect,
   signInWithPopup,
+  signInWithCustomToken,
   getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -14,7 +15,6 @@ import {
   browserSessionPersistence,
   setPersistence,
   inMemoryPersistence,
-  linkWithCredential,
 } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -77,25 +77,29 @@ export async function signInWithGitHub() {
       githubToken: credential?.accessToken ?? null,
     };
   } catch (e: unknown) {
-    const err = e as { code?: string; email?: string; customData?: { email?: string } };
-    // Account exists with different credential (e.g. Google) — sign in with Google then link GitHub
+    const err = e as { code?: string; customData?: { email?: string } };
+    // Account exists with a different provider (e.g. Google from another Magnova app).
+    // Silently map by email server-side — no extra popup needed.
     if (err.code === 'auth/account-exists-with-different-credential') {
-      // Capture the pending GitHub credential (contains the GitHub access token)
       const pendingCredential = GithubAuthProvider.credentialFromError(
         e as Parameters<typeof GithubAuthProvider.credentialFromError>[0]
       );
+      const githubToken = (pendingCredential as OAuthCredential | null)?.accessToken ?? null;
+      const email = err.customData?.email;
+      if (!email) throw e;
 
-      // Sign in with Google (the existing provider) — one popup
-      const googleResult = await signInWithPopup(auth, googleProvider);
+      // Ask server to look up existing Firebase user by email and issue a custom token
+      const res = await fetch('/api/auth/github-link', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error('Could not link account — please contact support');
+      const { customToken } = await res.json();
 
-      // Link the GitHub credential to the now-signed-in Google account
-      if (pendingCredential) {
-        await linkWithCredential(googleResult.user, pendingCredential);
-        const githubToken = (pendingCredential as OAuthCredential).accessToken ?? null;
-        return { user: googleResult.user, githubToken };
-      }
-
-      return { user: googleResult.user, githubToken: null };
+      // Sign in silently with the custom token (no popup)
+      const linked = await signInWithCustomToken(auth, customToken);
+      return { user: linked.user, githubToken };
     }
     throw e;
   }
