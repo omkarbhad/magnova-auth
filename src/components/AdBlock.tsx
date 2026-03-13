@@ -21,15 +21,15 @@ export function AdBlock({
       title: "Premium Kundali Features",
       description: "Unlock detailed predictions, remedies, and personalized consultations",
       cta: "Upgrade Now",
-      bgColor: "bg-gradient-to-r from-amber-600/20 to-yellow-600/20",
-      borderColor: "border-amber-500/30"
+      bgColor: "bg-gradient-to-r from-red-600/20 to-red-600/20",
+      borderColor: "border-red-500/30"
     },
     sidebar: {
       title: "Astrology Consultation",
       description: "Get personalized readings from expert astrologers",
       cta: "Book Session",
-      bgColor: "bg-gradient-to-b from-orange-600/20 to-red-600/20",
-      borderColor: "border-orange-500/30"
+      bgColor: "bg-gradient-to-b from-red-600/20 to-red-600/20",
+      borderColor: "border-red-500/30"
     },
     footer: {
       title: "Vedic Astrology Course",

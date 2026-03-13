@@ -8,7 +8,7 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: 'hsl(32.1, 94.6%, 43.7%)',
+          DEFAULT: 'hsl(0, 84%, 50%)',
           foreground: 'hsl(0, 0%, 98%)',
         },
         dark: {

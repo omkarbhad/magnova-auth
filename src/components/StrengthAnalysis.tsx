@@ -91,12 +91,12 @@ function CompactAshtakavargaTable({ ashtakavarga }: { ashtakavarga?: Ashtakavarg
   const maxSarvaPoint = Math.max(1, ...sarvaPoints);
 
   return (
-    <div className="bg-[hsl(24,16%,8%)] rounded-lg border border-amber-500/15 overflow-hidden">
+    <div className="bg-[hsl(220,10%,8%)] rounded-lg border border-red-500/15 overflow-hidden">
       <div className="max-h-[420px] overflow-auto custom-scrollbar">
         <table className="w-full text-xs min-w-[980px]">
-          <thead className="bg-[hsl(24,18%,9%)] sticky top-0 z-10">
-            <tr className="border-b border-amber-500/15">
-              <th className="px-3 py-2 text-left text-neutral-400 sticky left-0 bg-[hsl(24,18%,9%)] z-20">Planet</th>
+          <thead className="bg-[hsl(220,10%,9%)] sticky top-0 z-10">
+            <tr className="border-b border-red-500/15">
+              <th className="px-3 py-2 text-left text-neutral-400 sticky left-0 bg-[hsl(220,10%,9%)] z-20">Planet</th>
               {ASHTAKAVARGA_SIGNS.map((sign) => (
                 <th key={sign} className="px-2 py-2 text-center text-neutral-500">{sign}</th>
               ))}
@@ -107,8 +107,8 @@ function CompactAshtakavargaTable({ ashtakavarga }: { ashtakavarga?: Ashtakavarg
             {rows.map((row) => {
               const config = PLANET_CONFIG[row.planet];
               return (
-                <tr key={row.planet} className="border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors">
-                  <td className="px-3 py-2 sticky left-0 bg-[hsl(24,16%,8%)]">
+                <tr key={row.planet} className="border-b border-red-500/10 hover:bg-red-500/5 transition-colors">
+                  <td className="px-3 py-2 sticky left-0 bg-[hsl(220,10%,8%)]">
                     <div className="flex items-center gap-2">
                       <span style={{ color: config?.color }}>{config?.icon}</span>
                       <span className="text-white font-medium">{row.planet}</span>
@@ -123,8 +123,8 @@ function CompactAshtakavargaTable({ ashtakavarga }: { ashtakavarga?: Ashtakavarg
                 </tr>
               );
             })}
-            <tr className="bg-amber-500/10 border-t border-amber-500/30">
-              <td className="px-3 py-2 text-amber-300 font-semibold sticky left-0 bg-[hsl(24,20%,10%)]">Sarva</td>
+            <tr className="bg-red-500/10 border-t border-red-500/30">
+              <td className="px-3 py-2 text-red-300 font-semibold sticky left-0 bg-[hsl(24,20%,10%)]">Sarva</td>
               {sarvaPoints.map((value, idx) => {
                 const intensity = value / maxSarvaPoint;
                 return (
@@ -140,7 +140,7 @@ function CompactAshtakavargaTable({ ashtakavarga }: { ashtakavarga?: Ashtakavarg
                   </td>
                 );
               })}
-              <td className="px-3 py-2 text-center text-amber-300 font-bold">{sarvaTotal}</td>
+              <td className="px-3 py-2 text-center text-red-300 font-bold">{sarvaTotal}</td>
             </tr>
           </tbody>
         </table>
@@ -233,7 +233,7 @@ const PLANET_CONFIG: Record<string, {
     bodyParts: 'Toxins, Poisons', day: 'Saturday'
   },
   Dhuma: {
-    icon: 'Dh', label: 'Smoke', color: '#f59e0b',
+    icon: 'Dh', label: 'Smoke', color: '#ff3d3d',
     description: 'Fiery obscuration point derived from Sun, linked with heat and agitation',
     element: 'Fire', nature: 'Malefic', gender: 'Neutral', rules: 'None',
     keywords: ['Smoke', 'Heat', 'Obstruction', 'Irritation', 'Confusion'],
@@ -745,7 +745,7 @@ const LIFE_AREAS = [
   { key: 'emotions', label: 'Emotions', planets: ['Moon'], houses: [4], color: '#a3a3a3', description: 'Emotional nature, comfort, and inner peace' },
   { key: 'action', label: 'Action', planets: ['Mars'], houses: [3, 6], color: '#ef4444', description: 'Drive, courage, and ability to overcome' },
   { key: 'intellect', label: 'Intellect', planets: ['Mercury'], houses: [3, 5], color: '#22c55e', description: 'Communication, learning, and analysis' },
-  { key: 'growth', label: 'Growth', planets: ['Jupiter'], houses: [9, 5], color: '#eab308', description: 'Wisdom, luck, expansion, and blessings' },
+  { key: 'growth', label: 'Growth', planets: ['Jupiter'], houses: [9, 5], color: '#ef4444', description: 'Wisdom, luck, expansion, and blessings' },
   { key: 'relationships', label: 'Relationships', planets: ['Venus'], houses: [7], color: '#ec4899', description: 'Love, partnerships, and harmony' },
   { key: 'career', label: 'Career', planets: ['Saturn', 'Sun'], houses: [10], color: '#3b82f6', description: 'Professional success and status' },
   { key: 'wealth', label: 'Wealth', planets: ['Jupiter', 'Venus'], houses: [2, 11], color: '#14b8a6', description: 'Financial prosperity and gains' },
@@ -891,7 +891,7 @@ function SpiderChart({
         <svg viewBox={`0 0 ${size} ${size}`} preserveAspectRatio="xMidYMid meet" className="w-full h-auto overflow-visible">
           <defs>
             <radialGradient id={`grad_${safeId}`} cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.35" />
+              <stop offset="0%" stopColor="#ff3d3d" stopOpacity="0.35" />
               <stop offset="50%" stopColor="#d97706" stopOpacity="0.18" />
               <stop offset="100%" stopColor="#b45309" stopOpacity="0.06" />
             </radialGradient>
@@ -939,7 +939,7 @@ function SpiderChart({
           <polygon
             points={polygonPoints}
             fill="none"
-            stroke="rgba(245,158,11,0.85)"
+            stroke="rgba(255,61,61,0.85)"
             strokeWidth="2"
             filter={`url(#glow_${safeId})`}
             strokeLinejoin="round"
@@ -1041,7 +1041,7 @@ function InsightCard({ title, value, subtitle, color }: {
   color: string;
 }) {
   return (
-    <div className="bg-[hsl(24,16%,8%)] border border-amber-500/15 rounded-xl p-4 text-center hover:border-amber-500/30 transition-all duration-200 relative overflow-hidden group">
+    <div className="bg-[hsl(220,10%,8%)] border border-red-500/15 rounded-xl p-4 text-center hover:border-red-500/30 transition-all duration-200 relative overflow-hidden group">
       <div className="absolute top-0 left-0 right-0 h-[2px] opacity-60 group-hover:opacity-100 transition-opacity" style={{ background: `linear-gradient(90deg, transparent, ${color}, transparent)` }} />
       <div className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider mb-1.5">{title}</div>
       <div className="text-2xl font-bold mb-1" style={{ color }}>{value}</div>
@@ -1117,17 +1117,17 @@ function CompactShadBalaTable({ shadBala }: { shadBala: Record<string, Partial<S
   });
 
   const SortIcon = ({ col }: { col: typeof sortCol }) => (
-    <span className={`ml-0.5 text-[8px] ${sortCol === col ? 'text-amber-400' : 'text-neutral-600'}`}>
+    <span className={`ml-0.5 text-[8px] ${sortCol === col ? 'text-red-400' : 'text-neutral-600'}`}>
       {sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
     </span>
   );
 
   return (
-    <div className="bg-[hsl(24,16%,8%)] rounded-lg border border-amber-500/15 overflow-hidden">
+    <div className="bg-[hsl(220,10%,8%)] rounded-lg border border-red-500/15 overflow-hidden">
       <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
         <table className="w-full text-xs min-w-[920px]">
-          <thead className="bg-[hsl(24,18%,9%)] sticky top-0">
-            <tr className="border-b border-amber-500/15">
+          <thead className="bg-[hsl(220,10%,9%)] sticky top-0">
+            <tr className="border-b border-red-500/15">
               <th className="px-3 py-2 text-left text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('planet')}>Planet<SortIcon col="planet" /></th>
               <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('sthana')}>Sthana<SortIcon col="sthana" /></th>
               <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('dig')}>Dig<SortIcon col="dig" /></th>
@@ -1151,7 +1151,7 @@ function CompactShadBalaTable({ shadBala }: { shadBala: Record<string, Partial<S
               const config = PLANET_CONFIG[planet];
 
               return (
-                <tr key={planet} className="border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors">
+                <tr key={planet} className="border-b border-red-500/10 hover:bg-red-500/5 transition-colors">
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
                         <span style={{ color: config?.color }}>{config?.icon}</span>
@@ -1171,8 +1171,8 @@ function CompactShadBalaTable({ shadBala }: { shadBala: Record<string, Partial<S
                     </td>
                     <td className="px-3 py-2 text-center">
                       <span className={`px-2 py-1 rounded text-[9px] font-medium ${
-                        strength === 'Strong' ? 'bg-amber-500/20 text-amber-300' :
-                        strength === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                        strength === 'Strong' ? 'bg-red-500/20 text-red-300' :
+                        strength === 'Medium' ? 'bg-red-500/20 text-red-400' :
                         'bg-red-500/20 text-red-400'
                       }`}>
                         {strength}
@@ -1227,17 +1227,17 @@ function CompactBhavaBalaTable({ bhavaBala }: { bhavaBala: Record<number, Partia
   });
 
   const SortIcon = ({ col }: { col: typeof sortCol }) => (
-    <span className={`ml-0.5 text-[8px] ${sortCol === col ? 'text-amber-400' : 'text-neutral-600'}`}>
+    <span className={`ml-0.5 text-[8px] ${sortCol === col ? 'text-red-400' : 'text-neutral-600'}`}>
       {sortCol === col ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
     </span>
   );
 
   return (
-    <div className="bg-[hsl(24,16%,8%)] rounded-lg border border-amber-500/15 overflow-hidden">
+    <div className="bg-[hsl(220,10%,8%)] rounded-lg border border-red-500/15 overflow-hidden">
       <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
         <table className="w-full text-xs">
-          <thead className="bg-[hsl(24,18%,9%)] sticky top-0">
-            <tr className="border-b border-amber-500/15">
+          <thead className="bg-[hsl(220,10%,9%)] sticky top-0">
+            <tr className="border-b border-red-500/15">
               <th className="px-3 py-2 text-left text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('house')}>House<SortIcon col="house" /></th>
               <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('rupas')}>Rupas<SortIcon col="rupas" /></th>
               <th className="px-3 py-2 text-center text-neutral-400 cursor-pointer hover:text-white select-none" onClick={() => handleSort('max')}>Max<SortIcon col="max" /></th>
@@ -1266,7 +1266,7 @@ function CompactBhavaBalaTable({ bhavaBala }: { bhavaBala: Record<number, Partia
               return (
                 <Fragment key={house}>
                   <tr 
-                    className="border-b border-amber-500/10 hover:bg-amber-500/5 cursor-pointer transition-colors"
+                    className="border-b border-red-500/10 hover:bg-red-500/5 cursor-pointer transition-colors"
                     onClick={() => setExpandedHouse(expandedHouse === house ? null : house)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -1291,8 +1291,8 @@ function CompactBhavaBalaTable({ bhavaBala }: { bhavaBala: Record<number, Partia
                     </td>
                     <td className="px-3 py-2 text-center">
                       <span className={`px-2 py-1 rounded text-[9px] font-medium ${
-                        strength === 'Strong' ? 'bg-amber-500/20 text-amber-300' :
-                        strength === 'Medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                        strength === 'Strong' ? 'bg-red-500/20 text-red-300' :
+                        strength === 'Medium' ? 'bg-red-500/20 text-red-400' :
                         'bg-red-500/20 text-red-400'
                       }`}>
                         {strength}
@@ -1332,8 +1332,8 @@ function CompactPlanetPositionsTable({ planets, upagrahas, lagna }: {
   const BODY_ORDER = [...PLANET_ORDER, ...UPAGRAHA_ORDER];
 
   return (
-    <div className="bg-[hsl(24,16%,8%)] rounded-lg border border-amber-500/15 overflow-hidden">
-      <div className="p-3 bg-[hsl(24,18%,9%)] border-b border-amber-500/15">
+    <div className="bg-[hsl(220,10%,8%)] rounded-lg border border-red-500/15 overflow-hidden">
+      <div className="p-3 bg-[hsl(220,10%,9%)] border-b border-red-500/15">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">Planetary Positions</h3>
           <div className="text-[10px] text-neutral-500">
@@ -1343,8 +1343,8 @@ function CompactPlanetPositionsTable({ planets, upagrahas, lagna }: {
       </div>
       <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
         <table className="w-full text-xs">
-          <thead className="bg-[hsl(24,18%,9%)] sticky top-0">
-            <tr className="border-b border-amber-500/15">
+          <thead className="bg-[hsl(220,10%,9%)] sticky top-0">
+            <tr className="border-b border-red-500/15">
               <th className="px-3 py-2 text-left text-neutral-400">Planet</th>
               <th className="px-3 py-2 text-left text-neutral-400">Sign</th>
               <th className="px-3 py-2 text-center text-neutral-400">Degree</th>
@@ -1362,7 +1362,7 @@ function CompactPlanetPositionsTable({ planets, upagrahas, lagna }: {
               return (
                 <Fragment key={planetName}>
                   <tr 
-                    className="border-b border-amber-500/10 hover:bg-amber-500/5 cursor-pointer transition-colors"
+                    className="border-b border-red-500/10 hover:bg-red-500/5 cursor-pointer transition-colors"
                     onClick={() => setExpandedPlanet(expandedPlanet === planetName ? null : planetName)}
                   >
                     <td className="px-3 py-2">
@@ -1370,7 +1370,7 @@ function CompactPlanetPositionsTable({ planets, upagrahas, lagna }: {
                         <span style={{ color: config?.color }}>{config?.icon}</span>
                         <span className="text-white font-medium">{planetName}</span>
                         {isUpagraha && (
-                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/20 text-amber-300">Upagraha</span>
+                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-red-500/20 text-red-300">Upagraha</span>
                         )}
                       </div>
                     </td>
@@ -1392,15 +1392,15 @@ function CompactPlanetPositionsTable({ planets, upagrahas, lagna }: {
                             <div><span className="text-neutral-500">Type:</span> <span className="text-white">{isUpagraha ? 'Upagraha' : 'Graha'}</span></div>
                             <div><span className="text-neutral-500">Navamsa:</span> <span className="text-white">{planet.navamsa_sign || '-'}</span></div>
                             <div><span className="text-neutral-500">House:</span> <span className="text-white">{planet.house_whole_sign}</span></div>
-                            {planet.nakshatra && <div><span className="text-neutral-500">Nakshatra:</span> <span className="text-amber-300">{planet.nakshatra} Pada {planet.nakshatra_pada}</span></div>}
+                            {planet.nakshatra && <div><span className="text-neutral-500">Nakshatra:</span> <span className="text-red-300">{planet.nakshatra} Pada {planet.nakshatra_pada}</span></div>}
                             {planet.nakshatra_lord && <div><span className="text-neutral-500">Nak. Lord:</span> <span className="text-white">{planet.nakshatra_lord}</span></div>}
                           </div>
                           <div className="flex flex-wrap gap-1.5 pt-1">
-                            {planet.retrograde && <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-400 rounded text-[9px]">Retrograde</span>}
-                            {planet.exalted && <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded text-[9px]">Exalted</span>}
+                            {planet.retrograde && <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 rounded text-[9px]">Retrograde</span>}
+                            {planet.exalted && <span className="px-1.5 py-0.5 bg-red-500/20 text-red-300 rounded text-[9px]">Exalted</span>}
                             {planet.debilitated && <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 rounded text-[9px]">Debilitated</span>}
-                            {planet.vargottama && <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded text-[9px]">Vargottama</span>}
-                            {planet.combust && <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 rounded text-[9px]">Combust</span>}
+                            {planet.vargottama && <span className="px-1.5 py-0.5 bg-red-500/20 text-red-300 rounded text-[9px]">Vargottama</span>}
+                            {planet.combust && <span className="px-1.5 py-0.5 bg-red-500/20 text-orange-400 rounded text-[9px]">Combust</span>}
                           </div>
                         </div>
                       </td>
@@ -1481,8 +1481,8 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
   };
 
   return (
-    <div className="bg-[hsl(24,16%,8%)] rounded-lg border border-amber-500/15 overflow-hidden">
-      <div className="p-3 bg-[hsl(24,18%,9%)] border-b border-amber-500/15">
+    <div className="bg-[hsl(220,10%,8%)] rounded-lg border border-red-500/15 overflow-hidden">
+      <div className="p-3 bg-[hsl(220,10%,9%)] border-b border-red-500/15">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">Vimshottari Dasha</h3>
           <div className="text-[10px] text-neutral-500 text-right">
@@ -1494,8 +1494,8 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
       </div>
       <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
         <table className="w-full text-xs">
-          <thead className="bg-[hsl(24,18%,9%)] sticky top-0">
-            <tr className="border-b border-amber-500/15">
+          <thead className="bg-[hsl(220,10%,9%)] sticky top-0">
+            <tr className="border-b border-red-500/15">
               <th className="px-3 py-2 text-left text-neutral-500">Planet</th>
               <th className="px-3 py-2 text-left text-neutral-500">Current PAD</th>
               <th className="px-3 py-2 text-left text-neutral-500">Start</th>
@@ -1514,8 +1514,8 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
               return (
                 <Fragment key={period.planet}>
                   <tr 
-                    className={`border-b border-amber-500/10 hover:bg-amber-500/5 cursor-pointer transition-colors ${
-                      isActive ? 'bg-amber-500/10' : ''
+                    className={`border-b border-red-500/10 hover:bg-red-500/5 cursor-pointer transition-colors ${
+                      isActive ? 'bg-red-500/10' : ''
                     }`}
                     onClick={() => setExpandedPeriod(expandedPeriod === period.planet ? null : period.planet)}
                   >
@@ -1523,16 +1523,16 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
                       <div className="flex items-center gap-2">
                         <span style={{ color: config?.color }}>{config?.icon}</span>
                         <span className={`font-medium ${
-                          isActive ? 'text-amber-400' : 'text-white'
+                          isActive ? 'text-red-400' : 'text-white'
                         }`}>{period.planet}</span>
                       </div>
                     </td>
                     <td className="px-3 py-2 text-[10px]">
                       {activePadRef ? (
-                        <div className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-amber-200">
-                          <span className="text-amber-300/80">{activePadRef.ad}</span>
-                          <span className="text-amber-300/60">→</span>
-                          <span className="font-medium text-amber-200">{activePadRef.pad.planet}</span>
+                        <div className="inline-flex items-center gap-1.5 rounded-md border border-red-500/25 bg-red-500/10 px-2 py-1 text-red-200">
+                          <span className="text-red-300/80">{activePadRef.ad}</span>
+                          <span className="text-red-300/60">→</span>
+                          <span className="font-medium text-red-200">{activePadRef.pad.planet}</span>
                         </div>
                       ) : (
                         <span className="text-neutral-600">—</span>
@@ -1547,9 +1547,9 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
                     <td className="px-3 py-2 text-center">{formatYears(period.years)}</td>
                     <td className="px-3 py-2 text-center">
                       <span className={`px-2 py-1 rounded text-[9px] font-medium ${
-                        isActive ? 'bg-amber-500/20 text-amber-400' :
+                        isActive ? 'bg-red-500/20 text-red-400' :
                         isPast ? 'bg-gray-500/20 text-gray-400' :
-                        'bg-yellow-500/20 text-yellow-400'
+                        'bg-red-500/20 text-red-400'
                       }`}>
                         {isActive ? 'Active' : isPast ? 'Past' : 'Future'}
                       </span>
@@ -1561,7 +1561,7 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
                         <div className="text-[10px] text-neutral-400 mb-2">{config?.description}</div>
                         {period.antardashas && period.antardashas.length > 0 && (
                           <div className="space-y-1">
-                            <div className="text-[10px] font-semibold text-amber-300 uppercase tracking-wider mb-1">Antardashas</div>
+                            <div className="text-[10px] font-semibold text-red-300 uppercase tracking-wider mb-1">Antardashas</div>
                             {period.antardashas.map((ad) => {
                               const adConfig = PLANET_CONFIG[ad.planet];
                               const now = new Date();
@@ -1569,15 +1569,15 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
                               const adEnd = ad.end_datetime ? new Date(ad.end_datetime) : new Date(ad.end_date || '');
                               const isAdActive = now >= adStart && now < adEnd;
                               return (
-                                <div key={ad.planet} className={`rounded-md border ${isAdActive ? 'border-amber-500/30 bg-amber-500/5' : 'border-neutral-800/30 bg-neutral-900/30'}`}>
+                                <div key={ad.planet} className={`rounded-md border ${isAdActive ? 'border-red-500/30 bg-red-500/5' : 'border-neutral-800/30 bg-neutral-900/30'}`}>
                                   <div
                                     className="flex items-center justify-between px-2 py-1.5 cursor-pointer hover:bg-neutral-800/20 transition-colors"
                                     onClick={(e) => { e.stopPropagation(); setExpandedPeriod(expandedPeriod === `${period.planet}-${ad.planet}` ? period.planet : `${period.planet}-${ad.planet}`); }}
                                   >
                                     <div className="flex items-center gap-1.5">
                                       <span style={{ color: adConfig?.color }} className="text-[10px]">{adConfig?.icon}</span>
-                                      <span className={`text-[11px] font-medium ${isAdActive ? 'text-amber-300' : 'text-white'}`}>{ad.planet}</span>
-                                      {isAdActive && <span className="text-[8px] px-1 py-0.5 bg-amber-500/20 text-amber-300 rounded">Active</span>}
+                                      <span className={`text-[11px] font-medium ${isAdActive ? 'text-red-300' : 'text-white'}`}>{ad.planet}</span>
+                                      {isAdActive && <span className="text-[8px] px-1 py-0.5 bg-red-500/20 text-red-300 rounded">Active</span>}
                                     </div>
                                     <div className="flex items-center gap-3 text-[9px] text-neutral-500">
                                       <span>{ad.start_date}</span>
@@ -1596,7 +1596,7 @@ function CompactDashaTable({ dashaData }: { dashaData: DashaInfo }) {
                                           const padEnd = pad.end_datetime ? new Date(pad.end_datetime) : new Date(pad.end_date || '');
                                           const isPadActive = now >= padStart && now < padEnd;
                                           return (
-                                            <div key={pad.planet} className={`flex items-center justify-between px-1.5 py-1 rounded text-[9px] ${isPadActive ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-neutral-900/30'}`}>
+                                            <div key={pad.planet} className={`flex items-center justify-between px-1.5 py-1 rounded text-[9px] ${isPadActive ? 'bg-red-500/10 border border-red-500/20' : 'bg-neutral-900/30'}`}>
                                               <div className="flex items-center gap-1">
                                                 <span style={{ color: padConfig?.color }}>{padConfig?.icon}</span>
                                                 <span className={isPadActive ? 'text-yellow-300 font-medium' : 'text-neutral-400'}>{pad.planet}</span>
@@ -1794,14 +1794,14 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
   }, [planetData, houseData]);
 
   return (
-    <div className="bg-[linear-gradient(160deg,rgba(12,9,6,0.92),rgba(24,16,8,0.86))] rounded-2xl border border-amber-500/15 overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.2)]">
+    <div className="bg-[linear-gradient(160deg,rgba(12,9,6,0.92),rgba(24,16,8,0.86))] rounded-2xl border border-red-500/15 overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.2)]">
       {/* Header */}
-      <div className="px-4 py-4 bg-[linear-gradient(120deg,rgba(19,12,7,0.92),rgba(32,20,10,0.86))] border-b border-amber-500/15">
+      <div className="px-4 py-4 bg-[linear-gradient(120deg,rgba(19,12,7,0.92),rgba(32,20,10,0.86))] border-b border-red-500/15">
         <div className="flex items-center justify-between gap-3">
           {/* Title */}
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
-              <Zap className="w-4 h-4 text-amber-300" />
+            <div className="w-8 h-8 rounded-lg bg-red-500/20 border border-red-500/30 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 text-red-300" />
             </div>
             <div className="min-w-0">
               <h2 className="text-base sm:text-lg font-semibold text-white truncate">Strength Analysis</h2>
@@ -1810,7 +1810,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
           </div>
 
           {/* Desktop segmented control */}
-          <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-[hsl(24,18%,9%)] border border-amber-500/20 overflow-x-auto scrollbar-none">
+          <div className="hidden sm:flex items-center gap-1 p-1 rounded-lg bg-[hsl(220,10%,9%)] border border-red-500/20 overflow-x-auto scrollbar-none">
             {STRENGTH_TABS.map(tab => (
               <button
                 key={tab}
@@ -1818,7 +1818,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
                   activeTab === tab
                     ? 'bg-white text-black'
-                    : 'text-white/70 hover:text-white hover:bg-[hsl(24,20%,12%)]'
+                    : 'text-white/70 hover:text-white hover:bg-[hsl(220,10%,12%)]'
                 }`}
               >
                 {getTabLabel(tab)}
@@ -1831,14 +1831,14 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
             <button
               type="button"
               onClick={() => setDropdownOpen((v) => !v)}
-              className="px-3 py-2 rounded-lg bg-[hsl(24,18%,9%)] border border-amber-500/20 text-white text-xs font-medium flex items-center gap-2"
+              className="px-3 py-2 rounded-lg bg-[hsl(220,10%,9%)] border border-red-500/20 text-white text-xs font-medium flex items-center gap-2"
             >
               <span>{getTabLabel(activeTab)}</span>
               <ChevronDown className={`w-4 h-4 text-neutral-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-lg bg-[hsl(24,18%,9%)] border border-amber-500/20 shadow-xl overflow-hidden z-50">
+              <div className="absolute right-0 mt-2 w-48 rounded-lg bg-[hsl(220,10%,9%)] border border-red-500/20 shadow-xl overflow-hidden z-50">
                 {STRENGTH_TABS.map(tab => (
                   <button
                     key={tab}
@@ -1850,7 +1850,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
                     className={`w-full px-3 py-2 text-left text-xs font-medium transition-colors ${
                       activeTab === tab
                         ? 'bg-white text-black'
-                        : 'text-neutral-300 hover:text-white hover:bg-[hsl(24,20%,12%)]'
+                        : 'text-neutral-300 hover:text-white hover:bg-[hsl(220,10%,12%)]'
                     }`}
                   >
                     {getTabLabel(tab)}
@@ -1867,7 +1867,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
         {activeTab === 'combined' && (
           <div className="space-y-8">
             {/* Expressive Summary */}
-            <div className="bg-gradient-to-r from-amber-500/5 via-transparent to-amber-500/5 border border-amber-500/10 rounded-xl p-4 mb-2">
+            <div className="bg-gradient-to-r from-red-500/5 via-transparent to-red-500/5 border border-red-500/10 rounded-xl p-4 mb-2">
               <p className="text-sm text-neutral-300 leading-relaxed">
                 {insights.planetAvg >= 1.0 
                   ? <>Your chart shows <span className="text-white font-semibold">strong planetary energy</span> overall. {insights.strongPlanets} out of 7 planets exceed their required strength, giving you a solid foundation.</>
@@ -1947,7 +1947,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
                 const percent = pd ? (pd.value / pd.maxValue) * 100 : 0;
                 
                 return (
-                  <div key={planet} className="bg-[hsl(24,18%,9%)] rounded-lg p-3 border border-amber-500/15 hover:border-amber-500/30 transition-colors">
+                  <div key={planet} className="bg-[hsl(220,10%,9%)] rounded-lg p-3 border border-red-500/15 hover:border-red-500/30 transition-colors">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xl" style={{ color: config.color }}>{config.icon}</span>
@@ -1999,7 +1999,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
               {[1, 4, 7, 10].map(h => {
                 const config = HOUSE_CONFIG[h];
                 return (
-                  <div key={h} className="bg-[hsl(24,18%,9%)] rounded-lg p-3 border border-amber-500/15 hover:border-amber-500/30 transition-colors">
+                  <div key={h} className="bg-[hsl(220,10%,9%)] rounded-lg p-3 border border-red-500/15 hover:border-red-500/30 transition-colors">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm font-bold" style={{ color: config.color }}>H{h}</span>
                       <span className="text-xs text-neutral-400">{config.label}</span>
@@ -2022,31 +2022,31 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
           <div className="space-y-6">
             {/* Aspect Summary */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-amber-300">{aspects.filter(a => a.nature === 'harmonious').length}</div>
-                <div className="text-[10px] text-amber-300/80 uppercase">Harmonious</div>
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-red-300">{aspects.filter(a => a.nature === 'harmonious').length}</div>
+                <div className="text-[10px] text-red-300/80 uppercase">Harmonious</div>
                 <div className="text-[9px] text-neutral-400 mt-1">Trines & Sextiles</div>
               </div>
-              <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 text-center">
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
                 <div className="text-2xl font-bold text-orange-400">{aspects.filter(a => a.nature === 'tense').length}</div>
                 <div className="text-[10px] text-orange-400/80 uppercase">Challenging</div>
                 <div className="text-[9px] text-neutral-400 mt-1">Squares & Oppositions</div>
               </div>
-              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
-                <div className="text-2xl font-bold text-yellow-400">{aspects.filter(a => a.nature === 'neutral').length}</div>
-                <div className="text-[10px] text-yellow-400/80 uppercase">Conjunctions</div>
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
+                <div className="text-2xl font-bold text-red-400">{aspects.filter(a => a.nature === 'neutral').length}</div>
+                <div className="text-[10px] text-red-400/80 uppercase">Conjunctions</div>
                 <div className="text-[9px] text-neutral-400 mt-1">Energy Fusion</div>
               </div>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-wrap gap-3 p-3 bg-[hsl(24,18%,9%)] rounded-lg border border-amber-500/15">
+            <div className="flex flex-wrap gap-3 p-3 bg-[hsl(220,10%,9%)] rounded-lg border border-red-500/15">
               <div className="flex items-center gap-2">
                 <label className="text-[10px] text-neutral-400 uppercase">Planet:</label>
                 <select
                   value={aspectFilters.planet}
                   onChange={(e) => setAspectFilters(f => ({ ...f, planet: e.target.value }))}
-                  className="bg-[hsl(24,16%,8%)] border border-amber-500/20 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-amber-500/35"
+                  className="bg-[hsl(220,10%,8%)] border border-red-500/20 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-red-500/35"
                 >
                   <option value="all">All</option>
                   {aspectPlanets.map(p => (
@@ -2059,7 +2059,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
                 <select
                   value={aspectFilters.type}
                   onChange={(e) => setAspectFilters(f => ({ ...f, type: e.target.value }))}
-                  className="bg-[hsl(24,16%,8%)] border border-amber-500/20 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-amber-500/35"
+                  className="bg-[hsl(220,10%,8%)] border border-red-500/20 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-red-500/35"
                 >
                   <option value="all">All</option>
                   {ASPECT_DEFS.map(a => (
@@ -2072,7 +2072,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
                 <select
                   value={aspectFilters.nature}
                   onChange={(e) => setAspectFilters(f => ({ ...f, nature: e.target.value }))}
-                  className="bg-[hsl(24,16%,8%)] border border-amber-500/20 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-amber-500/35"
+                  className="bg-[hsl(220,10%,8%)] border border-red-500/20 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-red-500/35"
                 >
                   <option value="all">All</option>
                   <option value="harmonious">Harmonious</option>
@@ -2116,7 +2116,7 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
                     return (
                       <div 
                         key={i} 
-                        className="flex items-center gap-3 p-3 bg-[hsl(24,18%,9%)] rounded-lg border border-amber-500/15 hover:border-amber-500/30 transition-colors"
+                        className="flex items-center gap-3 p-3 bg-[hsl(220,10%,9%)] rounded-lg border border-red-500/15 hover:border-red-500/30 transition-colors"
                       >
                         <div className="flex items-center gap-2 min-w-[100px]">
                           <span style={{ color: p1Config?.color ?? '#888' }} className="text-lg">{p1Config?.icon ?? aspect.planet1.slice(0,2)}</span>
@@ -2128,9 +2128,9 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-xs font-medium text-white">{aspect.planet1} {aspect.type} {aspect.planet2}</span>
                             <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${
-                              aspect.nature === 'harmonious' ? 'bg-amber-500/20 text-amber-300' :
-                              aspect.nature === 'tense' ? 'bg-orange-500/20 text-orange-400' :
-                              'bg-yellow-500/20 text-yellow-400'
+                              aspect.nature === 'harmonious' ? 'bg-red-500/20 text-red-300' :
+                              aspect.nature === 'tense' ? 'bg-red-500/20 text-orange-400' :
+                              'bg-red-500/20 text-red-400'
                             }`}>
                               {aspect.nature}
                             </span>
@@ -2155,15 +2155,15 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
             )}
 
             {/* Aspect Interpretation Guide */}
-            <div className="bg-black/20 rounded-lg p-4 border border-amber-500/15">
+            <div className="bg-black/20 rounded-lg p-4 border border-red-500/15">
               <h4 className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-3">Understanding Aspects</h4>
               <div className="grid sm:grid-cols-2 gap-3 text-[11px]">
                 <div>
-                  <span className="text-amber-300 font-medium">△ Trines (120°)</span>
+                  <span className="text-red-300 font-medium">△ Trines (120°)</span>
                   <span className="text-neutral-500"> - Natural talents, easy flow of energy, gifts that come easily</span>
                 </div>
                 <div>
-                  <span className="text-amber-300 font-medium">⚹ Sextiles (60°)</span>
+                  <span className="text-red-300 font-medium">⚹ Sextiles (60°)</span>
                   <span className="text-neutral-500"> - Opportunities, skills that develop with effort, cooperation</span>
                 </div>
                 <div>
@@ -2272,13 +2272,13 @@ export function StrengthAnalysis({ shadBala, bhavaBala, ashtakavarga, planets, u
 
         {/* Legend - show only for non-aspects and non-table tabs */}
         {activeTab !== 'aspects' && activeTab !== 'shad-table' && activeTab !== 'bhava-table' && activeTab !== 'ashtakavarga' && activeTab !== 'positions' && activeTab !== 'dasha' && (
-          <div className="mt-6 pt-4 border-t border-amber-500/15 flex flex-wrap justify-center gap-4 text-[10px]">
+          <div className="mt-6 pt-4 border-t border-red-500/15 flex flex-wrap justify-center gap-4 text-[10px]">
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-amber-300" />
+              <div className="w-2.5 h-2.5 rounded-full bg-red-300" />
               <span className="text-neutral-500">Strong ≥100%</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+              <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
               <span className="text-neutral-500">Medium 80-100%</span>
             </div>
             <div className="flex items-center gap-1.5">

@@ -28,7 +28,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   if (!checked || !authenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[hsl(24,16%,6%)]">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-red-400" />
       </div>
     );
   }

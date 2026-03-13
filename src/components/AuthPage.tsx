@@ -1,6 +1,5 @@
-'use client';
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams as useRouterSearchParams } from 'react-router-dom';
 import { auth, signInWithGoogle, signInWithGitHub, getGoogleRedirectResult, signInWithEmail, signUpWithEmail } from '@/lib/firebase-client';
 import { onAuthStateChanged, sendEmailVerification } from 'firebase/auth';
 import { cn } from '@/lib/utils';
@@ -20,41 +19,41 @@ export const APP_CONFIGS: Record<string, AppConfig & { githubOnly?: boolean }> =
     name: 'Astrova',
     tagline: 'Your cosmic intelligence layer',
     defaultRedirect: 'https://astrova.magnova.ai/chart',
-    accent: 'ring-amber-500/40',
-    accentText: 'text-amber-400',
-    glow: 'from-amber-500/20 via-orange-500/10 to-transparent',
+    accent: 'ring-red-500/40',
+    accentText: 'text-red-400',
+    glow: 'from-red-500/20 via-red-500/10 to-transparent',
   },
   graphini: {
     name: 'Graphini',
     tagline: 'Diagram as code, beautifully',
     defaultRedirect: 'https://graphini.magnova.ai/dashboard',
-    accent: 'ring-violet-500/40',
-    accentText: 'text-violet-400',
-    glow: 'from-violet-500/20 via-fuchsia-500/10 to-transparent',
+    accent: 'ring-red-500/40',
+    accentText: 'text-red-400',
+    glow: 'from-red-500/20 via-red-500/10 to-transparent',
   },
   codecity: {
     name: 'CodeCity',
     tagline: 'Visualize your codebase in 3D',
     defaultRedirect: 'https://codecity.magnova.ai/dashboard',
-    accent: 'ring-cyan-500/40',
-    accentText: 'text-cyan-400',
-    glow: 'from-cyan-500/20 via-sky-500/10 to-transparent',
+    accent: 'ring-red-500/40',
+    accentText: 'text-red-400',
+    glow: 'from-red-500/20 via-red-500/10 to-transparent',
     githubOnly: true,
   },
   default: {
     name: 'Magnova',
     tagline: 'Sign in to continue',
     defaultRedirect: 'https://magnova.ai',
-    accent: 'ring-zinc-500/40',
-    accentText: 'text-zinc-400',
-    glow: 'from-zinc-500/10 via-zinc-500/5 to-transparent',
+    accent: 'ring-red-500/40',
+    accentText: 'text-red-400',
+    glow: 'from-red-500/20 via-red-500/10 to-transparent',
   },
 };
 
 export default function AuthPage({ app = 'default' }: { app?: string }) {
-  const searchParams = useSearchParams();
+  const [searchParams] = useRouterSearchParams();
   const config = APP_CONFIGS[app] ?? APP_CONFIGS.default;
-  const redirectTo = searchParams?.get('redirect') ?? config.defaultRedirect;
+  const redirectTo = searchParams.get('redirect') ?? config.defaultRedirect;
 
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -436,7 +435,7 @@ export default function AuthPage({ app = 'default' }: { app?: string }) {
                 </div>
 
                 {storageError && (
-                  <p className="text-amber-400 text-sm text-center">
+                  <p className="text-red-400 text-sm text-center">
                     Private browsing detected. Please disable private mode or enable cookies to sign in.
                   </p>
                 )}

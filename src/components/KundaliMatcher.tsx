@@ -87,11 +87,11 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
   const [selectedResultIndex2, setSelectedResultIndex2] = useState(-1);
   const [saveToast, setSaveToast] = useState<string | null>(null);
 
-  const actionButtonClass = 'gap-1 border border-amber-500/20 bg-[hsl(24,18%,9%)] text-white hover:bg-[hsl(24,20%,12%)] hover:border-amber-500/35 h-9 px-3';
-  const bannerClass = 'relative overflow-hidden rounded-2xl border border-amber-500/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.1),rgba(217,119,6,0.08),rgba(18,11,6,0.9))] p-5 sm:p-6';
-  const formPanelClass = 'bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] border border-amber-500/15 rounded-xl overflow-hidden hover:border-amber-500/30 transition-colors';
+  const actionButtonClass = 'gap-1 border border-red-500/20 bg-[hsl(220,10%,9%)] text-white hover:bg-[hsl(220,10%,12%)] hover:border-red-500/35 h-9 px-3';
+  const bannerClass = 'relative overflow-hidden rounded-2xl border border-red-500/20 bg-[linear-gradient(135deg,rgba(255,61,61,0.1),rgba(220,38,38,0.08),rgba(10,10,12,0.9))] p-5 sm:p-6';
+  const formPanelClass = 'bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] border border-red-500/15 rounded-xl overflow-hidden hover:border-red-500/30 transition-colors';
   const fieldLabelClass = 'block text-xs text-neutral-400 mb-1';
-  const selectFieldClass = 'w-full h-9 bg-[hsl(24,18%,9%)] border border-amber-500/20 rounded-lg px-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/25 focus:border-amber-500/40 appearance-none transition-colors cursor-pointer';
+  const selectFieldClass = 'w-full h-9 bg-[hsl(220,10%,9%)] border border-red-500/20 rounded-lg px-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-red-500/25 focus:border-red-500/40 appearance-none transition-colors cursor-pointer';
   
   // Form states for direct input
   const [formData1, setFormData1] = useState<KundaliRequest>(DEFAULT_FORM_DATA);
@@ -404,11 +404,11 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
     <div className="space-y-5 sm:space-y-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className={bannerClass}>
-        <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-amber-400/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-amber-300/10 blur-3xl" />
+        <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-red-400/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-red-300/10 blur-3xl" />
         <div className="relative">
           <div className="flex items-center justify-center gap-3 mb-2">
-            <Heart className="w-6 h-6 text-amber-300" />
+            <Heart className="w-6 h-6 text-red-300" />
             <h2 className="text-2xl font-bold text-white">Kundali Matcher</h2>
           </div>
           <p className="text-sm text-neutral-300 text-center">Compare two Vedic birth charts — all calculations run locally</p>
@@ -421,10 +421,10 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         {/* Person 1 Form */}
         <Card className={formPanelClass}>
-          <CardHeader className="px-4 py-3 pb-2 border-b border-amber-500/15 bg-amber-500/5">
+          <CardHeader className="px-4 py-3 pb-2 border-b border-red-500/15 bg-red-500/5">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/25 to-yellow-500/25 border border-amber-500/30 flex items-center justify-center">
-                <span className="text-amber-300 font-bold text-xs leading-none flex items-center justify-center">♂</span>
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500/25 to-red-500/25 border border-red-500/30 flex items-center justify-center">
+                <span className="text-red-300 font-bold text-xs leading-none flex items-center justify-center">♂</span>
               </div>
               <CardTitle className="text-white text-sm sm:text-base">{name1 || 'Person 1'}</CardTitle>
             </div>
@@ -437,7 +437,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                   value={name1}
                   onChange={(e) => setName1(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleMatch(); }}
-                  className="bg-[hsl(24,18%,9%)] border border-amber-500/20 text-white h-10 sm:h-9 text-sm rounded-lg focus:ring-1 focus:ring-amber-500/25 focus:border-amber-500/40 transition-all w-full"
+                  className="bg-[hsl(220,10%,9%)] border border-red-500/20 text-white h-10 sm:h-9 text-sm rounded-lg focus:ring-1 focus:ring-red-500/25 focus:border-red-500/40 transition-all w-full"
                   placeholder="Name"
                   aria-label="Person 1 name"
                 />
@@ -454,7 +454,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                     variant="outline"
                     size="sm"
                     onClick={() => { void handleSavePersonChart(1); }}
-                    className="gap-1 h-9 px-3 justify-center bg-amber-500/12 border border-amber-500/35 text-amber-300 hover:bg-amber-500/20 flex-shrink-0"
+                    className="gap-1 h-9 px-3 justify-center bg-red-500/12 border border-red-500/35 text-red-300 hover:bg-red-500/20 flex-shrink-0"
                     title="Save chart"
                     disabled={!name1.trim()}
                   >
@@ -531,7 +531,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                         onKeyDown={(e) => handleLocationInputKeyDown(e, 1)}
                         onFocus={() => setShowLocationDropdown1(true)}
                         onBlur={() => window.setTimeout(() => setShowLocationDropdown1(false), 200)}
-                        className="w-full h-9 bg-[hsl(24,18%,9%)] border border-amber-500/20 rounded-lg pl-8 pr-8 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-amber-500/25 focus:border-amber-500/40 transition-colors"
+                        className="w-full h-9 bg-[hsl(220,10%,9%)] border border-red-500/20 rounded-lg pl-8 pr-8 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-red-500/25 focus:border-red-500/40 transition-colors"
                         placeholder="Search city..."
                         aria-label="Search location for person 1"
                         autoComplete="off"
@@ -540,7 +540,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                       
                       {isSearching1 && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <div className="w-4 h-4 border-2 border-amber-500/30 border-t-amber-300 rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-300 rounded-full animate-spin"></div>
                         </div>
                       )}
                       
@@ -558,7 +558,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                     </div>
 
                     {showLocationDropdown1 && locationSuggestions1.length > 0 && (
-                      <div role="listbox" aria-label="Person 1 location suggestions" className="absolute z-[9999] w-full mt-2 bg-neutral-950/95 backdrop-blur-sm border border-amber-500/20 rounded-xl shadow-2xl max-h-60 overflow-y-auto">
+                      <div role="listbox" aria-label="Person 1 location suggestions" className="absolute z-[9999] w-full mt-2 bg-neutral-950/95 backdrop-blur-sm border border-red-500/20 rounded-xl shadow-2xl max-h-60 overflow-y-auto">
                         <div className="p-2">
                           {locationSuggestions1.map((location, index) => {
                             const lat = typeof location.lat === 'string' ? parseFloat(location.lat) : location.lat;
@@ -599,8 +599,8 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                     {locationSearch1 && Number.isFinite(formData1.latitude) && Number.isFinite(formData1.longitude) && (
                       <div className="mt-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-amber-500/20 border border-amber-500/40 rounded flex items-center justify-center">
-                            <MapPin className="w-3 h-3 text-amber-300" />
+                          <div className="w-6 h-6 bg-red-500/20 border border-red-500/40 rounded flex items-center justify-center">
+                            <MapPin className="w-3 h-3 text-red-300" />
                           </div>
                           <div className="text-xs text-white/60 font-mono">
                             {formData1.latitude.toFixed(4)}°, {formData1.longitude.toFixed(4)}° • TZ {formData1.tz_offset_hours > 0 ? '+' : ''}{formData1.tz_offset_hours}
@@ -618,10 +618,10 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
 
         {/* Person 2 Form */}
         <Card className={formPanelClass}>
-          <CardHeader className="px-4 py-3 pb-2 border-b border-amber-500/15 bg-amber-500/5">
+          <CardHeader className="px-4 py-3 pb-2 border-b border-red-500/15 bg-red-500/5">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500/25 to-yellow-500/25 border border-amber-500/30 flex items-center justify-center">
-                <span className="text-amber-300 font-bold text-xs leading-none flex items-center justify-center">♀</span>
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-red-500/25 to-red-500/25 border border-red-500/30 flex items-center justify-center">
+                <span className="text-red-300 font-bold text-xs leading-none flex items-center justify-center">♀</span>
               </div>
               <CardTitle className="text-white text-sm sm:text-base">{name2 || 'Person 2'}</CardTitle>
             </div>
@@ -634,7 +634,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                   value={name2}
                   onChange={(e) => setName2(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleMatch(); }}
-                  className="bg-[hsl(24,18%,9%)] border border-amber-500/20 text-white h-10 sm:h-9 text-sm rounded-lg focus:ring-1 focus:ring-amber-500/25 focus:border-amber-500/40 transition-all w-full"
+                  className="bg-[hsl(220,10%,9%)] border border-red-500/20 text-white h-10 sm:h-9 text-sm rounded-lg focus:ring-1 focus:ring-red-500/25 focus:border-red-500/40 transition-all w-full"
                   placeholder="Name"
                   aria-label="Person 2 name"
                 />
@@ -651,7 +651,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                     variant="outline"
                     size="sm"
                     onClick={() => { void handleSavePersonChart(2); }}
-                    className="gap-1 h-9 px-3 justify-center bg-amber-500/12 border border-amber-500/35 text-amber-300 hover:bg-amber-500/20 flex-shrink-0"
+                    className="gap-1 h-9 px-3 justify-center bg-red-500/12 border border-red-500/35 text-red-300 hover:bg-red-500/20 flex-shrink-0"
                     title="Save chart"
                     disabled={!name2.trim()}
                   >
@@ -728,7 +728,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                         onKeyDown={(e) => handleLocationInputKeyDown(e, 2)}
                         onFocus={() => setShowLocationDropdown2(true)}
                         onBlur={() => window.setTimeout(() => setShowLocationDropdown2(false), 200)}
-                        className="w-full h-9 bg-[hsl(24,18%,9%)] border border-amber-500/20 rounded-lg pl-8 pr-8 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-amber-500/25 focus:border-amber-500/40 transition-colors"
+                        className="w-full h-9 bg-[hsl(220,10%,9%)] border border-red-500/20 rounded-lg pl-8 pr-8 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-red-500/25 focus:border-red-500/40 transition-colors"
                         placeholder="Search city..."
                         aria-label="Search location for person 2"
                         autoComplete="off"
@@ -737,7 +737,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                       
                       {isSearching2 && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <div className="w-4 h-4 border-2 border-amber-500/30 border-t-amber-300 rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-300 rounded-full animate-spin"></div>
                         </div>
                       )}
                       
@@ -755,7 +755,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                     </div>
 
                     {showLocationDropdown2 && locationSuggestions2.length > 0 && (
-                      <div role="listbox" aria-label="Person 2 location suggestions" className="absolute z-[9999] w-full mt-2 bg-neutral-950/95 backdrop-blur-sm border border-amber-500/20 rounded-xl shadow-2xl max-h-60 overflow-y-auto">
+                      <div role="listbox" aria-label="Person 2 location suggestions" className="absolute z-[9999] w-full mt-2 bg-neutral-950/95 backdrop-blur-sm border border-red-500/20 rounded-xl shadow-2xl max-h-60 overflow-y-auto">
                         <div className="p-2">
                           {locationSuggestions2.map((location, index) => {
                             const lat = typeof location.lat === 'string' ? parseFloat(location.lat) : location.lat;
@@ -796,8 +796,8 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                     {locationSearch2 && Number.isFinite(formData2.latitude) && Number.isFinite(formData2.longitude) && (
                       <div className="mt-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-amber-500/20 border border-amber-500/40 rounded flex items-center justify-center">
-                            <MapPin className="w-3 h-3 text-amber-300" />
+                          <div className="w-6 h-6 bg-red-500/20 border border-red-500/40 rounded flex items-center justify-center">
+                            <MapPin className="w-3 h-3 text-red-300" />
                           </div>
                           <div className="text-xs text-white/60 font-mono">
                             {formData2.latitude.toFixed(4)}°, {formData2.longitude.toFixed(4)}° • TZ {formData2.tz_offset_hours > 0 ? '+' : ''}{formData2.tz_offset_hours}
@@ -814,18 +814,18 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
       </Card>
 
       {/* Match Button */}
-      <Card className="bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] border border-amber-500/15 rounded-xl lg:col-span-2 hover:border-amber-500/30 transition-colors">
+      <Card className="bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] border border-red-500/15 rounded-xl lg:col-span-2 hover:border-red-500/30 transition-colors">
         <CardContent className="p-4 sm:p-5 flex flex-col items-center">
             <Button
               onClick={handleMatch}
               disabled={isMatching || !!(selectedChart1 && selectedChart2 && selectedChart1 === selectedChart2)}
               aria-label={isMatching ? 'Calculating compatibility' : 'Analyze compatibility'}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40 focus-visible:ring-offset-0 disabled:pointer-events-none px-6 w-full max-w-2xl h-10 text-sm font-semibold bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white border-0 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/40 focus-visible:ring-offset-0 disabled:pointer-events-none px-6 w-full max-w-2xl h-10 text-sm font-semibold bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white border-0 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               size="lg"
             >
               {isMatching ? (
                 <div className="w-full flex items-center justify-center gap-3 text-center">
-                  <div className="w-5 h-5 border-2 border-amber-100/80 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-red-100/80 border-t-transparent rounded-full animate-spin" />
                   <span>Calculating compatibility...</span>
                 </div>
               ) : (
@@ -835,8 +835,8 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
               )}
             </Button>
             {selectedChart1 && selectedChart2 && selectedChart1 === selectedChart2 && (
-              <p className="text-center text-xs text-yellow-400/90 mt-3 flex items-center justify-center gap-2">
-                <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+              <p className="text-center text-xs text-red-400/90 mt-3 flex items-center justify-center gap-2">
+                <span className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
                 Please select two different charts to compare
               </p>
             )}
@@ -873,7 +873,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
 
                   {/* Enhanced Circular Score */}
                   <div className="relative w-40 h-40 mx-auto mb-6">
-                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-full blur-2xl animate-pulse" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-400/20 to-orange-400/20 rounded-full blur-2xl animate-pulse" />
                     <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
                       <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="10" />
                       <circle
@@ -907,33 +907,33 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
           )}
 
           {/* Ashtakoota Guna Milan */}
-          <div className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-[linear-gradient(145deg,rgba(245,158,11,0.08),rgba(28,17,8,0.62))] p-4 sm:p-6 shadow-[0_12px_26px_rgba(0,0,0,0.22)]">
-            <div className="pointer-events-none absolute -top-14 -right-12 h-32 w-32 rounded-full bg-amber-400/10 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-16 -left-12 h-36 w-36 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="relative overflow-hidden rounded-2xl border border-red-500/20 bg-[linear-gradient(145deg,rgba(255,61,61,0.08),rgba(28,17,8,0.62))] p-4 sm:p-6 shadow-[0_12px_26px_rgba(0,0,0,0.22)]">
+            <div className="pointer-events-none absolute -top-14 -right-12 h-32 w-32 rounded-full bg-red-400/10 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-16 -left-12 h-36 w-36 rounded-full bg-red-500/10 blur-3xl" />
 
             <div className="relative flex items-center gap-3 mb-5">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
-                <Star className="w-4 h-4 text-amber-300" />
+              <div className="w-9 h-9 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+                <Star className="w-4 h-4 text-red-300" />
               </div>
               <div>
                 <h3 className="text-white font-bold text-lg">Ashtakoota Guna Milan</h3>
                 <p className="text-[11px] text-neutral-400">Eight-factor compatibility breakdown</p>
               </div>
-              <span className="text-[11px] text-amber-200 ml-auto bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/30">8 Factors</span>
+              <span className="text-[11px] text-red-200 ml-auto bg-red-500/15 px-3 py-1 rounded-full border border-red-500/30">8 Factors</span>
             </div>
 
             <div className="relative grid grid-cols-1 md:grid-cols-2 gap-3">
               {matchScores.filter(s => s.category !== 'Overall Compatibility').map((score, index) => {
                 const pct = score.maxScore > 0 ? (score.score / score.maxScore) * 100 : 0;
                 const kootIconMap: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
-                  'Varna': { icon: Crown, color: 'text-amber-400', bg: 'bg-amber-500/20' },
-                  'Vashya': { icon: Handshake, color: 'text-amber-300', bg: 'bg-amber-500/20' },
-                  'Tara': { icon: Sparkles, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-                  'Yoni': { icon: PawPrint, color: 'text-amber-300', bg: 'bg-amber-500/20' },
-                  'Graha Maitri': { icon: Globe2, color: 'text-amber-300', bg: 'bg-amber-500/20' },
-                  'Gana': { icon: Users, color: 'text-amber-300', bg: 'bg-amber-500/20' },
-                  'Bhakoot': { icon: Orbit, color: 'text-amber-300', bg: 'bg-amber-500/20' },
-                  'Nadi': { icon: Dna, color: 'text-amber-300', bg: 'bg-amber-500/20' },
+                  'Varna': { icon: Crown, color: 'text-red-400', bg: 'bg-red-500/20' },
+                  'Vashya': { icon: Handshake, color: 'text-red-300', bg: 'bg-red-500/20' },
+                  'Tara': { icon: Sparkles, color: 'text-red-400', bg: 'bg-red-500/20' },
+                  'Yoni': { icon: PawPrint, color: 'text-red-300', bg: 'bg-red-500/20' },
+                  'Graha Maitri': { icon: Globe2, color: 'text-red-300', bg: 'bg-red-500/20' },
+                  'Gana': { icon: Users, color: 'text-red-300', bg: 'bg-red-500/20' },
+                  'Bhakoot': { icon: Orbit, color: 'text-red-300', bg: 'bg-red-500/20' },
+                  'Nadi': { icon: Dna, color: 'text-red-300', bg: 'bg-red-500/20' },
                 };
                 const kootInfo = kootIconMap[score.category];
                 const KootIcon = kootInfo?.icon || Star;
@@ -941,9 +941,9 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                 const kootBg = kootInfo?.bg || 'bg-neutral-500/20';
 
                 return (
-                  <div key={index} className="rounded-xl border border-amber-500/20 bg-[hsl(24,16%,8%)] p-3.5 hover:border-amber-500/35 transition-colors">
+                  <div key={index} className="rounded-xl border border-red-500/20 bg-[hsl(220,10%,8%)] p-3.5 hover:border-red-500/35 transition-colors">
                     <div className="flex items-center gap-3 mb-2.5">
-                      <div className={`w-9 h-9 ${kootBg} rounded-lg flex items-center justify-center border border-amber-500/25`}>
+                      <div className={`w-9 h-9 ${kootBg} rounded-lg flex items-center justify-center border border-red-500/25`}>
                         <KootIcon className={`w-4 h-4 ${kootColor}`} />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -956,7 +956,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                       </div>
                     </div>
 
-                    <div className="w-full bg-black/30 rounded-full h-2.5 overflow-hidden border border-amber-500/15">
+                    <div className="w-full bg-black/30 rounded-full h-2.5 overflow-hidden border border-red-500/15">
                       <div
                         className="h-full rounded-full transition-all duration-700 ease-out"
                         style={{ width: `${pct}%`, backgroundColor: score.color }}
@@ -969,7 +969,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
             </div>
 
             {overallScore && (
-              <div className="relative mt-5 pt-5 border-t border-amber-500/20">
+              <div className="relative mt-5 pt-5 border-t border-red-500/20">
                 <div className="flex items-center justify-between mb-2.5">
                   <span className="text-sm font-semibold text-white">Total Cosmic Score</span>
                   <div className="flex items-baseline gap-2">
@@ -977,7 +977,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                     <span className="text-xs text-neutral-500">/ {overallScore.maxScore}</span>
                   </div>
                 </div>
-                <div className="w-full bg-black/30 rounded-full h-3.5 overflow-hidden border border-amber-500/15">
+                <div className="w-full bg-black/30 rounded-full h-3.5 overflow-hidden border border-red-500/15">
                   <div
                     className="h-full rounded-full transition-all duration-700 ease-out"
                     style={{ width: `${(overallScore.score / overallScore.maxScore) * 100}%`, backgroundColor: overallScore.color }}
@@ -988,22 +988,22 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
           </div>
 
           {/* Compatibility Reading Guide */}
-          <div className="rounded-2xl border border-amber-500/20 bg-[hsl(24,16%,8%)] p-4 sm:p-5">
+          <div className="rounded-2xl border border-red-500/20 bg-[hsl(220,10%,8%)] p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-amber-300" />
+              <Sparkles className="w-4 h-4 text-red-300" />
               <h4 className="text-sm font-semibold text-white">How to read this match (simple)</h4>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="rounded-xl border border-amber-500/15 bg-[hsl(24,18%,9%)] p-3">
-                <div className="text-xs font-semibold text-amber-200 mb-1">1) Start with Total Score</div>
+              <div className="rounded-xl border border-red-500/15 bg-[hsl(220,10%,9%)] p-3">
+                <div className="text-xs font-semibold text-red-200 mb-1">1) Start with Total Score</div>
                 <p className="text-[11px] text-neutral-400 leading-relaxed">Above 70% usually means smoother daily compatibility. 55-70% is workable with communication. Below 55% needs conscious effort.</p>
               </div>
-              <div className="rounded-xl border border-amber-500/15 bg-[hsl(24,18%,9%)] p-3">
-                <div className="text-xs font-semibold text-amber-200 mb-1">2) Check low-scoring Kootas</div>
+              <div className="rounded-xl border border-red-500/15 bg-[hsl(220,10%,9%)] p-3">
+                <div className="text-xs font-semibold text-red-200 mb-1">2) Check low-scoring Kootas</div>
                 <p className="text-[11px] text-neutral-400 leading-relaxed">Focus on weaker factors first (especially Nadi, Bhakoot, Gana, Yoni). These point to potential friction patterns in lifestyle and temperament.</p>
               </div>
-              <div className="rounded-xl border border-amber-500/15 bg-[hsl(24,18%,9%)] p-3">
-                <div className="text-xs font-semibold text-amber-200 mb-1">3) Use it as guidance, not fear</div>
+              <div className="rounded-xl border border-red-500/15 bg-[hsl(220,10%,9%)] p-3">
+                <div className="text-xs font-semibold text-red-200 mb-1">3) Use it as guidance, not fear</div>
                 <p className="text-[11px] text-neutral-400 leading-relaxed">A match score is a map, not destiny. Strong communication, values, and timing can improve outcomes beyond raw numbers.</p>
               </div>
             </div>
@@ -1015,8 +1015,8 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
               { chart: matchedCharts.chart1, name: matchedCharts.chart1Name, symbol: '♂' },
               { chart: matchedCharts.chart2, name: matchedCharts.chart2Name, symbol: '♀' },
             ].map(({ chart, name, symbol }) => {
-              const panelClass = 'group relative rounded-2xl border border-amber-500/30 p-4 sm:p-5 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/15 overflow-hidden bg-amber-500/5 h-full';
-              const iconWrapClass = 'w-8 h-8 rounded-xl bg-gradient-to-br from-amber-500/25 to-orange-500/25 border border-amber-500/40 flex items-center justify-center';
+              const panelClass = 'group relative rounded-2xl border border-red-500/30 p-4 sm:p-5 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-red-500/15 overflow-hidden bg-red-500/5 h-full';
+              const iconWrapClass = 'w-8 h-8 rounded-xl bg-gradient-to-br from-red-500/25 to-red-500/25 border border-red-500/40 flex items-center justify-center';
 
               return (
               <div key={name} className={panelClass}>
@@ -1024,7 +1024,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                 <div className="relative">
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`${iconWrapClass} group-hover:scale-110 transition-transform`}>
-                      <span className="text-amber-300 font-bold text-xs leading-none flex items-center justify-center drop-shadow">{symbol}</span>
+                      <span className="text-red-300 font-bold text-xs leading-none flex items-center justify-center drop-shadow">{symbol}</span>
                     </div>
                     <div className="flex-1">
                       <h4 className="text-white font-bold text-base">{name}</h4>
@@ -1052,8 +1052,8 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
                               <span className="bg-neutral-700/50 px-2 py-0.5 rounded text-[9px] text-neutral-300 max-w-[110px] truncate">{p.nakshatra}</span>
                             )}
                             {p.retrograde && <span className="text-red-400 text-[10px] font-bold bg-red-500/20 px-1.5 py-0.5 rounded">R</span>}
-                            {p.exalted && <span className="text-amber-300 text-[10px] font-bold bg-amber-500/20 px-1.5 py-0.5 rounded">E</span>}
-                            {p.debilitated && <span className="text-orange-400 text-[10px] font-bold bg-orange-500/20 px-1.5 py-0.5 rounded">D</span>}
+                            {p.exalted && <span className="text-red-300 text-[10px] font-bold bg-red-500/20 px-1.5 py-0.5 rounded">E</span>}
+                            {p.debilitated && <span className="text-orange-400 text-[10px] font-bold bg-red-500/20 px-1.5 py-0.5 rounded">D</span>}
                           </div>
                         </div>
                       );
@@ -1068,10 +1068,10 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
 
       {/* Load Charts Modal */}
       {saveToast && (
-        <div role="status" aria-live="polite" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-4 py-2.5 bg-[hsl(220,10%,10%)] border border-amber-500/30 rounded-xl shadow-2xl text-sm text-amber-200 flex items-center gap-2">
+        <div role="status" aria-live="polite" className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-4 py-2.5 bg-[hsl(220,10%,10%)] border border-red-500/30 rounded-xl shadow-2xl text-sm text-red-200 flex items-center gap-2">
           <Save className="w-3.5 h-3.5" />
           {saveToast}
-          <button type="button" className="ml-1 h-8 w-8 inline-flex items-center justify-center rounded-lg text-amber-300 hover:text-amber-100 hover:bg-amber-500/10" onClick={() => setSaveToast(null)} aria-label="Dismiss save message">
+          <button type="button" className="ml-1 h-8 w-8 inline-flex items-center justify-center rounded-lg text-red-300 hover:text-red-100 hover:bg-red-500/10" onClick={() => setSaveToast(null)} aria-label="Dismiss save message">
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -1094,7 +1094,7 @@ export function KundaliMatcher({ savedCharts, onDeleteChart, onMatchComplete, on
 function getScoreColor(score: number, maxScore: number): string {
   const percentage = (score / maxScore) * 100;
   if (percentage >= 75) return '#fbbf24'; // amber
-  if (percentage >= 50) return '#f59e0b'; // amber
+  if (percentage >= 50) return '#ff3d3d'; // amber
   return '#ef4444'; // red
 }
 
@@ -1105,28 +1105,28 @@ function getCompatibilityLevel(score: number, maxScore: number) {
     return {
       label: 'Excellent Match',
       description: 'Highly compatible with strong astrological harmony',
-      gradient: 'from-amber-600/20 to-yellow-600/20',
-      badgeColor: 'bg-amber-600'
+      gradient: 'from-red-600/20 to-red-600/20',
+      badgeColor: 'bg-red-600'
     };
   } else if (percentage >= 60) {
     return {
       label: 'Good Match',
       description: 'Compatible with good potential for harmony',
-      gradient: 'from-amber-600/20 to-yellow-600/20',
-      badgeColor: 'bg-amber-600'
+      gradient: 'from-red-600/20 to-red-600/20',
+      badgeColor: 'bg-red-600'
     };
   } else if (percentage >= 40) {
     return {
       label: 'Moderate Match',
       description: 'Some compatibility, may require effort and understanding',
-      gradient: 'from-amber-600/20 to-orange-600/20',
-      badgeColor: 'bg-amber-600'
+      gradient: 'from-red-600/20 to-red-600/20',
+      badgeColor: 'bg-red-600'
     };
   } else {
     return {
       label: 'Challenging Match',
       description: 'Lower compatibility, requires conscious effort and compromise',
-      gradient: 'from-red-600/20 to-orange-600/20',
+      gradient: 'from-red-600/20 to-red-600/20',
       badgeColor: 'bg-red-600'
     };
   }

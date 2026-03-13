@@ -19,7 +19,7 @@ const LandingHeader = () => {
         <header className={cn(
             "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
             isScrolled 
-                ? "bg-[linear-gradient(180deg,rgba(20,13,7,0.96),rgba(13,9,5,0.94))] backdrop-blur-md border-b border-amber-500/20" 
+                ? "bg-[linear-gradient(180deg,rgba(10,10,12,0.96),rgba(8,8,10,0.94))] backdrop-blur-md border-b border-red-500/20" 
                 : "bg-transparent"
         )}>
             <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -32,13 +32,13 @@ const LandingHeader = () => {
 
                     {/* Navigation */}
                     <nav className="hidden md:flex items-center gap-8">
-                        <a href="#features" className="text-sm text-neutral-400 hover:text-amber-200 transition-colors">
+                        <a href="#features" className="text-sm text-neutral-400 hover:text-red-200 transition-colors">
                             Features
                         </a>
-                        <a href="#pricing" className="text-sm text-neutral-400 hover:text-amber-200 transition-colors">
+                        <a href="#pricing" className="text-sm text-neutral-400 hover:text-red-200 transition-colors">
                             Pricing
                         </a>
-                        <a href="#reviews" className="text-sm text-neutral-400 hover:text-amber-200 transition-colors">
+                        <a href="#reviews" className="text-sm text-neutral-400 hover:text-red-200 transition-colors">
                             Reviews
                         </a>
                     </nav>
@@ -49,11 +49,11 @@ const LandingHeader = () => {
                             asChild
                             variant="ghost"
                             size="sm"
-                            className="text-neutral-400 hover:text-amber-200 hover:bg-amber-500/10"
+                            className="text-neutral-400 hover:text-red-200 hover:bg-red-500/10"
                         >
                             <a href="https://auth.magnova.ai/astrova?redirect=https://astrova.magnova.ai/chart">Login</a>
                         </Button>
-                        <Button asChild size="sm" className="bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500">
+                        <Button asChild size="sm" className="bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500">
                             <a href="https://auth.magnova.ai/astrova?redirect=https://astrova.magnova.ai/chart">Get Started</a>
                         </Button>
                     </div>

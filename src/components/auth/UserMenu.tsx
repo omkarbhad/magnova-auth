@@ -98,8 +98,8 @@ export function UserMenu() {
               </div>
             </div>
             <div className="flex items-center gap-1.5 mt-2 px-0.5">
-              <Coins className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-amber-300 text-xs font-semibold">{liveCredits ?? astrovaUser.credits}</span>
+              <Coins className="w-3.5 h-3.5 text-red-400" />
+              <span className="text-red-300 text-xs font-semibold">{liveCredits ?? astrovaUser.credits}</span>
               <span className="text-neutral-500 text-[10px]">credits</span>
             </div>
           </div>

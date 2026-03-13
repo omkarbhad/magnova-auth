@@ -34,12 +34,12 @@ export function Header({
   }, [onToggleSidebar, onViewChange]);
 
   const navItems = [
-    { key: 'kundali' as const, label: 'Charts', icon: Calendar, activeColor: 'text-amber-400', activeBg: 'bg-amber-500/15 text-amber-300 shadow-sm shadow-amber-500/10' },
-    { key: 'matcher' as const, label: 'Matcher', icon: Heart, activeColor: 'text-amber-400', activeBg: 'bg-amber-500/15 text-amber-300 shadow-sm shadow-amber-500/10' },
+    { key: 'kundali' as const, label: 'Charts', icon: Calendar, activeColor: 'text-red-400', activeBg: 'bg-red-500/15 text-red-300 shadow-sm shadow-red-500/10' },
+    { key: 'matcher' as const, label: 'Matcher', icon: Heart, activeColor: 'text-red-400', activeBg: 'bg-red-500/15 text-red-300 shadow-sm shadow-red-500/10' },
   ];
 
   return (
-    <header className="sticky top-0 z-[60] w-full bg-[linear-gradient(180deg,rgba(20,13,7,0.96),rgba(13,9,5,0.94))] backdrop-blur-xl border-b border-amber-500/20 shadow-[0_6px_18px_rgba(0,0,0,0.22)]">
+    <header className="sticky top-0 z-[60] w-full bg-[linear-gradient(180deg,rgba(20,13,7,0.96),rgba(13,9,5,0.94))] backdrop-blur-xl border-b border-red-500/20 shadow-[0_6px_18px_rgba(0,0,0,0.22)]">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
@@ -53,7 +53,7 @@ export function Header({
           </div>
 
           {/* Center Nav - Icons only on mobile, full on desktop */}
-          <nav className="flex items-center gap-0.5 p-0.5 rounded-full bg-[hsl(24,18%,9%)] border border-amber-500/25">
+          <nav className="flex items-center gap-0.5 p-0.5 rounded-full bg-[hsl(220,10%,9%)] border border-red-500/25">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeView === item.key;
@@ -64,7 +64,7 @@ export function Header({
                   className={`flex items-center gap-1.5 px-3 sm:px-3 py-2 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 shrink-0 ${
                     isActive
                       ? item.activeBg
-                      : 'text-neutral-400 hover:text-amber-200 hover:bg-amber-500/10'
+                      : 'text-neutral-400 hover:text-red-200 hover:bg-red-500/10'
                   }`}
                   title={item.label}
                   aria-label={`Open ${item.label}`}
@@ -78,7 +78,7 @@ export function Header({
             {isAdmin && onOpenModelInfo && (
               <button
                 onClick={onOpenModelInfo}
-                className="flex items-center gap-1.5 px-3 sm:px-3 py-2 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 text-neutral-400 hover:text-amber-300 hover:bg-amber-500/10"
+                className="flex items-center gap-1.5 px-3 sm:px-3 py-2 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 text-neutral-400 hover:text-red-300 hover:bg-red-500/10"
                 title="Model Context Info"
                 aria-label="Open model context info"
               >
@@ -96,13 +96,13 @@ export function Header({
                 onClick={onToggleSidebar}
                 className={`flex items-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
                   sidebarOpen
-                    ? 'text-neutral-300 hover:text-amber-200 hover:bg-amber-500/12 border border-amber-500/25 hover:border-amber-500/40'
-                    : 'bg-amber-500/20 text-amber-300 shadow-sm shadow-amber-500/10 ring-1 ring-amber-500/30'
+                    ? 'text-neutral-300 hover:text-red-200 hover:bg-red-500/12 border border-red-500/25 hover:border-red-500/40'
+                    : 'bg-red-500/20 text-red-300 shadow-sm shadow-red-500/10 ring-1 ring-red-500/30'
                 }`}
                 title="Toggle Astrova AI"
                 aria-label="Toggle Astrova AI sidebar"
               >
-                <Sparkles className={`w-4 h-4 ${sidebarOpen ? 'text-amber-400 animate-pulse' : ''}`} />
+                <Sparkles className={`w-4 h-4 ${sidebarOpen ? 'text-red-400 animate-pulse' : ''}`} />
                 <span className="text-xs">AI</span>
               </button>
             )}
@@ -111,16 +111,16 @@ export function Header({
             {isAdmin && (
               <button
                 onClick={() => navigate('/admin')}
-                className="p-1.5 rounded-full text-neutral-500 hover:bg-amber-500/10 transition-all group"
+                className="p-1.5 rounded-full text-neutral-500 hover:bg-red-500/10 transition-all group"
                 title="Admin Panel"
                 aria-label="Open admin panel"
               >
-                <Shield className="w-3.5 h-3.5 text-amber-400 group-hover:text-amber-300" />
+                <Shield className="w-3.5 h-3.5 text-red-400 group-hover:text-red-300" />
               </button>
             )}
 
             {/* Divider */}
-            <div className="w-px h-5 bg-amber-500/20 mx-0.5 hidden sm:block" />
+            <div className="w-px h-5 bg-red-500/20 mx-0.5 hidden sm:block" />
 
             {/* User Menu */}
             <UserMenu />

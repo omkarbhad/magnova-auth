@@ -197,12 +197,12 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
     ? 'grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4'
     : 'grid grid-cols-1 sm:grid-cols-3 gap-4';
 
-  const cardClassName = `bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] rounded-xl ${compact ? 'p-3' : 'p-3'} border border-amber-500/15 hover:border-amber-500/30 transition-colors`;
-  const sectionIconWrapClass = 'w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0';
-  const sectionIconClass = 'w-4 h-4 text-amber-300';
+  const cardClassName = `bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] rounded-xl ${compact ? 'p-3' : 'p-3'} border border-red-500/15 hover:border-red-500/30 transition-colors`;
+  const sectionIconWrapClass = 'w-8 h-8 rounded-lg bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0';
+  const sectionIconClass = 'w-4 h-4 text-red-300';
   const sectionHintClass = 'text-xs text-neutral-400 mt-0.5';
   const selectLabelClass = 'block text-xs text-neutral-400 mb-1';
-  const selectControlClass = 'w-full h-9 bg-[hsl(24,18%,9%)] border border-amber-500/20 rounded-lg px-2 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-amber-500/25 focus:border-amber-500/40 appearance-none transition-colors';
+  const selectControlClass = 'w-full h-9 bg-[hsl(220,10%,9%)] border border-red-500/20 rounded-lg px-2 pr-8 text-sm text-white focus:outline-none focus:ring-1 focus:ring-red-500/25 focus:border-red-500/40 appearance-none transition-colors';
 
   // Dropdown option helpers
   const years = useMemo(() => {
@@ -248,8 +248,8 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
               <div className={sectionHintClass}>Birth date</div>
             </div>
           </div>
-          <div className="px-3 py-1.5 bg-amber-500/15 border border-amber-500/30 rounded-lg">
-            <div className={`${compact ? 'text-xs' : 'text-sm'} font-bold text-amber-300 tabular-nums`}>
+          <div className="px-3 py-1.5 bg-red-500/15 border border-red-500/30 rounded-lg">
+            <div className={`${compact ? 'text-xs' : 'text-sm'} font-bold text-red-300 tabular-nums`}>
               {localData.day}/{localData.month}/{localData.year}
             </div>
           </div>
@@ -317,7 +317,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                   onMouseUp={handleSliderEnd}
                   onTouchStart={handleSliderStart}
                   onTouchEnd={handleSliderEnd}
-                  className="w-full h-2 bg-amber-900/30 rounded-lg appearance-none cursor-pointer slider-amber"
+                  className="w-full h-2 bg-red-900/30 rounded-lg appearance-none cursor-pointer slider-red"
                 />
               </div>
               <div>
@@ -332,7 +332,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                   onMouseUp={handleSliderEnd}
                   onTouchStart={handleSliderStart}
                   onTouchEnd={handleSliderEnd}
-                  className="w-full h-2 bg-amber-900/30 rounded-lg appearance-none cursor-pointer slider-amber"
+                  className="w-full h-2 bg-red-900/30 rounded-lg appearance-none cursor-pointer slider-red"
                 />
               </div>
               <div>
@@ -347,7 +347,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                   onMouseUp={handleSliderEnd}
                   onTouchStart={handleSliderStart}
                   onTouchEnd={handleSliderEnd}
-                  className="w-full h-2 bg-amber-900/30 rounded-lg appearance-none cursor-pointer slider-amber"
+                  className="w-full h-2 bg-red-900/30 rounded-lg appearance-none cursor-pointer slider-red"
                 />
               </div>
             </div>
@@ -367,8 +367,8 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
               <div className={sectionHintClass}>Birth time</div>
             </div>
           </div>
-          <div className="px-3 py-1.5 bg-amber-500/15 border border-amber-500/30 rounded-lg">
-            <div className={`${compact ? 'text-xs' : 'text-sm'} font-bold text-amber-300 tabular-nums`}>
+          <div className="px-3 py-1.5 bg-red-500/15 border border-red-500/30 rounded-lg">
+            <div className={`${compact ? 'text-xs' : 'text-sm'} font-bold text-red-300 tabular-nums`}>
               {localData.hour.toString().padStart(2, '0')}:{localData.minute.toString().padStart(2, '0')}:{localData.second.toString().padStart(2, '0')}
             </div>
           </div>
@@ -436,7 +436,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                   onMouseUp={handleSliderEnd}
                   onTouchStart={handleSliderStart}
                   onTouchEnd={handleSliderEnd}
-                  className="w-full h-2 bg-amber-900/30 rounded-lg appearance-none cursor-pointer slider-amber"
+                  className="w-full h-2 bg-red-900/30 rounded-lg appearance-none cursor-pointer slider-red"
                 />
               </div>
               <div>
@@ -451,7 +451,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                   onMouseUp={handleSliderEnd}
                   onTouchStart={handleSliderStart}
                   onTouchEnd={handleSliderEnd}
-                  className="w-full h-2 bg-amber-900/30 rounded-lg appearance-none cursor-pointer slider-amber"
+                  className="w-full h-2 bg-red-900/30 rounded-lg appearance-none cursor-pointer slider-red"
                 />
               </div>
               <div>
@@ -466,7 +466,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                   onMouseUp={handleSliderEnd}
                   onTouchStart={handleSliderStart}
                   onTouchEnd={handleSliderEnd}
-                  className="w-full h-2 bg-amber-900/30 rounded-lg appearance-none cursor-pointer slider-amber"
+                  className="w-full h-2 bg-red-900/30 rounded-lg appearance-none cursor-pointer slider-red"
                 />
               </div>
             </div>
@@ -488,8 +488,8 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
               </div>
             </div>
             {locationName && (
-              <div className="px-3 py-2 bg-amber-500/15 border border-amber-500/30 rounded-lg w-full sm:w-auto sm:max-w-[180px] min-w-0">
-                <div className="text-xs font-bold text-amber-300 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
+              <div className="px-3 py-2 bg-red-500/15 border border-red-500/30 rounded-lg w-full sm:w-auto sm:max-w-[180px] min-w-0">
+                <div className="text-xs font-bold text-red-300 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
                   {locationName}
                 </div>
               </div>
@@ -509,7 +509,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                 onKeyDown={handleLocationKeyDown}
                 onFocus={() => setShowLocationResults(true)}
                 onBlur={() => window.setTimeout(() => setShowLocationResults(false), 200)}
-                className={`w-full h-10 sm:h-9 bg-[hsl(24,18%,9%)] border border-amber-500/20 rounded-lg pl-10 pr-10 text-sm text-white placeholder-white/40 focus:outline-none focus:border-amber-500/35 transition-colors`}
+                className={`w-full h-10 sm:h-9 bg-[hsl(220,10%,9%)] border border-red-500/20 rounded-lg pl-10 pr-10 text-sm text-white placeholder-white/40 focus:outline-none focus:border-red-500/35 transition-colors`}
                 aria-label="Search birth location"
                 autoComplete="off"
                 spellCheck={false}
@@ -525,7 +525,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                 <button
                   type="button"
                   onClick={clearLocation}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 inline-flex items-center justify-center rounded-lg hover:bg-amber-500/10 transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 inline-flex items-center justify-center rounded-lg hover:bg-red-500/10 transition-colors"
                   title="Clear location"
                   aria-label="Clear selected location"
                 >
@@ -535,7 +535,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
             </div>
 
             {showLocationResults && locationSearchResults.length > 0 && (
-              <div role="listbox" aria-label="Location suggestions" className="absolute z-[9999] w-full mt-2 bg-neutral-950/95 backdrop-blur-sm border border-amber-500/20 rounded-xl shadow-2xl max-h-64 overflow-y-auto">
+              <div role="listbox" aria-label="Location suggestions" className="absolute z-[9999] w-full mt-2 bg-neutral-950/95 backdrop-blur-sm border border-red-500/20 rounded-xl shadow-2xl max-h-64 overflow-y-auto">
                 <div className="p-2">
                   {locationSearchResults.map((result, idx) => {
                     const lat = typeof result.lat === 'string' ? parseFloat(result.lat) : result.lat;
@@ -578,8 +578,8 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
           {locationName && (
             <div className="mt-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-amber-500/15 border border-amber-500/30 rounded flex items-center justify-center">
-                  <MapPin className="w-3 h-3 text-amber-300" />
+                <div className="w-6 h-6 bg-red-500/15 border border-red-500/30 rounded flex items-center justify-center">
+                  <MapPin className="w-3 h-3 text-red-300" />
                 </div>
                 <div className="text-xs text-white/60 font-mono">
                   {localData.latitude.toFixed(4)}°, {localData.longitude.toFixed(4)}° • TZ {localData.tz_offset_hours > 0 ? '+' : ''}{localData.tz_offset_hours}
@@ -609,7 +609,7 @@ export function RealtimeControls({ data, onChange, showHeader = true, showLocati
                         lon: city.lon,
                       })
                     }
-                    className="h-8 px-2 text-xs bg-[hsl(24,18%,9%)] border border-amber-500/20 rounded-lg hover:bg-[hsl(24,20%,12%)] hover:border-amber-500/35 transition-all text-white/80 hover:text-white"
+                    className="h-8 px-2 text-xs bg-[hsl(220,10%,9%)] border border-red-500/20 rounded-lg hover:bg-[hsl(220,10%,12%)] hover:border-red-500/35 transition-all text-white/80 hover:text-white"
                   >
                     {city.name}
                   </button>

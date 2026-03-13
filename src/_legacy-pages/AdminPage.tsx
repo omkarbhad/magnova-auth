@@ -442,7 +442,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-[hsl(220,10%,6%)] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-amber-400 animate-spin" />
+        <Loader2 className="w-6 h-6 text-red-400 animate-spin" />
       </div>
     );
   }
@@ -512,7 +512,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                  activeTab === tab.key ? 'bg-amber-500/15 text-amber-300 shadow-sm shadow-amber-500/10' : 'text-neutral-500 hover:text-neutral-300'
+                  activeTab === tab.key ? 'bg-red-500/15 text-red-300 shadow-sm shadow-red-500/10' : 'text-neutral-500 hover:text-neutral-300'
                 }`}
               >
                 <tab.icon className="w-3.5 h-3.5" />
@@ -548,13 +548,13 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search articles..."
-                  className="w-full bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500/30"
+                  className="w-full bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-red-500/30"
                   aria-label="Search knowledge base articles"
                 />
               </div>
               <Button
                 onClick={() => setEditingArticle({ title: '', content: '', category: 'general', tags: [] })}
-                className="gap-1.5 bg-amber-400 text-black hover:bg-amber-300 text-xs font-medium"
+                className="gap-1.5 bg-red-400 text-black hover:bg-red-300 text-xs font-medium"
                 size="sm"
                 aria-label="Create new article"
               >
@@ -564,7 +564,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                 onClick={() => setShowArticleChat(!showArticleChat)}
                 variant="ghost"
                 size="sm"
-                className={`gap-1.5 text-xs font-medium h-9 px-3 ${showArticleChat ? 'text-amber-400 bg-amber-500/10' : 'text-neutral-500 hover:text-white'}`}
+                className={`gap-1.5 text-xs font-medium h-9 px-3 ${showArticleChat ? 'text-red-400 bg-red-500/10' : 'text-neutral-500 hover:text-white'}`}
                 aria-label="Toggle AI article assistant"
               >
                 <MessageSquare className="w-3.5 h-3.5" /> AI Assistant
@@ -584,7 +584,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                       onClick={handleSaveArticle}
                       size="sm"
                       disabled={saveStatus === 'saving'}
-                      className={`gap-1 text-xs h-8 ${saveStatus === 'saved' ? 'bg-amber-600 text-white' : saveStatus === 'error' ? 'bg-red-600' : 'bg-amber-400 text-black hover:bg-amber-300'}`}
+                      className={`gap-1 text-xs h-8 ${saveStatus === 'saved' ? 'bg-red-600 text-white' : saveStatus === 'error' ? 'bg-red-600' : 'bg-red-400 text-black hover:bg-red-300'}`}
                       aria-label="Save article"
                     >
                       <Save className="w-3 h-3" />
@@ -595,10 +595,10 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                 <div className="grid grid-cols-2 gap-3">
                   <input type="text" value={editingArticle.title || ''} onChange={e => setEditingArticle({ ...editingArticle, title: e.target.value })} placeholder="Title"
                     aria-label="Article title"
-                    className="bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/30" />
+                    className="bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-red-500/30" />
                   <select value={editingArticle.category || 'general'} onChange={e => setEditingArticle({ ...editingArticle, category: e.target.value })}
                     aria-label="Article category"
-                    className="bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500/30">
+                    className="bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500/30">
                     {['general', 'transits', 'nodes', 'doshas', 'dasha', 'planetary', 'yogas', 'nakshatra', 'houses', 'remedies', 'matching'].map(c => (
                       <option key={c} value={c}>{c}</option>
                     ))}
@@ -606,10 +606,10 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                 </div>
                 <textarea value={editingArticle.content || ''} onChange={e => setEditingArticle({ ...editingArticle, content: e.target.value })} placeholder="Article content..." rows={6}
                   aria-label="Article content"
-                  className="w-full bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/30 resize-y" />
+                  className="w-full bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-red-500/30 resize-y" />
                 <input type="text" value={(editingArticle.tags || []).join(', ')} onChange={e => setEditingArticle({ ...editingArticle, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} placeholder="Tags (comma-separated)"
                   aria-label="Article tags"
-                  className="w-full bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/30" />
+                  className="w-full bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-red-500/30" />
               </div>
             )}
 
@@ -620,7 +620,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                 <div className="text-center py-12 text-neutral-500 text-sm">{searchQuery ? 'No articles match your search' : 'No articles yet'}</div>
               ) : (
                 filteredArticles.map(article => (
-                  <div key={article.id} className="bg-[hsl(220,10%,8%)]/40 border border-[hsl(220,8%,16%)] rounded-xl p-3.5 hover:border-amber-500/20 transition-colors group">
+                  <div key={article.id} className="bg-[hsl(220,10%,8%)]/40 border border-[hsl(220,8%,16%)] rounded-xl p-3.5 hover:border-red-500/20 transition-colors group">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
@@ -643,7 +643,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                             const chatUrl = `/chart?openChat=true&prompt=${encodeURIComponent(`Tell me about: ${article.title}\n\nContext: ${article.content.slice(0, 300)}`)}`;
                             navigate(chatUrl);
                           }}
-                          variant="ghost" size="sm" className="h-8 px-2 text-neutral-500 hover:text-amber-400 text-[10px] gap-1"
+                          variant="ghost" size="sm" className="h-8 px-2 text-neutral-500 hover:text-red-400 text-[10px] gap-1"
                           title="Open in AI Chat"
                           aria-label="Open article context in AI chat"
                         >
@@ -674,8 +674,8 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
               <div className="px-3 py-3 border-b border-[hsl(220,8%,18%)] space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-500/30 flex items-center justify-center">
-                      <BookOpen className="w-4 h-4 text-amber-300" />
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500/20 to-red-500/20 border border-red-500/30 flex items-center justify-center">
+                      <BookOpen className="w-4 h-4 text-red-300" />
                     </div>
                     <div>
                       <span className="text-white text-sm font-semibold">Article Assistant</span>
@@ -705,8 +705,8 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
               <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
                 {articleChatMessages.length === 0 && (
                   <div className="text-center py-8 space-y-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/10 to-yellow-500/10 border border-amber-500/20 flex items-center justify-center mx-auto">
-                      <FileText className="w-6 h-6 text-amber-300/70" />
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500/10 to-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
+                      <FileText className="w-6 h-6 text-red-300/70" />
                     </div>
                     <div>
                       <p className="text-neutral-300 text-sm font-medium">Article Assistant</p>
@@ -720,7 +720,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                         { q: 'Write about Pancha Mahapurusha Yogas with examples', icon: '⭐' },
                         { q: 'Improve and expand the existing article on Shadbala', icon: '🔧' },
                       ].map(({ q, icon }) => (
-                        <button key={q} onClick={() => sendArticleChatMessage(q)} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,20%)] text-neutral-400 text-xs hover:text-white hover:border-amber-500/25 transition-colors text-left">
+                        <button key={q} onClick={() => sendArticleChatMessage(q)} className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,20%)] text-neutral-400 text-xs hover:text-white hover:border-red-500/25 transition-colors text-left">
                           <span className="text-sm shrink-0">{icon}</span>
                           <span className="line-clamp-1">{q}</span>
                         </button>
@@ -738,8 +738,8 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                             {msg.attachments.map(att => (
                               <div key={att.id} className="flex items-center gap-1 px-2 py-1 rounded-lg bg-[hsl(220,10%,14%)] border border-[hsl(220,8%,22%)] text-[10px] text-neutral-400">
                                 {att.type === 'pdf' && <FileText className="w-3 h-3 text-red-400" />}
-                                {att.type === 'doc' && <FileText className="w-3 h-3 text-amber-300" />}
-                                {att.type === 'link' && <Globe className="w-3 h-3 text-amber-300" />}
+                                {att.type === 'doc' && <FileText className="w-3 h-3 text-red-300" />}
+                                {att.type === 'link' && <Globe className="w-3 h-3 text-red-300" />}
                                 <span className="truncate max-w-[120px]">{att.name}</span>
                               </div>
                             ))}
@@ -753,7 +753,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                       <div className="space-y-2 group/msg">
                         <div className="prose prose-invert prose-sm max-w-none text-sm text-neutral-300 leading-relaxed [&_h1]:text-white [&_h1]:text-base [&_h1]:font-semibold [&_h2]:text-white [&_h2]:text-sm [&_h2]:font-semibold [&_p]:text-neutral-300 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:text-neutral-300 [&_strong]:text-white [&_strong]:font-semibold">
                           <ReactMarkdown>{msg.content}</ReactMarkdown>
-                          {msg.isStreaming && <span className="inline-block w-1.5 h-4 bg-amber-400/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />}
+                          {msg.isStreaming && <span className="inline-block w-1.5 h-4 bg-red-400/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />}
                         </div>
                         
                         {/* Copy button - hover reveal */}
@@ -764,7 +764,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                               className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-neutral-500 hover:text-white hover:bg-white/5 transition-all"
                               aria-label="Copy assistant message"
                             >
-                              {msg.id && copiedMessageId === msg.id ? <CheckIcon className="w-3 h-3 text-amber-300" /> : <Copy className="w-3 h-3" />}
+                              {msg.id && copiedMessageId === msg.id ? <CheckIcon className="w-3 h-3 text-red-300" /> : <Copy className="w-3 h-3" />}
                               {msg.id && copiedMessageId === msg.id ? 'Copied' : 'Copy'}
                             </button>
                           </div>
@@ -782,7 +782,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                                   setDeleteToast(`Saved article: "${parsed.title}"`);
                                   setTimeout(() => setDeleteToast(null), 3000);
                                 }}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/20 transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-medium hover:bg-red-500/20 transition-colors"
                                 aria-label="Save generated article to knowledge base"
                               >
                                 <Save className="w-3.5 h-3.5" /> Save to KB
@@ -792,7 +792,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                                   setEditingArticle({ title: parsed.title, content: parsed.content, category: parsed.category, tags: parsed.tags });
                                   setShowArticleChat(false);
                                 }}
-                                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-medium hover:bg-amber-500/20 transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-medium hover:bg-red-500/20 transition-colors"
                                 aria-label="Edit generated article before saving"
                               >
                                 <FileText className="w-3.5 h-3.5" /> Edit first
@@ -809,11 +809,11 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                 {articleChatLoading && !articleChatMessages.some(m => m.isStreaming) && (
                   <div className="flex items-center gap-2 py-2">
                     <img src="/star.png" alt="" className="w-5 h-5 animate-spin-slow" />
-                    <span className="text-amber-300/70 text-sm">Thinking</span>
+                    <span className="text-red-300/70 text-sm">Thinking</span>
                     <div className="flex items-center gap-0.5">
-                      <span className="w-1 h-1 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-1 h-1 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-1 h-1 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <span className="w-1 h-1 rounded-full bg-red-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1 h-1 rounded-full bg-red-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1 h-1 rounded-full bg-red-400 animate-bounce" style={{ animationDelay: '300ms' }} />
                     </div>
                   </div>
                 )}
@@ -827,8 +827,8 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                     {attachedFiles.map(file => (
                       <div key={file.id} className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[hsl(220,10%,12%)] border border-[hsl(220,8%,20%)] text-[10px]">
                         {file.type === 'pdf' && <FileText className="w-3 h-3 text-red-400" />}
-                        {file.type === 'doc' && <FileText className="w-3 h-3 text-amber-300" />}
-                        {file.type === 'link' && <Globe className="w-3 h-3 text-amber-300" />}
+                        {file.type === 'doc' && <FileText className="w-3 h-3 text-red-300" />}
+                        {file.type === 'link' && <Globe className="w-3 h-3 text-red-300" />}
                         <span className="text-neutral-400 truncate max-w-[100px]">{file.name}</span>
                         <button onClick={() => removeAttachment(file.id)} className="text-neutral-500 hover:text-red-400" aria-label={`Remove attachment ${file.name}`}>
                           <X className="w-3 h-3" />
@@ -851,7 +851,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                       placeholder="Ask AI to write an article..."
                       disabled={articleChatLoading}
                       rows={1}
-                      className="w-full bg-[hsl(220,10%,11%)] border border-[hsl(220,8%,20%)] rounded-2xl px-4 py-3 pr-20 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/40 focus:ring-2 focus:ring-amber-500/15 transition-all resize-none disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px] max-h-[120px]"
+                      className="w-full bg-[hsl(220,10%,11%)] border border-[hsl(220,8%,20%)] rounded-2xl px-4 py-3 pr-20 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-red-500/40 focus:ring-2 focus:ring-red-500/15 transition-all resize-none disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px] max-h-[120px]"
                       style={{ height: 'auto' }}
                       onInput={(e) => {
                         const target = e.target as HTMLTextAreaElement;
@@ -864,7 +864,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                       <button
                         type="button"
                         onClick={handleLinkAdd}
-                        className="p-1.5 rounded-lg text-neutral-500 hover:text-amber-300 hover:bg-amber-500/10 transition-all"
+                        className="p-1.5 rounded-lg text-neutral-500 hover:text-red-300 hover:bg-red-500/10 transition-all"
                         title="Add link"
                         aria-label="Attach link"
                       >
@@ -873,7 +873,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="p-1.5 rounded-lg text-neutral-500 hover:text-amber-300 hover:bg-amber-500/10 transition-all"
+                        className="p-1.5 rounded-lg text-neutral-500 hover:text-red-300 hover:bg-red-500/10 transition-all"
                         title="Attach file (PDF, DOC, TXT)"
                         aria-label="Attach file"
                       >
@@ -897,7 +897,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                     type={articleChatLoading ? 'button' : 'submit'}
                     disabled={!articleChatLoading && !articleChatInput.trim()}
                     onClick={articleChatLoading ? stopGeneration : undefined}
-                    className={`h-11 w-11 p-0 rounded-2xl border-0 disabled:opacity-30 disabled:cursor-not-allowed shrink-0 transition-all shadow-lg ${articleChatLoading ? 'bg-orange-600/70 hover:bg-orange-600 shadow-orange-600/20' : 'bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30'}`}
+                    className={`h-11 w-11 p-0 rounded-2xl border-0 disabled:opacity-30 disabled:cursor-not-allowed shrink-0 transition-all shadow-lg ${articleChatLoading ? 'bg-red-600/70 hover:bg-red-600 shadow-red-600/20' : 'bg-gradient-to-br from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 shadow-red-500/20 hover:shadow-xl hover:shadow-red-500/30'}`}
                   >
                     {articleChatLoading ? (
                       <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -922,9 +922,9 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
             <div className="bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold text-sm flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-400" /> Active Model for Users
+                  <Zap className="w-4 h-4 text-red-400" /> Active Model for Users
                 </h3>
-                {modelSaveStatus === 'saved' && <span className="text-amber-300 text-xs flex items-center gap-1"><Check className="w-3 h-3" /> Saved</span>}
+                {modelSaveStatus === 'saved' && <span className="text-red-300 text-xs flex items-center gap-1"><Check className="w-3 h-3" /> Saved</span>}
               </div>
               <div className="bg-[hsl(220,10%,10%)] rounded-lg p-3 border border-[hsl(220,8%,18%)]">
                 <div className="text-white font-mono text-sm">{selectedModel}</div>
@@ -949,7 +949,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                 <div className="space-y-2 max-h-[400px] overflow-y-auto">
                   {models.map(model => (
                     <div key={model.id} className={`flex items-center justify-between gap-3 p-3 rounded-lg border transition-colors ${
-                      selectedModel === model.model_id ? 'bg-amber-500/10 border-amber-500/30' : 'bg-[hsl(220,10%,10%)] border-[hsl(220,8%,16%)] hover:border-[hsl(220,8%,24%)]'
+                      selectedModel === model.model_id ? 'bg-red-500/10 border-red-500/30' : 'bg-[hsl(220,10%,10%)] border-[hsl(220,8%,16%)] hover:border-[hsl(220,8%,24%)]'
                     }`}>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -961,7 +961,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => handleToggleModel(model.id, !model.is_enabled)}
-                          className={`p-1 rounded-md transition-colors ${model.is_enabled ? 'text-amber-300 hover:bg-amber-500/10' : 'text-neutral-600 hover:bg-neutral-800'}`}
+                          className={`p-1 rounded-md transition-colors ${model.is_enabled ? 'text-red-300 hover:bg-red-500/10' : 'text-neutral-600 hover:bg-neutral-800'}`}
                           title={model.is_enabled ? 'Disable' : 'Enable'}
                           aria-label={model.is_enabled ? `Disable model ${model.display_name}` : `Enable model ${model.display_name}`}
                         >
@@ -972,7 +972,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                           disabled={selectedModel === model.model_id}
                           className={`px-2 py-1 rounded-md text-[10px] font-medium transition-colors ${
                             selectedModel === model.model_id
-                              ? 'bg-amber-500/20 text-amber-300 cursor-default'
+                              ? 'bg-red-500/20 text-red-300 cursor-default'
                               : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white'
                           }`}
                         >
@@ -1003,7 +1003,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                   onClick={handleFetchOpenRouterModels}
                   disabled={fetchingOpenRouter}
                   size="sm"
-                  className="gap-1.5 bg-amber-400 text-black hover:bg-amber-300 text-xs font-medium"
+                  className="gap-1.5 bg-red-400 text-black hover:bg-red-300 text-xs font-medium"
                 >
                   {fetchingOpenRouter ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                   {fetchingOpenRouter ? 'Fetching...' : 'Fetch Models'}
@@ -1020,7 +1020,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                       value={modelSearchQuery}
                       onChange={e => setModelSearchQuery(e.target.value)}
                       placeholder="Search models..."
-                      className="w-full bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-amber-500/30"
+                      className="w-full bg-[hsl(220,10%,10%)] border border-[hsl(220,8%,18%)] rounded-lg pl-10 pr-4 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-red-500/30"
                       aria-label="Search OpenRouter models"
                     />
                   </div>
@@ -1058,12 +1058,12 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
             <div className="bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold text-sm flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-amber-400" /> Credit Costs
+                  <Coins className="w-4 h-4 text-red-400" /> Credit Costs
                 </h3>
                 <Button
                   onClick={handleSaveCreditSettings}
                   size="sm"
-                  className={`gap-1 text-xs ${creditSaveStatus === 'saved' ? 'bg-amber-600 text-white' : 'bg-amber-400 text-black hover:bg-amber-300'}`}
+                  className={`gap-1 text-xs ${creditSaveStatus === 'saved' ? 'bg-red-600 text-white' : 'bg-red-400 text-black hover:bg-red-300'}`}
                   aria-label="Save credit configuration"
                 >
                   {creditSaveStatus === 'saving' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
@@ -1082,7 +1082,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                       <div className="text-neutral-500 text-xs">{item.desc}</div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Coins className="w-3.5 h-3.5 text-amber-400" />
+                      <Coins className="w-3.5 h-3.5 text-red-400" />
                       <input
                         type="number"
                         min={0}
@@ -1147,7 +1147,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                   value={userSearchQuery}
                   onChange={e => setUserSearchQuery(e.target.value)}
                   placeholder="Search users..."
-                  className="w-full bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500/30"
+                  className="w-full bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-neutral-600 focus:outline-none focus:border-red-500/30"
                   aria-label="Search users"
                 />
               </div>
@@ -1163,7 +1163,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
               </div>
               <div className="bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl p-3">
                 <div className="text-neutral-500 text-[10px] mb-0.5">Admins</div>
-                <div className="text-xl font-bold text-amber-400">{allUsers.filter(u => u.role === 'admin').length}</div>
+                <div className="text-xl font-bold text-red-400">{allUsers.filter(u => u.role === 'admin').length}</div>
               </div>
               <div className="bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl p-3">
                 <div className="text-neutral-500 text-[10px] mb-0.5">Banned</div>
@@ -1171,7 +1171,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
               </div>
               <div className="bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl p-3">
                 <div className="text-neutral-500 text-[10px] mb-0.5">Total Credits Used</div>
-                <div className="text-xl font-bold text-amber-300">{allUsers.reduce((s, u) => s + (u.credits_used || 0), 0)}</div>
+                <div className="text-xl font-bold text-red-300">{allUsers.reduce((s, u) => s + (u.credits_used || 0), 0)}</div>
               </div>
             </div>
 
@@ -1191,7 +1191,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-white text-sm font-medium truncate">{u.display_name || u.email.split('@')[0]}</span>
-                            {u.role === 'admin' && <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 text-[9px] font-medium flex items-center gap-0.5"><ShieldCheck className="w-2.5 h-2.5" />ADMIN</span>}
+                            {u.role === 'admin' && <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 text-[9px] font-medium flex items-center gap-0.5"><ShieldCheck className="w-2.5 h-2.5" />ADMIN</span>}
                             {u.is_banned && <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 text-[9px] font-medium flex items-center gap-0.5"><Ban className="w-2.5 h-2.5" />BANNED</span>}
                           </div>
                           <div className="text-neutral-500 text-[10px] font-mono truncate">{u.email}</div>
@@ -1202,8 +1202,8 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                         {/* Credits display */}
                         <div className="text-center">
                           <div className="flex items-center gap-1">
-                            <Coins className="w-3 h-3 text-amber-400" />
-                            <span className="text-amber-300 text-sm font-bold">{u.credits}</span>
+                            <Coins className="w-3 h-3 text-red-400" />
+                            <span className="text-red-300 text-sm font-bold">{u.credits}</span>
                           </div>
                           <div className="text-neutral-600 text-[9px]">used: {u.credits_used || 0}</div>
                         </div>
@@ -1218,7 +1218,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                             className="w-16 h-7 bg-neutral-900 border border-neutral-700/50 rounded text-center text-xs text-white focus:outline-none focus:border-neutral-600"
                             aria-label={`Credit adjustment for ${u.display_name || u.email}`}
                           />
-                          <Button onClick={() => handleAddCredits(u.id)} size="sm" className="h-7 px-2 text-[10px] bg-amber-600/80 hover:bg-amber-600 text-white" aria-label={`Apply credit adjustment for ${u.display_name || u.email}`}>
+                          <Button onClick={() => handleAddCredits(u.id)} size="sm" className="h-7 px-2 text-[10px] bg-red-600/80 hover:bg-red-600 text-white" aria-label={`Apply credit adjustment for ${u.display_name || u.email}`}>
                             <Plus className="w-3 h-3" />
                           </Button>
                         </div>
@@ -1226,7 +1226,7 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                         {/* Role toggle */}
                         <button
                           onClick={() => handleSetRole(u.id, u.role === 'admin' ? 'user' : 'admin')}
-                          className={`p-1.5 rounded-md transition-colors ${u.role === 'admin' ? 'text-amber-400 hover:bg-amber-500/10' : 'text-neutral-600 hover:bg-neutral-800'}`}
+                          className={`p-1.5 rounded-md transition-colors ${u.role === 'admin' ? 'text-red-400 hover:bg-red-500/10' : 'text-neutral-600 hover:bg-neutral-800'}`}
                           title={u.role === 'admin' ? 'Remove admin' : 'Make admin'}
                           aria-label={u.role === 'admin' ? `Remove admin role from ${u.display_name || u.email}` : `Make ${u.display_name || u.email} an admin`}
                         >
@@ -1272,9 +1272,9 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
                   <div key={i} className="flex items-center justify-between py-2.5 border-b border-neutral-800/30 last:border-0">
                     <span className="text-neutral-500">{item.label}</span>
                     <span className={`font-mono text-[11px] flex items-center gap-1.5 ${
-                      'status' in item ? (item.status === 'green' ? 'text-amber-300' : 'text-red-400') : 'text-white'
+                      'status' in item ? (item.status === 'green' ? 'text-red-300' : 'text-red-400') : 'text-white'
                     }`}>
-                      {'status' in item && <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'green' ? 'bg-amber-300' : 'bg-red-400'}`} />}
+                      {'status' in item && <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'green' ? 'bg-red-300' : 'bg-red-400'}`} />}
                       {item.value}
                     </span>
                   </div>
@@ -1286,14 +1286,14 @@ The admin can then save it directly. Be concise, factual, and use proper Vedic a
             <div className="bg-[hsl(220,10%,8%)] border border-[hsl(220,8%,18%)] rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-white font-semibold text-sm flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-amber-400" /> AI System Prompt
+                  <MessageSquare className="w-4 h-4 text-red-400" /> AI System Prompt
                 </h3>
                 <button
                   onClick={() => { navigator.clipboard.writeText(buildSystemPrompt(null)); setCopiedMessageId('sys-prompt'); setTimeout(() => setCopiedMessageId(null), 2000); }}
                   className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-neutral-500 hover:text-white hover:bg-white/5 transition-all"
                   aria-label="Copy AI system prompt"
                 >
-                  {copiedMessageId === 'sys-prompt' ? <><Check className="w-3 h-3 text-amber-300" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                  {copiedMessageId === 'sys-prompt' ? <><Check className="w-3 h-3 text-red-300" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
                 </button>
               </div>
               <p className="text-neutral-500 text-[10px] mb-3">This is the base system prompt sent to the AI. Chart data, KB context, and match data are appended dynamically when available.</p>

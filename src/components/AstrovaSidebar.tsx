@@ -261,21 +261,21 @@ interface AstrovaSidebarProps {
 }
 
 const CHART_PROMPTS = [
-  { label: 'Overview', prompt: 'Give me a full overview of my birth chart', icon: Eye, color: 'text-amber-400' },
-  { label: 'Career', prompt: 'What does my chart say about my career?', icon: Briefcase, color: 'text-amber-300' },
-  { label: 'Love', prompt: 'Tell me about love and marriage in my chart', icon: HeartPulse, color: 'text-amber-300' },
-  { label: 'Health', prompt: 'What are the health indicators in my chart?', icon: Activity, color: 'text-amber-300' },
-  { label: 'Dasha', prompt: 'Analyze my current dasha period and antardashas', icon: Clock, color: 'text-amber-300' },
+  { label: 'Overview', prompt: 'Give me a full overview of my birth chart', icon: Eye, color: 'text-red-400' },
+  { label: 'Career', prompt: 'What does my chart say about my career?', icon: Briefcase, color: 'text-red-300' },
+  { label: 'Love', prompt: 'Tell me about love and marriage in my chart', icon: HeartPulse, color: 'text-red-300' },
+  { label: 'Health', prompt: 'What are the health indicators in my chart?', icon: Activity, color: 'text-red-300' },
+  { label: 'Dasha', prompt: 'Analyze my current dasha period and antardashas', icon: Clock, color: 'text-red-300' },
   { label: 'Strengths', prompt: 'Show me my planetary strengths (Shadbala)', icon: Dumbbell, color: 'text-orange-400' },
-  { label: 'Houses', prompt: 'Analyze my house strengths (Bhava Bala)', icon: Home, color: 'text-amber-300' },
-  { label: 'Remedies', prompt: 'What remedies do you suggest for my chart?', icon: Pill, color: 'text-amber-300' },
+  { label: 'Houses', prompt: 'Analyze my house strengths (Bhava Bala)', icon: Home, color: 'text-red-300' },
+  { label: 'Remedies', prompt: 'What remedies do you suggest for my chart?', icon: Pill, color: 'text-red-300' },
 ];
 
 const GENERAL_PROMPTS = [
-  { label: 'What is Vedic?', prompt: 'What is Vedic astrology and how is it different from Western astrology?', icon: Eye, color: 'text-amber-400' },
-  { label: 'Houses', prompt: 'Explain the 12 houses in Vedic astrology briefly', icon: Home, color: 'text-amber-300' },
-  { label: 'Planets', prompt: 'What do the 9 planets (Navagraha) signify in Vedic astrology?', icon: Activity, color: 'text-amber-300' },
-  { label: 'Doshas', prompt: 'What are common doshas like Mangal Dosha and Sade Sati?', icon: HeartPulse, color: 'text-amber-300' },
+  { label: 'What is Vedic?', prompt: 'What is Vedic astrology and how is it different from Western astrology?', icon: Eye, color: 'text-red-400' },
+  { label: 'Houses', prompt: 'Explain the 12 houses in Vedic astrology briefly', icon: Home, color: 'text-red-300' },
+  { label: 'Planets', prompt: 'What do the 9 planets (Navagraha) signify in Vedic astrology?', icon: Activity, color: 'text-red-300' },
+  { label: 'Doshas', prompt: 'What are common doshas like Mangal Dosha and Sade Sati?', icon: HeartPulse, color: 'text-red-300' },
 ];
 
 const LOGO_SRC = '/Logo.png';
@@ -980,7 +980,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
     return (
       <button
         onClick={onToggle}
-        className="fixed right-4 bottom-20 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 border border-amber-400/50 shadow-lg shadow-amber-500/25 flex items-center justify-center hover:scale-110 transition-all duration-200 group"
+        className="fixed right-4 bottom-20 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 border border-red-400/50 shadow-lg shadow-red-500/25 flex items-center justify-center hover:scale-110 transition-all duration-200 group"
         title="Open Astrova AI"
       >
         <img src={LOGO_SRC} alt="Astrova" className="w-6 h-6 object-contain group-hover:scale-105 transition-transform" />
@@ -994,12 +994,12 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
   }
 
   return (
-    <div className="flex flex-col h-full bg-[hsl(24,16%,8%)] backdrop-blur-xl border-l border-amber-500/20">
+    <div className="flex flex-col h-full bg-[hsl(220,10%,8%)] backdrop-blur-xl border-l border-red-500/20">
       {/* Sidebar Header */}
-      <div className="px-3 py-3 border-b border-amber-500/15 bg-[linear-gradient(120deg,rgba(245,158,11,0.08),rgba(249,115,22,0.03)_55%,transparent)]">
+      <div className="px-3 py-3 border-b border-red-500/15 bg-[linear-gradient(120deg,rgba(255,61,61,0.08),rgba(249,115,22,0.03)_55%,transparent)]">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-[hsl(24,18%,9%)] border border-amber-400/30 shadow-[0_0_0_1px_rgba(245,158,11,0.15)_inset] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-[hsl(220,10%,9%)] border border-red-400/30 shadow-[0_0_0_1px_rgba(255,61,61,0.15)_inset] flex items-center justify-center">
               <img src={LOGO_SRC} alt="Astrova logo" className="w-5 h-5 object-contain" />
             </div>
             <div>
@@ -1008,17 +1008,17 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                 {matchData ? (
                   <span className="flex items-center gap-1">
                     <span className="text-neutral-300">{matchData.chart1Name}</span>
-                    <Link2 className="w-3 h-3 text-amber-400" />
+                    <Link2 className="w-3 h-3 text-red-400" />
                     <span className="text-neutral-300">{matchData.chart2Name}</span>
                   </span>
                 ) : kundaliData ? (
                   <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block animate-pulse" />
-                    {chartName ? <span className="text-amber-300 font-medium">{chartName}</span> : <span className="text-neutral-400">{kundaliData.lagna.sign} Lagna</span>}
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block animate-pulse" />
+                    {chartName ? <span className="text-red-300 font-medium">{chartName}</span> : <span className="text-neutral-400">{kundaliData.lagna.sign} Lagna</span>}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 inline-block" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block" />
                     No chart loaded
                   </span>
                 )}
@@ -1057,7 +1057,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-2">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500/15 to-orange-500/15 border border-amber-500/20 flex items-center justify-center mb-3">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500/15 to-red-500/15 border border-red-500/20 flex items-center justify-center mb-3">
               <img src={LOGO_SRC} alt="Astrova" className="w-7 h-7 object-contain" />
             </div>
             <h3 className="text-white font-semibold text-base mb-1">Astrova</h3>
@@ -1075,7 +1075,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                     <button
                       key={qp.label}
                       onClick={() => sendMessage(qp.prompt)}
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[hsl(24,18%,9%)] border border-amber-500/15 text-neutral-300 text-[11px] font-medium hover:bg-[hsl(24,20%,12%)] hover:border-amber-500/25 hover:text-white transition-all duration-200 text-left group"
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[hsl(220,10%,9%)] border border-red-500/15 text-neutral-300 text-[11px] font-medium hover:bg-[hsl(220,10%,12%)] hover:border-red-500/25 hover:text-white transition-all duration-200 text-left group"
                     >
                       <Icon className={`w-3.5 h-3.5 ${qp.color} shrink-0 group-hover:scale-110 transition-transform`} />
                       <span>{qp.label}</span>
@@ -1091,7 +1091,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                 {/* User message */}
                 {msg.role === 'user' && (
                   <div className="flex flex-col items-end mb-3 gap-1">
-                    <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-md bg-[hsl(24,18%,11%)] border border-amber-500/15">
+                    <div className="max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-md bg-[hsl(24,18%,11%)] border border-red-500/15">
                       <p className="text-white/90 text-sm leading-relaxed">{msg.content}</p>
                     </div>
                   </div>
@@ -1101,7 +1101,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                 {msg.role === 'tool' && (
                   <div className="mb-2">
                     <div className="flex items-center gap-1.5 text-[10px]">
-                      <BookOpen className="w-3 h-3 text-amber-400" />
+                      <BookOpen className="w-3 h-3 text-red-400" />
                       <span className="text-neutral-400 font-medium">{msg.content}</span>
                     </div>
                   </div>
@@ -1112,24 +1112,24 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                   <div className="mb-4">
                     {/* Thinking tokens - collapsible */}
                     {msg.thinking && (
-                      <div className="mb-2 rounded-xl border border-amber-500/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.03)_55%,rgba(24,15,8,0.35))] px-2.5 py-2">
+                      <div className="mb-2 rounded-xl border border-red-500/20 bg-[linear-gradient(135deg,rgba(255,61,61,0.12),rgba(255,61,61,0.03)_55%,rgba(24,15,8,0.35))] px-2.5 py-2">
                         <button
                           onClick={() => toggleThinking(msg.id)}
                           className="w-full flex items-center justify-between gap-2 text-left"
                         >
                           <span className="inline-flex items-center gap-1.5 min-w-0">
                             <img src={THINKING_ICON_SRC} alt="" className={`w-3.5 h-3.5 object-contain ${msg.isStreaming ? 'animate-spin' : ''}`} style={msg.isStreaming ? { animationDuration: '2s' } : undefined} />
-                            <span className="text-xs text-amber-200">Thinking...</span>
-                            {msg.thinkingDuration ? <span className="text-[10px] text-amber-300/70">{msg.thinkingDuration}s</span> : null}
+                            <span className="text-xs text-red-200">Thinking...</span>
+                            {msg.thinkingDuration ? <span className="text-[10px] text-red-300/70">{msg.thinkingDuration}s</span> : null}
                           </span>
-                          <ChevronRight className={`w-3.5 h-3.5 text-amber-200/80 transition-transform ${expandedThinkingById[msg.id] ? 'rotate-90' : ''}`} />
+                          <ChevronRight className={`w-3.5 h-3.5 text-red-200/80 transition-transform ${expandedThinkingById[msg.id] ? 'rotate-90' : ''}`} />
                         </button>
                         {expandedThinkingById[msg.id] || msg.isStreaming ? (
-                          <div className="mt-2 rounded-lg bg-black/20 border border-amber-500/15 px-2.5 py-2 text-[11px] text-amber-50/85 leading-relaxed max-h-[170px] overflow-y-auto whitespace-pre-wrap">
+                          <div className="mt-2 rounded-lg bg-black/20 border border-red-500/15 px-2.5 py-2 text-[11px] text-red-50/85 leading-relaxed max-h-[170px] overflow-y-auto whitespace-pre-wrap">
                             {msg.thinking}
                           </div>
                         ) : (
-                          <p className="mt-1.5 text-[11px] text-amber-100/70 line-clamp-2">{msg.thinking}</p>
+                          <p className="mt-1.5 text-[11px] text-red-100/70 line-clamp-2">{msg.thinking}</p>
                         )}
                       </div>
                     )}
@@ -1144,23 +1144,23 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                           [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:mb-2 [&_ol]:text-sm
                           [&_li]:text-neutral-300 [&_li]:text-sm [&_li]:mb-1
                           [&_strong]:text-white [&_strong]:font-semibold
-                          [&_em]:text-amber-300
-                          [&_code]:text-amber-300 [&_code]:bg-[hsl(24,18%,11%)] [&_code]:px-1 [&_code]:rounded [&_code]:text-xs
-                          [&_pre]:bg-[hsl(24,18%,9%)] [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:overflow-x-auto
-                          [&_blockquote]:border-l-2 [&_blockquote]:border-amber-500/50 [&_blockquote]:pl-3 [&_blockquote]:text-neutral-400
+                          [&_em]:text-red-300
+                          [&_code]:text-red-300 [&_code]:bg-[hsl(24,18%,11%)] [&_code]:px-1 [&_code]:rounded [&_code]:text-xs
+                          [&_pre]:bg-[hsl(220,10%,9%)] [&_pre]:p-2 [&_pre]:rounded-lg [&_pre]:overflow-x-auto
+                          [&_blockquote]:border-l-2 [&_blockquote]:border-red-500/50 [&_blockquote]:pl-3 [&_blockquote]:text-neutral-400
                         "
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {msg.content}
                         </ReactMarkdown>
                         {msg.isStreaming && !msg.content && !msg.thinking && (
-                          <div className="flex items-center gap-1.5 text-[10px] text-amber-300/90">
+                          <div className="flex items-center gap-1.5 text-[10px] text-red-300/90">
                             <img src={THINKING_ICON_SRC} alt="" className="w-4 h-4 animate-spin" style={{ animationDuration: '2s' }} />
                             <span>Thinking...</span>
                           </div>
                         )}
                         {msg.isStreaming && msg.content && (
-                          <span className="inline-block w-1.5 h-4 bg-amber-400/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
+                          <span className="inline-block w-1.5 h-4 bg-red-400/70 animate-pulse ml-0.5 align-text-bottom rounded-sm" />
                         )}
                       </div>
                       {/* Copy + Retry buttons - hover reveal */}
@@ -1170,13 +1170,13 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
                             onClick={() => copyMessage(msg.id, msg.content)}
                             className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-neutral-500 hover:text-white hover:bg-white/5 transition-all"
                           >
-                            {copiedMessageId === msg.id ? <Check className="w-3 h-3 text-amber-300" /> : <Copy className="w-3 h-3" />}
+                            {copiedMessageId === msg.id ? <Check className="w-3 h-3 text-red-300" /> : <Copy className="w-3 h-3" />}
                             {copiedMessageId === msg.id ? 'Copied' : 'Copy'}
                           </button>
                           {msg.id.startsWith('error-') && (
                             <button
                               onClick={retryLastMessage}
-                              className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-neutral-500 hover:text-amber-300 hover:bg-amber-500/10 transition-all"
+                              className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-neutral-500 hover:text-red-300 hover:bg-red-500/10 transition-all"
                             >
                               <RefreshCw className="w-3 h-3" /> Retry
                             </button>
@@ -1197,7 +1197,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
           <div className="sticky bottom-2 flex justify-center pointer-events-none">
             <button
               onClick={scrollToBottom}
-              className="pointer-events-auto w-7 h-7 rounded-full bg-[hsl(24,18%,10%)] border border-amber-500/20 flex items-center justify-center hover:bg-[hsl(24,20%,13%)] transition-colors shadow-lg"
+              className="pointer-events-auto w-7 h-7 rounded-full bg-[hsl(220,10%,10%)] border border-red-500/20 flex items-center justify-center hover:bg-[hsl(24,20%,13%)] transition-colors shadow-lg"
             >
               <ChevronDown className="w-3.5 h-3.5 text-white" />
             </button>
@@ -1212,7 +1212,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
             Insufficient credits. Purchase more to continue.
           </div>
         )}
-        <div className="relative bg-[hsl(24,18%,9%)] border border-amber-500/20 rounded-[26px] focus-within:border-amber-500/40 focus-within:ring-2 focus-within:ring-amber-500/10 transition-all flex items-end shadow-[0_8px_26px_rgba(0,0,0,0.3)]">
+        <div className="relative bg-[hsl(220,10%,9%)] border border-red-500/20 rounded-[26px] focus-within:border-red-500/40 focus-within:ring-2 focus-within:ring-red-500/10 transition-all flex items-end shadow-[0_8px_26px_rgba(0,0,0,0.3)]">
           <textarea
             ref={inputRef}
             value={input}
@@ -1237,7 +1237,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
               <Button
                 type="submit"
                 disabled={!input.trim() || credits < creditCosts.AI_MESSAGE}
-                className="h-9 w-9 p-0 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 border-0 disabled:opacity-20 disabled:cursor-not-allowed shrink-0 transition-all"
+                className="h-9 w-9 p-0 rounded-full bg-gradient-to-br from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 border-0 disabled:opacity-20 disabled:cursor-not-allowed shrink-0 transition-all"
               >
                 <ArrowUp className="w-4 h-4" />
               </Button>

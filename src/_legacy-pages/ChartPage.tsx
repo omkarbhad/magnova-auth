@@ -189,11 +189,11 @@ function ChartPage() {
   );
 
   const actionButtonClass =
-    'gap-1 border border-amber-500/20 bg-[hsl(24,18%,9%)] text-white hover:bg-[hsl(24,20%,12%)] hover:border-amber-500/35 transition-all duration-200 h-9 px-3';
+    'gap-1 border border-red-500/20 bg-[hsl(220,10%,9%)] text-white hover:bg-[hsl(220,10%,12%)] hover:border-red-500/35 transition-all duration-200 h-9 px-3';
   const pageBannerClass =
-    'relative overflow-hidden rounded-2xl border border-amber-500/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.1),rgba(217,119,6,0.08),rgba(18,11,6,0.9))] p-5 sm:p-6';
+    'relative overflow-hidden rounded-2xl border border-red-500/20 bg-[linear-gradient(135deg,rgba(255,61,61,0.1),rgba(220,38,38,0.08),rgba(10,10,12,0.9))] p-5 sm:p-6';
   const summaryCardClass =
-    'bg-gradient-to-br from-amber-500/12 to-yellow-600/8 rounded-xl p-4 border border-amber-500/30 shadow-[0_8px_18px_rgba(0,0,0,0.18)] min-h-0 sm:min-h-[242px]';
+    'bg-gradient-to-br from-red-500/12 to-red-600/8 rounded-xl p-4 border border-red-500/30 shadow-[0_8px_18px_rgba(0,0,0,0.18)] min-h-0 sm:min-h-[242px]';
 
   // Reverse-geocode when we have coordinates but no location name
   useEffect(() => {
@@ -507,8 +507,8 @@ function ChartPage() {
         <CreditsProvider>
           <div className="min-h-screen flex flex-col bg-[hsl(220,10%,6%)]">
           {/* Background gradient */}
-          <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(245,158,11,0.06),transparent)] pointer-events-none" />
-          <div className="fixed inset-0 bg-[radial-gradient(circle_at_12%_28%,rgba(245,158,11,0.08),transparent_36%),radial-gradient(circle_at_85%_20%,rgba(249,115,22,0.07),transparent_35%),radial-gradient(circle_at_50%_100%,rgba(245,158,11,0.05),transparent_45%)] pointer-events-none" />
+          <div className="fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,61,61,0.06),transparent)] pointer-events-none" />
+          <div className="fixed inset-0 bg-[radial-gradient(circle_at_12%_28%,rgba(255,61,61,0.08),transparent_36%),radial-gradient(circle_at_85%_20%,rgba(249,115,22,0.07),transparent_35%),radial-gradient(circle_at_50%_100%,rgba(255,61,61,0.05),transparent_45%)] pointer-events-none" />
 
           <Header
             activeView={activeView}
@@ -547,11 +547,11 @@ function ChartPage() {
                       {/* Intro Banner */}
                       <div className="max-w-6xl mx-auto">
                         <div className={pageBannerClass}>
-                          <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-amber-400/15 blur-3xl" />
-                          <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-amber-300/10 blur-3xl" />
+                          <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-red-400/15 blur-3xl" />
+                          <div className="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-red-300/10 blur-3xl" />
                           <div className="relative">
                             <div className="flex items-center justify-center gap-3 mb-2">
-                              <Calendar className="w-6 h-6 text-amber-300" />
+                              <Calendar className="w-6 h-6 text-red-300" />
                               <h2 className="text-2xl font-bold text-white">Birth Chart Analysis</h2>
                             </div>
                             <p className="text-xs text-neutral-300 text-center">Generate your Vedic birth chart — all calculations run locally</p>
@@ -563,13 +563,13 @@ function ChartPage() {
                       {currentRequest && (
                         <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto">
                           {/* Birth Details Section */}
-                          <div className="bg-[linear-gradient(160deg,rgba(12,9,6,0.92),rgba(24,16,8,0.86))] rounded-2xl sm:rounded-3xl border border-amber-500/15 shadow-[0_12px_30px_rgba(0,0,0,0.3)] max-w-6xl mx-auto">
+                          <div className="bg-[linear-gradient(160deg,rgba(12,9,6,0.92),rgba(24,16,8,0.86))] rounded-2xl sm:rounded-3xl border border-red-500/15 shadow-[0_12px_30px_rgba(0,0,0,0.3)] max-w-6xl mx-auto">
                             {/* Header with controls */}
-                            <div className="flex flex-col gap-3 px-4 sm:px-6 py-3.5 sm:py-4.5 bg-[linear-gradient(120deg,rgba(19,12,7,0.92),rgba(32,20,10,0.86))] border-b border-amber-500/15 rounded-t-2xl sm:rounded-t-3xl">
+                            <div className="flex flex-col gap-3 px-4 sm:px-6 py-3.5 sm:py-4.5 bg-[linear-gradient(120deg,rgba(19,12,7,0.92),rgba(32,20,10,0.86))] border-b border-red-500/15 rounded-t-2xl sm:rounded-t-3xl">
                               <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0 shadow-inner shadow-amber-500/20">
-                                    <Calendar className="w-4 h-4 text-amber-300" />
+                                  <div className="w-9 h-9 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center shrink-0 shadow-inner shadow-red-500/20">
+                                    <Calendar className="w-4 h-4 text-red-300" />
                                   </div>
                                   <div>
                                     <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Birth Details</h3>
@@ -585,7 +585,7 @@ function ChartPage() {
                                       <>
                                         <div className="min-w-0">
                                           {nameInputError ? (
-                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-500/25 border border-yellow-500/40 text-yellow-200 rounded-lg text-xs font-medium animate-pulse h-9 sm:h-8" style={{ animationDuration: '2.5s' }}>
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/25 border border-red-500/40 text-yellow-200 rounded-lg text-xs font-medium animate-pulse h-9 sm:h-8" style={{ animationDuration: '2.5s' }}>
                                               <AlertTriangle className="w-3 h-3 shrink-0" />
                                               <span className="truncate">{!inlineSaveName.trim() ? 'Enter a name' : 'Name exists'}</span>
                                             </div>
@@ -602,12 +602,12 @@ function ChartPage() {
                                           ) : currentChartName ? (
                                             <button
                                               type="button"
-                                              className="flex w-full items-center gap-1.5 truncate px-2.5 py-1 bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-md text-xs font-medium cursor-pointer hover:bg-amber-500/25 transition-colors h-9 sm:h-8"
+                                              className="flex w-full items-center gap-1.5 truncate px-2.5 py-1 bg-red-500/20 border border-red-500/30 text-red-300 rounded-md text-xs font-medium cursor-pointer hover:bg-red-500/25 transition-colors h-9 sm:h-8"
                                               onClick={() => { setIsEditingName(true); setNameInputError(false); }}
                                               title={currentChartName}
                                               aria-label="Edit current chart name"
                                             >
-                                              {selectedChartId && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />}
+                                              {selectedChartId && <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />}
                                               <span className="truncate">{currentChartName}</span>
                                             </button>
                                           ) : (
@@ -655,7 +655,7 @@ function ChartPage() {
                                         aria-label="Chart name"
                                         className={`min-w-0 w-full px-2.5 py-1 bg-neutral-900/50 border rounded-lg text-xs font-medium focus:outline-none transition-all h-9 sm:h-8 ${
                                           nameInputError
-                                            ? 'border-yellow-500/50 text-yellow-200 placeholder-yellow-200/50 bg-yellow-500/10'
+                                            ? 'border-red-500/50 text-yellow-200 placeholder-yellow-200/50 bg-red-500/10'
                                             : 'border-neutral-700/60 text-white placeholder-white/40 focus:border-neutral-600/80'
                                         }`}
                                         autoFocus
@@ -670,8 +670,8 @@ function ChartPage() {
                                       variant="outline" size="sm" onClick={handleSaveChart}
                                       disabled={!kundaliData || !currentRequest || isLoading}
                                       className={`${actionButtonClass} px-3 h-9 ${(!kundaliData || !currentRequest) ? 'opacity-50 pointer-events-none' : ''} ${
-                                        saveButtonFlash === 'saved' ? 'bg-amber-500/20 border-amber-500/50 text-amber-200 animate-pulse' :
-                                        saveButtonFlash === 'error' ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-200 animate-pulse' : ''
+                                        saveButtonFlash === 'saved' ? 'bg-red-500/20 border-red-500/50 text-red-200 animate-pulse' :
+                                        saveButtonFlash === 'error' ? 'bg-red-500/20 border-red-500/50 text-yellow-200 animate-pulse' : ''
                                       }`}
                                       title={saveButtonFlash === 'saved' ? 'Saved' : 'Save chart'}
                                       aria-label={saveButtonFlash === 'saved' ? 'Saved chart' : 'Save chart'}
@@ -724,7 +724,7 @@ function ChartPage() {
                                       </Button>
 
                                       {/* Auto toggle */}
-                                      <label className="flex items-center justify-start gap-1.5 cursor-pointer h-9 px-3 rounded-lg bg-[hsl(24,18%,9%)] border border-amber-500/20 flex-shrink-0">
+                                      <label className="flex items-center justify-start gap-1.5 cursor-pointer h-9 px-3 rounded-lg bg-[hsl(220,10%,9%)] border border-red-500/20 flex-shrink-0">
                                         <span className="text-xs text-neutral-400">Auto</span>
                                         <div className="relative">
                                           <input
@@ -735,8 +735,8 @@ function ChartPage() {
                                             aria-label="Toggle auto update"
                                             aria-pressed={realtimeEnabled}
                                           />
-                                          <div className={`w-10 h-5 sm:w-8 sm:h-4 rounded-full transition-colors ${realtimeEnabled ? 'bg-amber-400' : 'bg-[hsl(24,18%,9%)] border border-amber-500/20'}`}>
-                                            <div className={`absolute top-0.5 left-0.5 w-4 h-4 sm:w-3 sm:h-3 rounded-full shadow transition-transform ${realtimeEnabled ? 'translate-x-5 sm:translate-x-4 bg-[hsl(24,16%,8%)]' : 'bg-neutral-400'}`} />
+                                          <div className={`w-10 h-5 sm:w-8 sm:h-4 rounded-full transition-colors ${realtimeEnabled ? 'bg-red-400' : 'bg-[hsl(220,10%,9%)] border border-red-500/20'}`}>
+                                            <div className={`absolute top-0.5 left-0.5 w-4 h-4 sm:w-3 sm:h-3 rounded-full shadow transition-transform ${realtimeEnabled ? 'translate-x-5 sm:translate-x-4 bg-[hsl(220,10%,8%)]' : 'bg-neutral-400'}`} />
                                           </div>
                                         </div>
                                       </label>
@@ -748,12 +748,12 @@ function ChartPage() {
                                         onClick={handleManualGenerate}
                                         disabled={realtimeEnabled || !currentRequest || isLoading}
                                         aria-label={realtimeEnabled ? 'Chart automatically generated' : (isLoading ? 'Generating chart' : 'Generate chart')}
-                                        className={`inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/40 focus-visible:ring-offset-0 disabled:pointer-events-none px-6 min-w-[120px] h-9 transition-all flex-shrink-0 font-medium ${
+                                        className={`inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/40 focus-visible:ring-offset-0 disabled:pointer-events-none px-6 min-w-[120px] h-9 transition-all flex-shrink-0 font-medium ${
                                           realtimeEnabled 
                                             ? 'bg-neutral-600/30 border-neutral-600/50 text-neutral-400 cursor-not-allowed' 
                                             : (!currentRequest || isLoading)
                                               ? 'bg-white/45 border-white/20 text-black/45 cursor-not-allowed'
-                                              : 'bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-white border-0'
+                                              : 'bg-gradient-to-r from-red-600 to-red-600 hover:from-red-500 hover:to-red-500 text-white border-0'
                                         }`}
                                       >
                                         <span className="text-xs font-semibold">
@@ -804,14 +804,14 @@ function ChartPage() {
                           {kundaliData && currentRequest && (
                             <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto">
                               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-                                <div className="bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] rounded-lg sm:rounded-xl p-3 sm:p-4 border border-amber-500/15 hover:border-amber-500/30 transition-colors flex flex-col shadow-[0_8px_20px_rgba(0,0,0,0.2)]">
+                                <div className="bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] rounded-lg sm:rounded-xl p-3 sm:p-4 border border-red-500/15 hover:border-red-500/30 transition-colors flex flex-col shadow-[0_8px_20px_rgba(0,0,0,0.2)]">
                                   <div className="flex-1 flex items-center justify-center">
                                     <NorthIndianChart data={kundaliData} chartType="rasi" />
                                   </div>
                                   <h3 className="text-sm sm:text-base font-medium text-center mt-2 sm:mt-3 text-white flex items-center justify-center gap-1">Lagna <span className="text-[11px] px-2.5 py-1 rounded-md bg-black/30 border border-white/10">D1</span></h3>
                                 </div>
 
-                                <div className="bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] rounded-lg sm:rounded-xl p-3 sm:p-4 border border-amber-500/15 hover:border-amber-500/30 transition-colors flex flex-col shadow-[0_8px_20px_rgba(0,0,0,0.2)]">
+                                <div className="bg-[linear-gradient(160deg,rgba(14,10,6,0.93),rgba(32,20,10,0.72))] rounded-lg sm:rounded-xl p-3 sm:p-4 border border-red-500/15 hover:border-red-500/30 transition-colors flex flex-col shadow-[0_8px_20px_rgba(0,0,0,0.2)]">
                                   <div className="flex-1 flex items-center justify-center">
                                     <NorthIndianChart data={kundaliData} chartType="navamsa" />
                                   </div>
@@ -820,27 +820,27 @@ function ChartPage() {
                               </div>
                               
                               {/* Ascendant & Dasha Info */}
-                              <div className="max-w-6xl mx-auto rounded-2xl border border-amber-500/20 bg-[linear-gradient(145deg,rgba(245,158,11,0.08),rgba(28,17,8,0.56))] p-3 sm:p-4 shadow-[0_12px_26px_rgba(0,0,0,0.22)]">
+                              <div className="max-w-6xl mx-auto rounded-2xl border border-red-500/20 bg-[linear-gradient(145deg,rgba(255,61,61,0.08),rgba(28,17,8,0.56))] p-3 sm:p-4 shadow-[0_12px_26px_rgba(0,0,0,0.22)]">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 place-items-stretch">
                                 {/* Ascendant Card */}
                                 <div className={summaryCardClass}>
                                   <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-6 h-6 rounded-lg bg-amber-500/30 flex items-center justify-center">
-                                      <span className="text-amber-300 text-sm font-bold">↑</span>
+                                    <div className="w-6 h-6 rounded-lg bg-red-500/30 flex items-center justify-center">
+                                      <span className="text-red-300 text-sm font-bold">↑</span>
                                     </div>
                                     <h4 className="text-sm font-semibold text-white">Ascendant (Lagna)</h4>
                                   </div>
                                   <div className="flex items-baseline gap-2">
                                     <span className="text-2xl font-bold text-white">{kundaliData.lagna.sign}</span>
-                                    <span className="text-sm text-amber-300">{kundaliData.lagna.sign_sanskrit}</span>
+                                    <span className="text-sm text-red-300">{kundaliData.lagna.sign_sanskrit}</span>
                                   </div>
                                   <div className="text-xs text-neutral-400 mt-1">
                                     {kundaliData.lagna.deg}°{kundaliData.lagna.min}'{kundaliData.lagna.sec}"
                                   </div>
-                                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 pt-3 border-t border-amber-500/20">
+                                  <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 pt-3 border-t border-red-500/20">
                                     <div className="text-xs"><span className="text-neutral-500">Moon:</span> <span className="text-white font-medium">{kundaliData.planets.Moon?.sign || '—'}</span></div>
                                     <div className="text-xs"><span className="text-neutral-500">Sun:</span> <span className="text-white font-medium">{kundaliData.planets.Sun?.sign || '—'}</span></div>
-                                    <div className="text-xs"><span className="text-neutral-500">Nakshatra:</span> <span className="text-amber-300 font-medium">{kundaliData.planets.Moon?.nakshatra || kundaliData.dasha?.moon_nakshatra_name || '—'}</span></div>
+                                    <div className="text-xs"><span className="text-neutral-500">Nakshatra:</span> <span className="text-red-300 font-medium">{kundaliData.planets.Moon?.nakshatra || kundaliData.dasha?.moon_nakshatra_name || '—'}</span></div>
                                     <div className="text-xs"><span className="text-neutral-500">Pada:</span> <span className="text-white font-medium">{kundaliData.planets.Moon?.nakshatra_pada || kundaliData.dasha?.moon_nakshatra_pada || '—'}</span></div>
                                   </div>
                                 </div>
@@ -848,8 +848,8 @@ function ChartPage() {
                                 {/* Upagraha Card */}
                                 <div className={summaryCardClass}>
                                     <div className="flex items-center gap-2 mb-3">
-                                      <div className="w-6 h-6 rounded-lg bg-amber-500/30 flex items-center justify-center">
-                                        <Orbit className="w-3.5 h-3.5 text-amber-100" />
+                                      <div className="w-6 h-6 rounded-lg bg-red-500/30 flex items-center justify-center">
+                                        <Orbit className="w-3.5 h-3.5 text-red-100" />
                                       </div>
                                       <h4 className="text-sm font-semibold text-white">Grahas & Upagrahas</h4>
                                     </div>
@@ -858,30 +858,30 @@ function ChartPage() {
                                         {GRAHA_DISPLAY_ORDER.filter((name) => Boolean(kundaliData.planets?.[name])).map((name) => {
                                           const graha = kundaliData.planets?.[name];
                                           return (
-                                            <div key={`graha-${name}`} className="flex items-center justify-between text-xs rounded-md px-2 py-1 bg-amber-500/10 border border-amber-500/20">
+                                            <div key={`graha-${name}`} className="flex items-center justify-between text-xs rounded-md px-2 py-1 bg-red-500/10 border border-red-500/20">
                                               <div className="flex items-center gap-1.5">
-                                                <span className="text-amber-200 font-semibold">{graha?.symbol || name.slice(0, 2)}</span>
+                                                <span className="text-red-200 font-semibold">{graha?.symbol || name.slice(0, 2)}</span>
                                                 <span className="text-white">{name}</span>
                                               </div>
-                                              <span className="text-amber-100/90">{graha?.sign} {graha?.deg}°{graha?.min}'</span>
+                                              <span className="text-red-100/90">{graha?.sign} {graha?.deg}°{graha?.min}'</span>
                                             </div>
                                           );
                                         })}
                                         {UPAGRAHA_DISPLAY_ORDER.filter((name) => Boolean(kundaliData.upagrahas[name])).map((name) => {
                                           const upa = kundaliData.upagrahas[name];
                                           return (
-                                            <div key={name} className="flex items-center justify-between text-xs rounded-md px-2 py-1 bg-black/20 border border-amber-500/15">
+                                            <div key={name} className="flex items-center justify-between text-xs rounded-md px-2 py-1 bg-black/20 border border-red-500/15">
                                               <div className="flex items-center gap-1.5">
-                                                <span className="text-amber-300 font-medium">{upa?.symbol || name.slice(0, 2)}</span>
+                                                <span className="text-red-300 font-medium">{upa?.symbol || name.slice(0, 2)}</span>
                                                 <span className="text-white">{name}</span>
                                               </div>
-                                              <span className="text-amber-100/90">{upa?.sign} {upa?.deg}°{upa?.min}'</span>
+                                              <span className="text-red-100/90">{upa?.sign} {upa?.deg}°{upa?.min}'</span>
                                             </div>
                                           );
                                         })}
                                       </div>
                                     ) : (
-                                      <div className="h-[180px] sm:h-[212px] rounded-lg border border-amber-500/20 bg-amber-500/5 text-neutral-400 text-xs flex items-center justify-center text-center px-3">
+                                      <div className="h-[180px] sm:h-[212px] rounded-lg border border-red-500/20 bg-red-500/5 text-neutral-400 text-xs flex items-center justify-center text-center px-3">
                                         No graha/upagraha data for this chart.
                                       </div>
                                     )}
@@ -905,8 +905,8 @@ function ChartPage() {
                                   return (
                                     <div className={summaryCardClass}>
                                       <div className="flex items-center gap-2 mb-3">
-                                        <div className="w-6 h-6 rounded-lg bg-amber-500/30 flex items-center justify-center">
-                                          <span className="text-amber-300 text-xs font-bold">D</span>
+                                        <div className="w-6 h-6 rounded-lg bg-red-500/30 flex items-center justify-center">
+                                          <span className="text-red-300 text-xs font-bold">D</span>
                                         </div>
                                         <h4 className="text-sm font-semibold text-white">Vimshottari Dasha</h4>
                                       </div>
@@ -918,7 +918,7 @@ function ChartPage() {
                                             <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Mahadasha</span>
                                             <div className="text-lg font-bold text-white">{kundaliData.dasha.current_dasha}</div>
                                           </div>
-                                          <div className="text-right text-[10px] text-amber-300/70 space-y-0.5">
+                                          <div className="text-right text-[10px] text-red-300/70 space-y-0.5">
                                             <div><span className="text-neutral-500">Start:</span> {formatDashaDate(currentPeriod?.start_date)}</div>
                                             <div><span className="text-neutral-500">End:</span> {formatDashaDate(currentPeriod?.end_date)}</div>
                                           </div>
@@ -926,12 +926,12 @@ function ChartPage() {
                                         
                                         {/* Antardasha */}
                                         {currentAD && (
-                                          <div className="pt-2 border-t border-amber-500/20 flex items-center justify-between">
+                                          <div className="pt-2 border-t border-red-500/20 flex items-center justify-between">
                                             <div>
                                               <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Antardasha</span>
-                                              <div className="text-base font-semibold text-amber-200">{currentAD.planet}</div>
+                                              <div className="text-base font-semibold text-red-200">{currentAD.planet}</div>
                                             </div>
-                                            <div className="text-right text-[10px] text-amber-300/60 space-y-0.5">
+                                            <div className="text-right text-[10px] text-red-300/60 space-y-0.5">
                                               <div><span className="text-neutral-500">Start:</span> {formatDashaDate(currentAD.start_date)}</div>
                                               <div><span className="text-neutral-500">End:</span> {formatDashaDate(currentAD.end_date)}</div>
                                             </div>
@@ -940,12 +940,12 @@ function ChartPage() {
                                         
                                         {/* Pratyantardasha */}
                                         {currentPAD && (
-                                          <div className="pt-2 border-t border-amber-500/20 flex items-center justify-between">
+                                          <div className="pt-2 border-t border-red-500/20 flex items-center justify-between">
                                             <div>
                                               <span className="text-[10px] text-neutral-500 uppercase tracking-wider">Pratyantardasha</span>
-                                              <div className="text-sm font-medium text-amber-300">{currentPAD.planet}</div>
+                                              <div className="text-sm font-medium text-red-300">{currentPAD.planet}</div>
                                             </div>
-                                            <div className="text-right text-[10px] text-amber-300/50 space-y-0.5">
+                                            <div className="text-right text-[10px] text-red-300/50 space-y-0.5">
                                               <div><span className="text-neutral-500">Start:</span> {formatDashaDate(currentPAD.start_date)}</div>
                                               <div><span className="text-neutral-500">End:</span> {formatDashaDate(currentPAD.end_date)}</div>
                                             </div>
@@ -953,7 +953,7 @@ function ChartPage() {
                                         )}
                                         
                                         {/* Nakshatra info */}
-                                        <div className="pt-2 border-t border-amber-500/20 text-xs text-neutral-400">
+                                        <div className="pt-2 border-t border-red-500/20 text-xs text-neutral-400">
                                           Moon in {kundaliData.dasha.moon_nakshatra_name} (Pada {kundaliData.dasha.moon_nakshatra_pada})
                                         </div>
                                       </div>
@@ -968,7 +968,7 @@ function ChartPage() {
                       )}
 
                       {!currentRequest && (
-                        <div className="bg-[hsl(24,16%,8%)]/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-amber-500/15 flex flex-col max-w-6xl mx-auto">
+                        <div className="bg-[hsl(220,10%,8%)]/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-red-500/15 flex flex-col max-w-6xl mx-auto">
                           <h2 className="text-base sm:text-xl font-medium text-center mb-3 sm:mb-4 text-white">North Indian Chart</h2>
                           <div className="flex-1 flex items-center justify-center py-8">
                             <div className="text-neutral-400 text-sm">Generate birth chart to view chart</div>
@@ -978,16 +978,16 @@ function ChartPage() {
 
                       {kundaliData && (
                         <div className="max-w-6xl mx-auto">
-                          <div className="rounded-2xl p-4 sm:p-5 border border-amber-500/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.1),rgba(249,115,22,0.08),rgba(16,10,6,0.92))] shadow-[0_10px_25px_rgba(0,0,0,0.25)]">
+                          <div className="rounded-2xl p-4 sm:p-5 border border-red-500/20 bg-[linear-gradient(135deg,rgba(255,61,61,0.1),rgba(249,115,22,0.08),rgba(16,10,6,0.92))] shadow-[0_10px_25px_rgba(0,0,0,0.25)]">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                               <div className="text-center sm:text-left">
-                                <p className="text-[11px] uppercase tracking-[0.12em] text-amber-300/80">Birth Chart Analysis</p>
+                                <p className="text-[11px] uppercase tracking-[0.12em] text-red-300/80">Birth Chart Analysis</p>
                                 <p className="text-white font-semibold text-sm sm:text-base mt-0.5">{kundaliData.birth.date} • {kundaliData.birth.time}</p>
                               </div>
                               <div className="flex flex-wrap items-center gap-1.5 sm:justify-end text-xs justify-center">
                                 <span className="px-2.5 py-1 rounded-md bg-black/25 border border-white/10 text-neutral-200 inline-flex items-center gap-1.5"><Clock3 className="w-3 h-3" />TZ {kundaliData.birth.tz_offset_hours}h</span>
                                 {kundaliData.birth.dst_applied && (
-                                  <span className="px-2 py-1 rounded-md bg-amber-500/20 border border-amber-500/50 text-amber-300 font-medium">
+                                  <span className="px-2 py-1 rounded-md bg-red-500/20 border border-red-500/50 text-red-300 font-medium">
                                     DST +{kundaliData.birth.dst_adjustment_hours}h
                                   </span>
                                 )}
@@ -1114,13 +1114,13 @@ function ChartPage() {
 
             {showModelInfo && isAdmin && (
               <div className="fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-3 sm:p-6">
-                <div role="dialog" aria-modal="true" aria-label="Model context" className="w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl border border-amber-500/20 bg-[hsl(24,16%,8%)]" onMouseDown={(e) => e.stopPropagation()}>
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-amber-500/15">
+                <div role="dialog" aria-modal="true" aria-label="Model context" className="w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl border border-red-500/20 bg-[hsl(220,10%,8%)]" onMouseDown={(e) => e.stopPropagation()}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-red-500/15">
                     <h3 className="text-white font-semibold text-sm sm:text-base">Model Context (Current Session)</h3>
                     <button
                       type="button"
                       onClick={() => setShowModelInfo(false)}
-                      className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-amber-500/10"
+                      className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-red-500/10"
                       title="Close"
                       aria-label="Close model context"
                     >
@@ -1166,20 +1166,20 @@ function ChartPage() {
           </div>
 
           {/* Footer */}
-          <footer className="mt-auto border-t border-amber-500/15 bg-[hsl(220,10%,5%)]">
+          <footer className="mt-auto border-t border-red-500/15 bg-[hsl(220,10%,5%)]">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-5">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <img src="/astrova_logo.png" alt="Astrova" className="w-5 h-5 opacity-60" />
                   <span className="text-sm font-semibold text-neutral-400">Astrova</span>
-                  <span className="text-amber-500/35">·</span>
+                  <span className="text-red-500/35">·</span>
                   <span className="text-xs text-neutral-500">Vedic Birth Chart Generator</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-neutral-600">© {new Date().getFullYear()} Astrova</span>
-                  <span className="text-amber-500/35">·</span>
-                  <a href="mailto:support@astrova.app?subject=Privacy%20Policy" className="text-xs text-neutral-500 hover:text-amber-300 transition-colors">Privacy</a>
-                  <a href="mailto:support@astrova.app?subject=Terms%20of%20Service" className="text-xs text-neutral-500 hover:text-amber-300 transition-colors">Terms</a>
+                  <span className="text-red-500/35">·</span>
+                  <a href="mailto:support@astrova.app?subject=Privacy%20Policy" className="text-xs text-neutral-500 hover:text-red-300 transition-colors">Privacy</a>
+                  <a href="mailto:support@astrova.app?subject=Terms%20of%20Service" className="text-xs text-neutral-500 hover:text-red-300 transition-colors">Terms</a>
                 </div>
               </div>
             </div>
@@ -1200,7 +1200,7 @@ function ChartPage() {
 
           {/* Delete Toast */}
           {deleteToast && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-4 py-2.5 bg-[hsl(24,18%,9%)] border border-amber-500/25 rounded-xl shadow-2xl text-sm text-white flex items-center gap-2" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-4 py-2.5 bg-[hsl(220,10%,9%)] border border-red-500/25 rounded-xl shadow-2xl text-sm text-white flex items-center gap-2" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
               <Trash2 className="w-3.5 h-3.5 text-red-400" />
               {deleteToast}
               <button type="button" className="ml-1 h-8 w-8 inline-flex items-center justify-center rounded-lg text-neutral-400 hover:text-white hover:bg-white/5" onClick={() => setDeleteToast(null)} aria-label="Dismiss delete message">
@@ -1211,7 +1211,7 @@ function ChartPage() {
 
           {/* Matcher Save Error Toast */}
           {matcherSaveError && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-4 py-2.5 bg-[hsl(24,18%,9%)] border border-red-500/40 rounded-xl shadow-2xl text-sm text-red-200 flex items-center gap-2" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] px-4 py-2.5 bg-[hsl(220,10%,9%)] border border-red-500/40 rounded-xl shadow-2xl text-sm text-red-200 flex items-center gap-2" style={{ animation: 'fadeInUp 0.3s ease-out' }}>
               <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
               {matcherSaveError}
               <button type="button" className="ml-1 h-8 w-8 inline-flex items-center justify-center rounded-lg text-red-300 hover:text-red-100 hover:bg-red-500/10" onClick={() => setMatcherSaveError(null)} aria-label="Dismiss matcher save error">

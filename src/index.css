@@ -67,32 +67,32 @@
   --border: 220 8% 18%;
   --input: 220 10% 14%;
 
-  /* Primary - Warm Amber Gold */
-  --primary: 36 95% 50%;
-  --primary-foreground: 220 10% 6%;
-  --primary-hover: 36 95% 44%;
-  --primary-active: 36 95% 38%;
+  /* Primary - Red */
+  --primary: 0 84% 50%;
+  --primary-foreground: 0 0% 98%;
+  --primary-hover: 0 84% 44%;
+  --primary-active: 0 84% 38%;
 
   /* Secondary - Warm dark */
   --secondary: 220 10% 14%;
   --secondary-foreground: 210 15% 85%;
 
-  /* Accent - Warm amber instead of blue */
-  --accent: 28 90% 52%;
-  --accent-foreground: 210 20% 98%;
+  /* Accent - Red */
+  --accent: 0 84% 55%;
+  --accent-foreground: 0 0% 98%;
 
   /* Destructive - Red */
   --destructive: 0 72% 51%;
   --destructive-foreground: 210 20% 98%;
 
   /* Ring - Focus indicator */
-  --ring: 36 95% 50%;
+  --ring: 0 84% 50%;
 
   /* Chart colors - vibrant for data viz */
-  --chart-1: 36 95% 55%;
+  --chart-1: 0 84% 55%;
   --chart-2: 160 84% 39%;
   --chart-3: 340 75% 55%;
-  --chart-4: 28 90% 52%;
+  --chart-4: 0 72% 51%;
   --chart-5: 262 83% 58%;
 
   /* Surface hierarchy - for layered UI */
@@ -107,15 +107,15 @@
   
   /* Status colors */
   --success: 152 76% 42%;
-  --warning: 36 95% 50%;
+  --warning: 38 92% 50%;
   --error: 0 84% 60%;
 
-  /* Cosmic accent colors */
-  --cosmic-gold: 43 96% 56%;
-  --cosmic-amber: 36 95% 50%;
-  --cosmic-yellow: 48 96% 53%;
-  --cosmic-orange: 25 95% 53%;
-  --cosmic-warm: 35 91% 50%;
+  /* Cosmic accent colors - Red brand */
+  --cosmic-gold: 0 84% 60%;
+  --cosmic-amber: 0 84% 50%;
+  --cosmic-yellow: 0 72% 55%;
+  --cosmic-orange: 0 90% 53%;
+  --cosmic-warm: 0 84% 50%;
 
   /* Chart page specific colors */
   --color-primary-dark: hsl(220, 10%, 6%);
@@ -227,11 +227,11 @@ body {
 }
 
 .card-mask {
-  background: radial-gradient(ellipse at center, rgba(245, 158, 11, 0.08), transparent);
+  background: radial-gradient(ellipse at center, rgba(255, 61, 61, 0.08), transparent);
 }
 
 .gradient {
-  background: conic-gradient(from 230.29deg at 51.63% 52.16%, hsl(36, 95%, 50%) 0deg, hsl(43, 96%, 56%) 67.5deg, hsl(28, 90%, 52%) 198.75deg, hsl(36, 95%, 44%) 251.25deg, hsl(43, 96%, 50%) 301.88deg, hsl(36, 95%, 50%) 360deg);
+  background: conic-gradient(from 230.29deg at 51.63% 52.16%, hsl(0, 84%, 50%) 0deg, hsl(0, 84%, 60%) 67.5deg, hsl(0, 72%, 51%) 198.75deg, hsl(0, 84%, 44%) 251.25deg, hsl(0, 84%, 55%) 301.88deg, hsl(0, 84%, 50%) 360deg);
 }
 
 .lamp {
@@ -268,8 +268,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(234, 179, 8, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(234, 179, 8, 0.6), 0 0 60px rgba(245, 158, 11, 0.4); }
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 61, 61, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 61, 61, 0.6), 0 0 60px rgba(255, 61, 61, 0.4); }
 }
 
 .star {
@@ -284,18 +284,18 @@ body {
 .star-large { width: 4px; height: 4px; }
 
 .cosmic-gradient {
-  background: linear-gradient(135deg, 
-    hsl(43, 96%, 50%) 0%, 
-    hsl(38, 92%, 50%) 50%, 
-    hsl(25, 95%, 53%) 100%
+  background: linear-gradient(135deg,
+    hsl(0, 84%, 50%) 0%,
+    hsl(0, 84%, 55%) 50%,
+    hsl(0, 72%, 51%) 100%
   );
 }
 
 .cosmic-gradient-text {
-  background: linear-gradient(135deg, 
-    hsl(48, 96%, 60%) 0%, 
-    hsl(43, 96%, 56%) 50%, 
-    hsl(38, 92%, 55%) 100%
+  background: linear-gradient(135deg,
+    hsl(0, 84%, 60%) 0%,
+    hsl(0, 84%, 55%) 50%,
+    hsl(0, 72%, 55%) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -303,16 +303,16 @@ body {
 }
 
 .cosmic-glow {
-  box-shadow: 
-    0 0 20px rgba(234, 179, 8, 0.3),
-    0 0 40px rgba(245, 158, 11, 0.2),
-    0 0 60px rgba(234, 179, 8, 0.1);
+  box-shadow:
+    0 0 20px rgba(255, 61, 61, 0.3),
+    0 0 40px rgba(255, 61, 61, 0.2),
+    0 0 60px rgba(255, 61, 61, 0.1);
 }
 
 .cosmic-border {
   border: 1px solid transparent;
   background: linear-gradient(hsl(220, 10%, 8%), hsl(220, 10%, 8%)) padding-box,
-              linear-gradient(135deg, rgba(234, 179, 8, 0.5), rgba(245, 158, 11, 0.5), rgba(234, 179, 8, 0.3)) border-box;
+              linear-gradient(135deg, rgba(255, 61, 61, 0.5), rgba(255, 61, 61, 0.5), rgba(255, 61, 61, 0.3)) border-box;
 }
 
 .stars-bg {
@@ -434,35 +434,35 @@ body {
 }
 
 /* Amber slider thumb */
-.slider-amber::-webkit-slider-thumb {
+.slider-red::-webkit-slider-thumb {
   appearance: none;
   width: 16px;
   height: 16px;
-  background: hsl(32.1 94.6% 43.7%);
+  background: hsl(0 84% 50%);
   border-radius: 50%;
   cursor: pointer;
-  border: 2px solid hsl(32.1 94.6% 53.7%);
-  box-shadow: 0 0 8px hsl(32.1 94.6% 43.7% / 0.5);
+  border: 2px solid hsl(0 84% 60%);
+  box-shadow: 0 0 8px hsl(0 84% 50% / 0.5);
 }
 
-.slider-amber::-moz-range-thumb {
+.slider-red::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  background: hsl(32.1 94.6% 43.7%);
+  background: hsl(0 84% 50%);
   border-radius: 50%;
   cursor: pointer;
-  border: 2px solid hsl(32.1 94.6% 53.7%);
-  box-shadow: 0 0 8px hsl(32.1 94.6% 43.7% / 0.5);
+  border: 2px solid hsl(0 84% 60%);
+  box-shadow: 0 0 8px hsl(0 84% 50% / 0.5);
 }
 
-.slider-amber::-webkit-slider-thumb:hover {
-  background: hsl(32.1 94.6% 53.7%);
-  box-shadow: 0 0 12px hsl(32.1 94.6% 43.7% / 0.7);
+.slider-red::-webkit-slider-thumb:hover {
+  background: hsl(0 84% 60%);
+  box-shadow: 0 0 12px hsl(0 84% 50% / 0.7);
 }
 
-.slider-amber::-moz-range-thumb:hover {
-  background: hsl(32.1 94.6% 53.7%);
-  box-shadow: 0 0 12px hsl(32.1 94.6% 43.7% / 0.7);
+.slider-red::-moz-range-thumb:hover {
+  background: hsl(0 84% 60%);
+  box-shadow: 0 0 12px hsl(0 84% 50% / 0.7);
 }
 
 @keyframes spin-slow {
