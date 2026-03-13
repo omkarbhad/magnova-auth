@@ -3,6 +3,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   GithubAuthProvider,
+  OAuthCredential,
   signInWithRedirect,
   signInWithPopup,
   getRedirectResult,
@@ -13,8 +14,7 @@ import {
   browserSessionPersistence,
   setPersistence,
   inMemoryPersistence,
-  fetchSignInMethodsForEmail,
-  linkWithPopup,
+  linkWithCredential,
 } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -78,22 +78,24 @@ export async function signInWithGitHub() {
     };
   } catch (e: unknown) {
     const err = e as { code?: string; email?: string; customData?: { email?: string } };
-    // Account exists with different credential — link GitHub to the existing account
+    // Account exists with different credential (e.g. Google) — sign in with Google then link GitHub
     if (err.code === 'auth/account-exists-with-different-credential') {
-      const email = err.email ?? err.customData?.email;
-      if (!email) throw e;
+      // Capture the pending GitHub credential (contains the GitHub access token)
+      const pendingCredential = GithubAuthProvider.credentialFromError(
+        e as Parameters<typeof GithubAuthProvider.credentialFromError>[0]
+      );
 
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-      if (methods.includes('google.com')) {
-        // Sign in with Google first, then link GitHub
-        const googleResult = await signInWithPopup(auth, googleProvider);
-        const linked = await linkWithPopup(googleResult.user, githubProvider);
-        const credential = GithubAuthProvider.credentialFromResult(linked);
-        return {
-          user: linked.user,
-          githubToken: credential?.accessToken ?? null,
-        };
+      // Sign in with Google (the existing provider) — one popup
+      const googleResult = await signInWithPopup(auth, googleProvider);
+
+      // Link the GitHub credential to the now-signed-in Google account
+      if (pendingCredential) {
+        await linkWithCredential(googleResult.user, pendingCredential);
+        const githubToken = (pendingCredential as OAuthCredential).accessToken ?? null;
+        return { user: googleResult.user, githubToken };
       }
+
+      return { user: googleResult.user, githubToken: null };
     }
     throw e;
   }
