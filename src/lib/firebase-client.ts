@@ -13,6 +13,8 @@ import {
   browserSessionPersistence,
   setPersistence,
   inMemoryPersistence,
+  fetchSignInMethodsForEmail,
+  linkWithPopup,
 } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -67,12 +69,34 @@ export async function getGoogleRedirectResult() {
  * Returns { user, githubToken } where githubToken is the GitHub OAuth token.
  */
 export async function signInWithGitHub() {
-  const result = await signInWithPopup(auth, githubProvider);
-  const credential = GithubAuthProvider.credentialFromResult(result);
-  return {
-    user: result.user,
-    githubToken: credential?.accessToken ?? null,
-  };
+  try {
+    const result = await signInWithPopup(auth, githubProvider);
+    const credential = GithubAuthProvider.credentialFromResult(result);
+    return {
+      user: result.user,
+      githubToken: credential?.accessToken ?? null,
+    };
+  } catch (e: unknown) {
+    const err = e as { code?: string; email?: string; customData?: { email?: string } };
+    // Account exists with different credential — link GitHub to the existing account
+    if (err.code === 'auth/account-exists-with-different-credential') {
+      const email = err.email ?? err.customData?.email;
+      if (!email) throw e;
+
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (methods.includes('google.com')) {
+        // Sign in with Google first, then link GitHub
+        const googleResult = await signInWithPopup(auth, googleProvider);
+        const linked = await linkWithPopup(googleResult.user, githubProvider);
+        const credential = GithubAuthProvider.credentialFromResult(linked);
+        return {
+          user: linked.user,
+          githubToken: credential?.accessToken ?? null,
+        };
+      }
+    }
+    throw e;
+  }
 }
 
 export async function signInWithEmail(email: string, password: string) {
