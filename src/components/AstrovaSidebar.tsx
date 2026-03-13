@@ -702,7 +702,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
     setIsLoading(true);
 
     try {
-      const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
       if (!apiKey) {
         throw new Error('OpenRouter API key not configured.');
       }
@@ -903,7 +903,7 @@ export function AstrovaSidebar({ kundaliData, chartName, isOpen, onToggle, onGen
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     try {
-      const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
       if (!apiKey) throw new Error('OpenRouter API key not configured.');
       const modelToUse = selectedModel || PRIMARY_MODEL;
       const kbResults = await searchKnowledgeBase(messageText.trim()).catch(() => []);

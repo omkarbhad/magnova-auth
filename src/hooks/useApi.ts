@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios, { type AxiosResponse, type AxiosError } from 'axios';
 import type { ApiResponse, ApiError, ApiHeaders } from '@/types/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 export interface UseApiOptions<T> {
   immediate?: boolean;

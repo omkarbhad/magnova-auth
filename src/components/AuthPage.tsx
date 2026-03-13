@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { auth, signInWithGoogle, signInWithGitHub, getGoogleRedirectResult, signInWithEmail, signUpWithEmail } from '@/lib/firebase-client';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, sendEmailVerification } from 'firebase/auth';
 import { cn } from '@/lib/utils';
 
 type AppConfig = {
@@ -54,7 +54,7 @@ export const APP_CONFIGS: Record<string, AppConfig & { githubOnly?: boolean }> =
 export default function AuthPage({ app = 'default' }: { app?: string }) {
   const searchParams = useSearchParams();
   const config = APP_CONFIGS[app] ?? APP_CONFIGS.default;
-  const redirectTo = searchParams.get('redirect') ?? config.defaultRedirect;
+  const redirectTo = searchParams?.get('redirect') ?? config.defaultRedirect;
 
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -222,7 +222,7 @@ export default function AuthPage({ app = 'default' }: { app?: string }) {
       }
       const r = await signInWithEmail(email, password);
       if (!r.user.emailVerified) {
-        await r.user.sendEmailVerification();
+        await sendEmailVerification(r.user);
         setError('Please verify your email before signing in. A new verification email has been sent.');
         setLoading(false);
         return;

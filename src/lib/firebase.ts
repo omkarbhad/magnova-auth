@@ -19,7 +19,7 @@ const requiredKeys = [
 type EnvKey = (typeof requiredKeys)[number];
 
 function getEnv(key: EnvKey): string | undefined {
-  return import.meta.env[key] as string | undefined;
+  return process.env[key] as string | undefined;
 }
 
 const hasFirebaseConfig = requiredKeys.every((key) => Boolean(getEnv(key)));

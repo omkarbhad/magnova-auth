@@ -297,7 +297,7 @@ Tags: [comma-separated tags]
 
 The admin can then save it directly. Be concise, factual, and use proper Vedic astrology terminology. If the user asks for suggestions, suggest article topics that are missing from the existing collection. If files or links are attached, reference them when relevant.`;
 
-      const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
