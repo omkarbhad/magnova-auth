@@ -170,7 +170,20 @@ export default function AuthPage({ app = 'default' }: { app?: string }) {
     setLoading(true);
     setError('');
     try {
-      const { user, githubToken } = await signInWithGitHub();
+      const { user, githubToken, sessionCreated } = await signInWithGitHub();
+
+      // If the server already created the session (account linking case), redirect immediately
+      if (sessionCreated) {
+        window.location.href = decodeURIComponent(redirectTo);
+        return;
+      }
+
+      if (!user) {
+        setError('Sign-in failed');
+        setLoading(false);
+        return;
+      }
+
       const token = await user.getIdToken();
 
       // Fetch GitHub username

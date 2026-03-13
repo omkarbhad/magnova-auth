@@ -6,7 +6,6 @@ import {
   OAuthCredential,
   signInWithRedirect,
   signInWithPopup,
-  signInWithCustomToken,
   getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -68,7 +67,11 @@ export async function getGoogleRedirectResult() {
  * the OAuth access token from the credential.
  * Returns { user, githubToken } where githubToken is the GitHub OAuth token.
  */
-export async function signInWithGitHub() {
+export async function signInWithGitHub(): Promise<{
+  user: import('firebase/auth').User | null;
+  githubToken: string | null;
+  sessionCreated?: boolean; // true when server-side session was already created
+}> {
   try {
     const result = await signInWithPopup(auth, githubProvider);
     const credential = GithubAuthProvider.credentialFromResult(result);
@@ -79,7 +82,7 @@ export async function signInWithGitHub() {
   } catch (e: unknown) {
     const err = e as { code?: string; customData?: { email?: string } };
     // Account exists with a different provider (e.g. Google from another Magnova app).
-    // Silently map by email server-side — no extra popup needed.
+    // Server creates session directly by matching email — no extra popup needed.
     if (err.code === 'auth/account-exists-with-different-credential') {
       const pendingCredential = GithubAuthProvider.credentialFromError(
         e as Parameters<typeof GithubAuthProvider.credentialFromError>[0]
@@ -88,18 +91,27 @@ export async function signInWithGitHub() {
       const email = err.customData?.email;
       if (!email) throw e;
 
-      // Ask server to look up existing Firebase user by email and issue a custom token
+      // Fetch GitHub username
+      let githubUsername: string | undefined;
+      if (githubToken) {
+        try {
+          const ghRes = await fetch('https://api.github.com/user', {
+            headers: { Authorization: `Bearer ${githubToken}` },
+          });
+          if (ghRes.ok) githubUsername = (await ghRes.json()).login;
+        } catch { /* non-critical */ }
+      }
+
+      // Server creates session + stores GitHub token by matching email
       const res = await fetch('/api/auth/github-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        credentials: 'include',
+        body: JSON.stringify({ email, githubToken, githubUsername }),
       });
       if (!res.ok) throw new Error('Could not link account — please contact support');
-      const { customToken } = await res.json();
 
-      // Sign in silently with the custom token (no popup)
-      const linked = await signInWithCustomToken(auth, customToken);
-      return { user: linked.user, githubToken };
+      return { user: null, githubToken, sessionCreated: true };
     }
     throw e;
   }
