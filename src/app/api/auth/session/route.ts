@@ -24,7 +24,7 @@ export async function OPTIONS(req: NextRequest) {
   return new NextResponse(null, { status: 204, headers: corsHeaders(origin) });
 }
 import { verifyToken } from '@/lib/firebase-admin';
-import { getUserByFirebaseUid, upsertUser } from '@/lib/db';
+import { getUserByFirebaseUid, upsertUser, updateGitHubToken } from '@/lib/db';
 
 const COOKIE_NAME = 'magnova_session';
 const COOKIE_MAX_AGE = 60 * 60; // 1 hour
@@ -33,7 +33,7 @@ const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.magnova.ai' : un
 export async function POST(req: NextRequest) {
   const origin = req.headers.get('origin');
   try {
-    const { token } = await req.json();
+    const { token, githubToken, githubUsername } = await req.json();
     if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400, headers: corsHeaders(origin) });
 
     // Verify Firebase token
@@ -42,13 +42,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Token missing email' }, { status: 400, headers: corsHeaders(origin) });
     }
 
-    // Upsert user in Neon
+    // Upsert user in Neon (with optional GitHub token)
     const user = await upsertUser(
       decoded.uid,
       decoded.email!,
       decoded.name ?? undefined,
       decoded.picture ?? undefined,
+      githubToken ?? undefined,
+      githubUsername ?? undefined,
     );
+
+    // If user already exists and is linking GitHub, update token
+    if (githubToken && !user.github_token) {
+      await updateGitHubToken(decoded.uid, githubToken, githubUsername);
+      user.github_token = githubToken;
+      user.github_username = githubUsername ?? null;
+    }
 
     // Set httpOnly session cookie on .magnova.ai (works across all subdomains)
     const res = NextResponse.json({ ok: true, user }, { headers: corsHeaders(origin) });

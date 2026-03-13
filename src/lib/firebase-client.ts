@@ -2,7 +2,9 @@ import { initializeApp, getApps } from 'firebase/app';
 import {
   getAuth,
   GoogleAuthProvider,
+  GithubAuthProvider,
   signInWithRedirect,
+  signInWithPopup,
   getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -46,6 +48,10 @@ if (typeof window !== 'undefined') {
 const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
+const githubProvider = new GithubAuthProvider();
+githubProvider.addScope('repo'); // Access private repos
+githubProvider.addScope('read:user');
+
 export async function signInWithGoogle() {
   // Use redirect instead of popup - more reliable
   return signInWithRedirect(auth, googleProvider);
@@ -53,6 +59,20 @@ export async function signInWithGoogle() {
 
 export async function getGoogleRedirectResult() {
   return getRedirectResult(auth);
+}
+
+/**
+ * Sign in with GitHub using popup (not redirect) so we can capture
+ * the OAuth access token from the credential.
+ * Returns { user, githubToken } where githubToken is the GitHub OAuth token.
+ */
+export async function signInWithGitHub() {
+  const result = await signInWithPopup(auth, githubProvider);
+  const credential = GithubAuthProvider.credentialFromResult(result);
+  return {
+    user: result.user,
+    githubToken: credential?.accessToken ?? null,
+  };
 }
 
 export async function signInWithEmail(email: string, password: string) {

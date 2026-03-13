@@ -15,10 +15,16 @@ CREATE TABLE IF NOT EXISTS users (
   is_banned     BOOLEAN NOT NULL DEFAULT false,
   credits       INTEGER NOT NULL DEFAULT 10,
   credits_used  INTEGER NOT NULL DEFAULT 0,
+  github_token  TEXT,
+  github_username TEXT,
   last_login_at TIMESTAMPTZ,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Migration: add GitHub token columns (run if table already exists)
+-- ALTER TABLE users ADD COLUMN IF NOT EXISTS github_token TEXT;
+-- ALTER TABLE users ADD COLUMN IF NOT EXISTS github_username TEXT;
 
 -- ── credit_transactions ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS credit_transactions (
