@@ -36,7 +36,7 @@ export default async function handler(req: Request): Promise<Response> {
       return new Response('Method Not Allowed', { status: 405 });
     }
 
-    const { token: bodyToken } = await parseBody<{ token?: string }>(req);
+    const { token: bodyToken, githubToken, githubUsername } = await parseBody<{ token?: string; githubToken?: string; githubUsername?: string }>(req);
     const header = req.headers.get('authorization');
     const headerToken = header?.toLowerCase().startsWith('bearer ')
       ? header.slice(7).trim()
@@ -58,6 +58,8 @@ export default async function handler(req: Request): Promise<Response> {
         name,
         display_name,
         avatar_url,
+        github_token,
+        github_username,
         credits,
         last_login_at,
         updated_at
@@ -68,6 +70,8 @@ export default async function handler(req: Request): Promise<Response> {
         ${displayName},
         ${displayName},
         ${avatarUrl},
+        ${githubToken ?? null},
+        ${githubUsername ?? null},
         10,
         now(),
         now()
@@ -78,6 +82,8 @@ export default async function handler(req: Request): Promise<Response> {
         name = COALESCE(EXCLUDED.name, users.name),
         display_name = COALESCE(EXCLUDED.display_name, users.display_name, users.name),
         avatar_url = COALESCE(EXCLUDED.avatar_url, users.avatar_url),
+        github_token = COALESCE(EXCLUDED.github_token, users.github_token),
+        github_username = COALESCE(EXCLUDED.github_username, users.github_username),
         last_login_at = now(),
         updated_at = now()
       RETURNING
@@ -90,6 +96,8 @@ export default async function handler(req: Request): Promise<Response> {
         is_banned,
         credits,
         credits_used,
+        github_token,
+        github_username,
         last_login_at,
         created_at`;
 
