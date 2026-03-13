@@ -30,8 +30,35 @@ function buildCookie(req: Request, token: string): string {
   return cookieParts.join('; ');
 }
 
+function parseCookies(req: Request): Record<string, string> {
+  const header = req.headers.get('cookie') ?? '';
+  return Object.fromEntries(
+    header.split(';').map(c => {
+      const [k, ...v] = c.trim().split('=');
+      return [k, decodeURIComponent(v.join('='))];
+    })
+  );
+}
+
 export default async function handler(req: Request): Promise<Response> {
   try {
+    // GET — check if session cookie is valid and return user
+    if (req.method === 'GET') {
+      const cookies = parseCookies(req);
+      const uid = cookies[COOKIE_NAME];
+      if (!uid) return new Response('Unauthorized', { status: 401 });
+
+      const [user] = await sql`
+        SELECT id, firebase_uid AS auth_id, email,
+               COALESCE(display_name, name) AS display_name,
+               avatar_url, role, is_banned, credits, credits_used,
+               github_token, github_username, last_login_at, created_at
+        FROM users WHERE firebase_uid = ${uid}
+      `;
+      if (!user) return new Response('Unauthorized', { status: 401 });
+      return json({ user });
+    }
+
     if (req.method !== 'POST') {
       return new Response('Method Not Allowed', { status: 405 });
     }
